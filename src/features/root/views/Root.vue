@@ -13,7 +13,7 @@
           </div>
         </div>
         <div class="flex items-center gap-4">
-          <router-link :to="{ name: 'auth' }" class="text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-950 dark:hover:text-white transition">
+          <router-link :to="{ name: 'login' }" class="text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-950 dark:hover:text-white transition">
             Sign In
           </router-link>
           <router-link :to="{ name: 'auth' }" class="bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-950 font-bold py-3 px-5 rounded-xl transition active:scale-[0.98] shadow-sm text-xs uppercase tracking-wider">
