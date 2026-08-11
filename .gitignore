@@ -80,5 +80,6 @@ dist-ssr/
 
 # Environment files
 .env
-.env.*
+.venv
+.env.local
 !.env.example

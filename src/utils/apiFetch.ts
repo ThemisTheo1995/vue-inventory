@@ -40,12 +40,13 @@ export async function apiFetch(
             return refreshRes.ok
           } catch {
             return false
+          } finally {
+            activeRefreshPromise = null
           }
         })()
       }
 
       const refreshSuccessful = await activeRefreshPromise
-      activeRefreshPromise = null
 
       if (refreshSuccessful) {
         response = await fetch(url, options)
