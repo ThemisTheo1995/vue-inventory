@@ -178,15 +178,36 @@
             </thead>
 
             <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
-              <!-- Desktop Skeleton -->
-              <tr v-if="isTableLoading" v-for="i in 6" :key="'desk-skel-'+i" class="animate-pulse bg-white/30 dark:bg-slate-900/30">
-                <td class="px-6 py-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700/50"></div><div class="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-48"></div></div></td>
-                <td class="px-6 py-4 flex justify-end"><div class="h-5 bg-slate-200 dark:bg-slate-700/50 rounded w-10"></div></td>
-                <td class="px-6 py-4 flex justify-end"><div class="h-5 bg-amber-100 dark:bg-amber-900/20 rounded w-10"></div></td>
-                <td class="px-6 py-4 flex justify-end"><div class="h-5 bg-blue-100 dark:bg-blue-900/20 rounded w-10"></div></td>
-                <td class="px-6 py-4 flex justify-end"><div class="h-7 bg-emerald-100 dark:bg-emerald-900/20 rounded-md w-14"></div></td>
-                <td v-if="!isReadOnly" class="px-6 py-4"></td>
-              </tr>
+              
+              <!-- Desktop Skeleton (FIXED) -->
+              <template v-if="isTableLoading">
+                <tr v-for="i in 6" :key="'desk-skel-'+i" class="animate-pulse bg-white/30 dark:bg-slate-900/30">
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700/50"></div>
+                      <div class="space-y-2">
+                        <div class="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-24"></div>
+                        <div class="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-32"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="h-5 bg-slate-200 dark:bg-slate-700/50 rounded w-8 ml-auto"></div>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="h-5 bg-amber-100 dark:bg-amber-900/20 rounded w-8 ml-auto"></div>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="h-5 bg-blue-100 dark:bg-blue-900/20 rounded w-8 ml-auto"></div>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="h-7 bg-emerald-100 dark:bg-emerald-900/20 rounded-md w-12 ml-auto"></div>
+                  </td>
+                  <td v-if="!isReadOnly" class="px-6 py-4 text-right">
+                     <div class="h-8 bg-slate-100 dark:bg-slate-800/50 rounded-lg w-8 ml-auto"></div>
+                  </td>
+                </tr>
+              </template>
 
               <!-- Desktop Empty State -->
               <tr v-else-if="!balances.length">

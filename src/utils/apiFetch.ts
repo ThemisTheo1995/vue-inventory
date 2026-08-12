@@ -29,7 +29,7 @@ export async function apiFetch(
   try {
     let response = await fetch(url, options)
 
-    if (response.status === 401 && !endpoint.includes('/auth/refresh')) {
+    if (response.status === 401 && !endpoint.startsWith('/auth/')) {
       if (!activeRefreshPromise) {
         activeRefreshPromise = (async () => {
           try {

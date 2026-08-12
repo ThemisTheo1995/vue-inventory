@@ -1,10 +1,10 @@
 <template>
   <Teleport to="body">
     <Transition name="modal">
+      <!-- Removed @click.self so clicking outside does nothing -->
       <div 
         v-if="isOpen" 
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm"
-        @click.self="handleClose"
       >
         <div 
           class="modal-card w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl flex flex-col max-h-[90vh]"
@@ -27,6 +27,7 @@
               </div>
             </div>
             
+            <!-- X Button (Always closes) -->
             <button 
               @click="handleClose" 
               class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
@@ -50,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { X } from 'lucide-vue-next'
 
 const props = withDefaults(defineProps<{
@@ -69,6 +70,21 @@ const emit = defineEmits<{
 const handleClose = () => {
   emit('close')
 }
+
+// Escape key (Always closes)
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && props.isOpen) {
+    handleClose()
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
 
 const maxWidthClass = computed(() => {
   const map: Record<string, string> = {
@@ -106,5 +122,4 @@ const maxWidthClass = computed(() => {
   opacity: 0;
   transform: translateY(16px) scale(0.98);
 }
-
 </style>
