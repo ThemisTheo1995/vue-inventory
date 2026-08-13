@@ -3,9 +3,7 @@ import BaseLayout from '../components/layout/BaseLayout.vue'
 
 import { authRoutes } from '../features/auth/routes'
 import { dashboardRoutes } from '../features/dashboard/routes'
-import { integrationsRoutes } from '../features/integrations/routes'
 import { settingsRoutes } from '../features/settings/routes'
-import { ebayRoutes } from '../features/ebay/routes'
 import { RootRoute } from '../features/root/routes'
 import { customersRoutes } from '../features/customers/routes'
 import { suppliersRoutes } from '../features/suppliers/routes'
@@ -29,8 +27,6 @@ const router = createRouter({
       component: BaseLayout,
       children: [
         dashboardRoutes,
-        ebayRoutes,
-        integrationsRoutes,
         settingsRoutes,
         customersRoutes,
         suppliersRoutes,

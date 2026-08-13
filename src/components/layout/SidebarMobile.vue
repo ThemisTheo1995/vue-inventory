@@ -114,8 +114,7 @@ import {
   Tag, 
   Package, 
   Users, 
-  Truck, 
-  Cable as Plugging, 
+  Truck,
   Settings, 
   Moon, 
   Sun, 
@@ -170,7 +169,6 @@ const navGroups = [
     id: 'system',
     label: 'System',
     items: [
-      { name: 'integrations', label: 'Integrations', icon: Plugging },
       { name: 'settings', label: 'Settings', icon: Settings }
     ]
   }
