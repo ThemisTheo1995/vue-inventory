@@ -412,9 +412,17 @@ const fetchBalances = async () => {
     const data = await inventoryService.getInventories(workspaceId, currentPage.value, itemsPerPage.value)
     balances.value = data.items || []
     totalBalances.value = data.total || 0
-  } catch (err) {
-    console.error(err)
-    showToast("Failed to load inventory balances", "error")
+  } catch (err: any) {
+    const errorMessage = 
+        err.response?.data?.detail || 
+        err.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
   } finally {
     isLoading.value = false
   }

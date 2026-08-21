@@ -401,8 +401,17 @@ const onCustomerSearchInput = () => {
     try {
       const customersData = await customerService.getAll(props.workspaceId, query)
       customers.value = customersData.items
-    } catch (err) {
-      console.error(err)
+    } catch (err: any) {
+      const errorMessage = 
+        err.response?.data?.detail || 
+        err.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
     } finally {
       isCustomerLoading.value = false
     }
@@ -595,8 +604,16 @@ const submitForm = async () => {
     emit("created", newSO)
     handleClose()
   } catch (error: any) {
-    console.log(error)
-    showToast(error.response?.data?.detail || "Could not save draft SO", "error")
+    const errorMessage = 
+        error.response?.data?.detail || 
+        error.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
   } finally {
     isSubmitting.value = false
   }

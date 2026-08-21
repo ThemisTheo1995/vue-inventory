@@ -351,9 +351,17 @@ const fetchPurchaseOrders = async (searchVal = searchQuery.value) => {
     const data = await purchaseOrderService.getAll(workspaceId, searchVal, currentPage.value, itemsPerPage.value)
     purchaseOrders.value = data.items || []
     totalItems.value = data.total || 0
-  } catch (err) {
-    console.error(err)
-    showToast("Failed to load purchase orders", "error")
+  } catch (err: any) {
+    const errorMessage = 
+        err.response?.data?.detail || 
+        err.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
   }
 }
 

@@ -14,14 +14,9 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     async initialize(workspaceIdFromUrl?: string) {
-
       try {
         const user = await authService.getCurrentUser(workspaceIdFromUrl)
-        this.user = user
-
-        localStorage.setItem('workspace_id', user.workspace_id)
-        localStorage.setItem('role', user.role)
-        localStorage.setItem('status', user.status)
+        this.setUser(user)
       } catch (error) {
         this.clearUser()
         throw error
@@ -30,8 +25,33 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    setUser(user: AuthUser) {
+      this.user = user
+
+      localStorage.setItem('workspace_id', user.workspace_id)
+      localStorage.setItem('role', user.role)
+      localStorage.setItem('status', user.status)
+    },
+
+    updateUserData(partialUser: Partial<AuthUser>) {
+      if (!this.user) return
+
+      this.user = { ...this.user, ...partialUser }
+
+      if (partialUser.workspace_id) {
+        localStorage.setItem('workspace_id', partialUser.workspace_id)
+      }
+      if (partialUser.role) {
+        localStorage.setItem('role', partialUser.role)
+      }
+      if (partialUser.status) {
+        localStorage.setItem('status', partialUser.status)
+      }
+    },
+
     clearUser() {
       this.user = null
+
       localStorage.removeItem('workspace_id')
       localStorage.removeItem('role')
       localStorage.removeItem('status')

@@ -184,7 +184,6 @@ const isLoading = ref(true)
 
 const routeId = Array.isArray(route.params.workspaceId) ? route.params.workspaceId[0] : route.params.workspaceId
 
-// Computed property that strictly checks against missing data or the literal string "undefined"
 const isValidId = computed(() => {
   return typeof routeId === 'string' && routeId.trim() !== '' && routeId !== 'undefined'
 })

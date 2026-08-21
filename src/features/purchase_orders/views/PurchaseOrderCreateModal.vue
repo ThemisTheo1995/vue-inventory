@@ -398,8 +398,17 @@ const onSupplierSearchInput = () => {
     try {
       const suppliersData = await supplierService.getAll(props.workspaceId, query)
       suppliers.value = suppliersData.items
-    } catch (err) {
-      console.error(err)
+    } catch (err: any) {
+      const errorMessage = 
+        err.response?.data?.detail || 
+        err.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+      showToast(displayMessage, "error")
     } finally {
       isSupplierLoading.value = false
     }
@@ -592,8 +601,16 @@ const submitForm = async () => {
     emit("created", newPO)
     handleClose()
   } catch (error: any) {
-    console.log(error)
-    showToast(error.response?.data?.detail || "Could not save draft PO", "error")
+    const errorMessage = 
+        error.response?.data?.detail || 
+        error.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
   } finally {
     isSubmitting.value = false
   }

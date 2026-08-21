@@ -11,6 +11,7 @@ import { inventoryRoutes } from '../features/inventory/routes'
 import { itemsRoutes } from '../features/items/routes'
 import { purchaseOrdersRoutes } from '../features/purchase_orders/routes'
 import { sellOrdersRoutes } from '../features/sell_orders/routes'
+import { userRoutes } from '../features/user/routes'
 
 import { useAuthStore } from '../features/auth/services/auth.store.ts'
 
@@ -26,6 +27,7 @@ const router = createRouter({
       path: '/:workspaceId',
       component: BaseLayout,
       children: [
+        userRoutes,
         dashboardRoutes,
         settingsRoutes,
         customersRoutes,

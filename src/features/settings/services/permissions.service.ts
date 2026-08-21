@@ -18,7 +18,7 @@ export interface InvitePayload {
 class PermissionService {
 
   async getMembers(workspaceId: string): Promise<WorkspaceMember[]> {
-    const response = await apiFetch(`/${workspaceId}/workspace_users`, {
+    const response = await apiFetch(`/${workspaceId}/workspace-users`, {
       method: 'GET',
     })
     if (!response.ok) throw new Error('Failed to fetch workspace members')
@@ -30,7 +30,7 @@ class PermissionService {
 
     const snakePayload = keysToSnake(payload)
 
-    const response = await apiFetch(`/${workspaceId}/workspace_users/invite`, {
+    const response = await apiFetch(`/${workspaceId}/workspace-users/invite`, {
       method: 'POST',
       body: JSON.stringify(snakePayload),
     })
@@ -42,7 +42,7 @@ class PermissionService {
 
     const roleCleaned = keysToSnake(role)
   
-    const response = await apiFetch(`/${workspaceId}/workspace_users/${workspaceUserId}`, {
+    const response = await apiFetch(`/${workspaceId}/workspace-users/${workspaceUserId}`, {
       method: 'PATCH',
       body: JSON.stringify({ role: roleCleaned }),
     })
@@ -50,7 +50,7 @@ class PermissionService {
   }
 
   async removeMember(workspaceId: string, workspaceUserId: string): Promise<void> {
-    const response = await apiFetch(`/${workspaceId}/workspace_users/${workspaceUserId}`, {
+    const response = await apiFetch(`/${workspaceId}/workspace-users/${workspaceUserId}`, {
       method: 'PATCH',
       body: JSON.stringify({ is_deleted: true }),
     })

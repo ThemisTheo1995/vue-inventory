@@ -323,9 +323,17 @@ const fetchSuppliers = async (searchVal = searchQuery.value) => {
     const data = await supplierService.getAll(workspaceId, searchVal, currentPage.value, itemsPerPage.value)
     suppliers.value = data.items || []
     totalItems.value = data.total || 0
-  } catch (err) {
-    console.error("Error fetching suppliers:", err)
-    showToast("Failed to load suppliers", "error")
+  } catch (err: any) {
+    const errorMessage = 
+        err.response?.data?.detail || 
+        err.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
   }
 }
 

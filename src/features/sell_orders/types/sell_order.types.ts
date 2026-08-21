@@ -3,7 +3,7 @@ import type { Item } from '../../items/types/item.types'
 import type { Customer } from '../../customers/types/customer.types'
 
 
-export type SellOrderStatus = 'DRAFT' | 'SENT' | 'RECEIVED' | 'CANCELLED'
+export type SellOrderStatus = 'DRAFT' | 'CONFIRMED' | 'FULLFILLED' | 'CANCELLED' | 'RETURNED' | 'CLOSED'
 
 export interface SellOrderLine {
   id: string

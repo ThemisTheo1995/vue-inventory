@@ -89,24 +89,24 @@
 
           <button
             v-if="so.status === 'DRAFT'"
-            @click="updateStatus('SENT')"
+            @click="updateStatus('CONFIRMED')"
             class="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-all shadow-md shadow-indigo-200 dark:shadow-none active:scale-95"
           >
             <Send class="w-4 h-4" />
-            Mark as Sent
+            Mark as Confirmed
           </button>
 
           <button
-            v-if="so.status === 'SENT'"
-            @click="updateStatus('RECEIVED')"
+            v-if="so.status === 'CONFIRMED'"
+            @click="updateStatus('FULLFILLED')"
             class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all shadow-md shadow-emerald-200 dark:shadow-none active:scale-95"
           >
             <CheckCircle class="w-4 h-4" />
-            Mark as Received
+            Mark as Fullfilled
           </button>
 
           <button
-            v-if="['DRAFT', 'SENT'].includes(so.status)"
+            v-if="['DRAFT', 'CONFIRMED'].includes(so.status)"
             @click="updateStatus('CANCELLED')"
             class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 font-bold text-sm transition-all active:scale-95"
           >
@@ -339,8 +339,8 @@ const StatusBadge = (props: { status: string }) => {
   const getStyle = () => {
     switch (props.status.toUpperCase()) {
       case 'DRAFT': return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 print:!border-slate-300 print:!text-black print:!bg-transparent'
-      case 'SENT': return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20 print:!border-slate-300 print:!text-black print:!bg-transparent'
-      case 'RECEIVED': return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 print:!border-slate-300 print:!text-black print:!bg-transparent'
+      case 'CONFIRMED': return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20 print:!border-slate-300 print:!text-black print:!bg-transparent'
+      case 'FULLFILLED': return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 print:!border-slate-300 print:!text-black print:!bg-transparent'
       case 'CANCELLED': return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20 print:!border-slate-300 print:!text-black print:!bg-transparent'
       default: return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 print:!border-slate-300 print:!text-black print:!bg-transparent'
     }
@@ -374,9 +374,17 @@ const fetchSODetails = async () => {
   try {
     isLoading.value = true
     so.value = await sellOrderService.getOne(workspaceId, soId)
-  } catch (err) {
-    console.error(err)
-    showToast("Failed to retrieve sell order details", "error")
+  } catch (err: any) {
+    const errorMessage = 
+        err.response?.data?.detail || 
+        err.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
   } finally {
     isLoading.value = false
   }
@@ -413,9 +421,17 @@ const updateStatus = async (nextStatus: SellOrderStatus) => {
     await sellOrderService.update(workspaceId, soId, { status: nextStatus })
     showToast(`SO successfully moved to ${nextStatus}`, "success")
     await fetchSODetails()
-  } catch (err) {
-    console.error(err)
-    showToast("Unable to process status state change", "error")
+  } catch (err: any) {
+    const errorMessage = 
+        err.response?.data?.detail || 
+        err.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
   }
 }
 

@@ -292,8 +292,8 @@ const StatusBadge = (props: { status: string }) => {
   const getStyle = () => {
     switch (props.status.toUpperCase()) {
       case 'DRAFT': return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
-      case 'SENT': return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20'
-      case 'RECEIVED': return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
+      case 'CONFIRMED': return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20'
+      case 'FULLFILLED': return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
       case 'CANCELLED': return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'
       default: return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
     }
@@ -369,9 +369,17 @@ const fetchSellOrders = async (searchVal = searchQuery.value) => {
     const data = await sellOrderService.getAll(workspaceId, searchVal, currentPage.value, itemsPerPage.value)
     sellOrders.value = data.items || []
     totalItems.value = data.total || 0
-  } catch (err) {
-    console.error(err)
-    showToast("Failed to load sell orders", "error")
+  } catch (err: any) {
+    const errorMessage = 
+        err.response?.data?.detail || 
+        err.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
   }
 }
 

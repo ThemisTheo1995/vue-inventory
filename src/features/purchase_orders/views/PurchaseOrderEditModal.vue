@@ -475,8 +475,17 @@ const onSupplierSearchInput = () => {
     try {
       const suppliersData = await supplierService.getAll(props.workspaceId, query)
       suppliers.value = suppliersData.items
-    } catch (err) {
-      console.error(err)
+    } catch (err: any) {
+      const errorMessage = 
+        err.response?.data?.detail || 
+        err.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
     } finally {
       isSupplierLoading.value = false
     }
@@ -518,7 +527,16 @@ const updateHeader = async () => {
     showToast("PO header details updated successfully", "success")
     emit("updated")
   } catch (error: any) {
-    showToast(error.response?.data?.detail || "Failed to update PO details", "error")
+    const errorMessage = 
+        error.response?.data?.detail || 
+        error.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
   } finally {
     isSavingHeader.value = false
   }
@@ -656,7 +674,16 @@ const saveLineItem = async (index: number) => {
     line.isDirty = false
     emit("updated")
   } catch (error: any) {
-    showToast(error.response?.data?.detail || "Failed to save line item", "error")
+    const errorMessage = 
+        error.response?.data?.detail || 
+        error.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
   } finally {
     line.isSaving = false
   }
@@ -682,7 +709,16 @@ const removeLineItem = async (index: number) => {
       showToast("Line removed successfully", "success")
       emit("updated")
     } catch (error: any) {
-      showToast(error.response?.data?.detail || "Failed to remove line item", "error")
+      const errorMessage = 
+        error.response?.data?.detail || 
+        error.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
       line.isSaving = false
       return
     }

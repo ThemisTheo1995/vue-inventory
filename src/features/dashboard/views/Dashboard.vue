@@ -1,323 +1,575 @@
 <template>
-  <div class="space-y-8 pb-24 relative">
+  <div class="space-y-6 lg:space-y-8 pb-20 relative min-h-full">
     
-    <!-- Welcome Header & Quick Action Hub -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-card-1">
+    <!-- Header Section -->
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <div class="flex flex-wrap items-center gap-2 mb-1">
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            SyncFlow Engine Active
-          </span>
-          <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Updated just now</span>
-        </div>
-        <h1 class="text-2xl md:text-3xl font-black tracking-wider text-slate-900 dark:text-white">
-          Overview
+        <h1 class="text-2xl sm:text-3xl font-black tracking-wider text-slate-900 dark:text-white">
+          Dashboard
         </h1>
-      </div>
-    </div>
-
-    <!-- KPI Metric Cards Grid (Optimized breakpoints to prevent squeezing) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-      
-      <!-- Card 1: Revenue -->
-      <div class="relative group bg-white dark:bg-slate-800/80 backdrop-blur-xl border dark:border-slate-200/70 border-slate-700/20 rounded-2xl shadow-sm hover:shadow-xl hover:shadow-brand-500/10 transition-all duration-300 ease-out hover:-translate-y-1 p-6 animate-card-1">
-        <div class="absolute inset-0 z-0 rounded-2xl bg-gradient-to-br from-transparent to-brand-50/30 dark:to-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-        <div class="relative z-10 flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Revenue</p>
-            <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-1">$142,500.00</h3>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 transition-transform duration-300 group-hover:scale-105">
-            <DollarSign class="w-6 h-6" />
-          </div>
-        </div>
-        <div class="relative z-10 mt-4 flex items-center text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
-          <TrendingUp class="w-3.5 h-3.5 mr-1" />
-          <span>+14.2%</span>
-          <span class="text-slate-500 dark:text-slate-400 font-normal ml-1.5">vs last month</span>
-        </div>
-      </div>
-
-      <!-- Card 2: Inventory Valuation -->
-      <div class="relative group bg-white dark:bg-slate-800/80 backdrop-blur-xl border dark:border-slate-200/70 border-slate-700/20 rounded-2xl shadow-sm hover:shadow-xl hover:shadow-brand-500/10 transition-all duration-300 ease-out hover:-translate-y-1 p-6 animate-card-2">
-        <div class="absolute inset-0 z-0 rounded-2xl bg-gradient-to-br from-transparent to-brand-50/30 dark:to-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-        <div class="relative z-10 flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Inventory Assets</p>
-            <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-1">$84,210.50</h3>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-500/20 transition-transform duration-300 group-hover:scale-105">
-            <Package class="w-6 h-6" />
-          </div>
-        </div>
-        <div class="relative z-10 mt-4 flex items-center text-xs text-slate-500 dark:text-slate-400 font-medium">
-          <span class="text-slate-900 dark:text-white font-bold mr-1">412 SKUs</span> active in warehouse
-        </div>
-      </div>
-
-      <!-- Card 3: Pending Purchase Orders -->
-      <div class="relative group bg-white dark:bg-slate-800/80 backdrop-blur-xl border dark:border-slate-200/70 border-slate-700/20 rounded-2xl shadow-sm hover:shadow-xl hover:shadow-brand-500/10 transition-all duration-300 ease-out hover:-translate-y-1 p-6 animate-card-3">
-        <div class="absolute inset-0 z-0 rounded-2xl bg-gradient-to-br from-transparent to-brand-50/30 dark:to-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-        <div class="relative z-10 flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Pending POs</p>
-            <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-1">8 Orders</h3>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20 transition-transform duration-300 group-hover:scale-105">
-            <Truck class="w-6 h-6" />
-          </div>
-        </div>
-        <div class="relative z-10 mt-4 flex items-center text-xs text-amber-600 dark:text-amber-400 font-semibold">
-          <Clock class="w-3.5 h-3.5 mr-1" />
-          <span>$18,400.00</span>
-          <span class="text-slate-500 dark:text-slate-400 font-normal ml-1.5">in transit</span>
-        </div>
-      </div>
-
-      <!-- Card 4: Active Network -->
-      <div class="relative group bg-white dark:bg-slate-800/80 backdrop-blur-xl border dark:border-slate-200/70 border-slate-700/20 rounded-2xl shadow-sm hover:shadow-xl hover:shadow-brand-500/10 transition-all duration-300 ease-out hover:-translate-y-1 p-6 animate-card-4">
-        <div class="absolute inset-0 z-0 rounded-2xl bg-gradient-to-br from-transparent to-brand-50/30 dark:to-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-        <div class="relative z-10 flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Trading Partners</p>
-            <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-1">180 Total</h3>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center border border-purple-500/20 transition-transform duration-300 group-hover:scale-105">
-            <Users class="w-6 h-6" />
-          </div>
-        </div>
-        <div class="relative z-10 mt-4 flex items-center text-xs text-slate-500 dark:text-slate-400 font-medium">
-          <span class="text-slate-900 dark:text-white font-bold mr-1">148</span> Customers • <span class="text-slate-900 dark:text-white font-bold ml-1">32</span> Suppliers
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Main Content Split Grid -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 relative z-0">
-      
-      <!-- Left Column: Recent Orders Activity Stream (Spans 2 Cols) -->
-      <div class="xl:col-span-2 space-y-6 animate-card-3">
-        
-        <div class="relative group bg-white dark:bg-slate-800/80 backdrop-blur-xl border dark:border-slate-200/70 border-slate-700/20 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 ease-out p-6">
-          <div class="flex items-center justify-between mb-6">
-            <div>
-              <h2 class="text-lg font-bold text-slate-900 dark:text-white">Recent Transactions</h2>
-              <p class="text-xs text-slate-500 dark:text-slate-400">Latest sell and purchase orders processed across workspace</p>
-            </div>
-            <router-link to="/sell-orders" class="text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline flex items-center pointer-events-auto">
-              View All <ArrowUpRight class="w-3.5 h-3.5 ml-0.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </router-link>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse min-w-max">
-              <thead>
-                <tr class="border-b border-slate-200/70 dark:border-slate-700/70 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  <th class="pb-3 font-semibold">Reference</th>
-                  <th class="pb-3 font-semibold">Type</th>
-                  <th class="pb-3 font-semibold">Partner</th>
-                  <th class="pb-3 font-semibold">Status</th>
-                  <th class="pb-3 font-semibold text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
-                
-                <tr class="group/row hover:bg-slate-50/80 dark:hover:bg-slate-700/40 transition-colors duration-200">
-                  <td class="py-3.5 font-bold text-slate-900 dark:text-white">SO-2026-089</td>
-                  <td class="py-3.5">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                      Sell Order
-                    </span>
-                  </td>
-                  <td class="py-3.5 text-slate-600 dark:text-slate-300 font-medium">Acme Corp Ltd.</td>
-                  <td class="py-3.5">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
-                      Draft
-                    </span>
-                  </td>
-                  <td class="py-3.5 text-right font-mono font-bold text-slate-900 dark:text-white">$4,250.00</td>
-                </tr>
-
-                <tr class="group/row hover:bg-slate-50/80 dark:hover:bg-slate-700/40 transition-colors duration-200">
-                  <td class="py-3.5 font-bold text-slate-900 dark:text-white">PO-2026-044</td>
-                  <td class="py-3.5">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400">
-                      Purchase Order
-                    </span>
-                  </td>
-                  <td class="py-3.5 text-slate-600 dark:text-slate-300 font-medium">Global Supply Co.</td>
-                  <td class="py-3.5">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
-                      Received
-                    </span>
-                  </td>
-                  <td class="py-3.5 text-right font-mono font-bold text-slate-900 dark:text-white">$12,890.00</td>
-                </tr>
-
-                <tr class="group/row hover:bg-slate-50/80 dark:hover:bg-slate-700/40 transition-colors duration-200">
-                  <td class="py-3.5 font-bold text-slate-900 dark:text-white">SO-2026-088</td>
-                  <td class="py-3.5">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                      Sell Order
-                    </span>
-                  </td>
-                  <td class="py-3.5 text-slate-600 dark:text-slate-300 font-medium">Vertex Technologies</td>
-                  <td class="py-3.5">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400">
-                      Confirmed
-                    </span>
-                  </td>
-                  <td class="py-3.5 text-right font-mono font-bold text-slate-900 dark:text-white">$1,450.00</td>
-                </tr>
-
-                <tr class="group/row hover:bg-slate-50/80 dark:hover:bg-slate-700/40 transition-colors duration-200">
-                  <td class="py-3.5 font-bold text-slate-900 dark:text-white">PO-2026-043</td>
-                  <td class="py-3.5">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400">
-                      Purchase Order
-                    </span>
-                  </td>
-                  <td class="py-3.5 text-slate-600 dark:text-slate-300 font-medium">Precision Parts Inc.</td>
-                  <td class="py-3.5">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                      Sent
-                    </span>
-                  </td>
-                  <td class="py-3.5 text-right font-mono font-bold text-slate-900 dark:text-white">$8,300.00</td>
-                </tr>
-
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- Right Column: Low Stock Warnings & Shortcuts -->
-      <div class="space-y-6 animate-card-4">
-        
-        <!-- Inventory Stock Alerts Card -->
-        <div class="relative group bg-white dark:bg-slate-800/80 backdrop-blur-xl border dark:border-slate-200/70 border-slate-700/20 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 ease-out p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2">
-              <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-                <AlertTriangle class="w-4 h-4" />
-              </div>
-              <h2 class="text-base font-bold text-slate-900 dark:text-white">Low Stock Alerts</h2>
-            </div>
-            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400">3 Items</span>
-          </div>
-
-          <div class="space-y-3">
-            
-            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/30 border border-slate-200/60 dark:border-slate-700 flex items-center justify-between transition-all duration-200 hover:border-rose-500/30 hover:bg-slate-100/80 dark:hover:bg-slate-700/50">
-              <div class="flex-1 min-w-0 pr-4">
-                <p class="text-xs font-bold text-slate-900 dark:text-white truncate">Industrial Bolt M8</p>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">SKU: BOLT-M8-01</p>
-              </div>
-              <div class="text-right shrink-0">
-                <span class="inline-block px-2 py-0.5 rounded text-xs font-black bg-rose-500/10 text-rose-600 dark:text-rose-400">4 left</span>
-                <p class="text-[10px] text-slate-400 mt-0.5">Min: 15</p>
-              </div>
-            </div>
-
-            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/30 border border-slate-200/60 dark:border-slate-700 flex items-center justify-between transition-all duration-200 hover:border-rose-500/30 hover:bg-slate-100/80 dark:hover:bg-slate-700/50">
-              <div class="flex-1 min-w-0 pr-4">
-                <p class="text-xs font-bold text-slate-900 dark:text-white truncate">Aluminum Sheet 2mm</p>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">SKU: ALU-SHT-2</p>
-              </div>
-              <div class="text-right shrink-0">
-                <span class="inline-block px-2 py-0.5 rounded text-xs font-black bg-rose-500/10 text-rose-600 dark:text-rose-400">2 left</span>
-                <p class="text-[10px] text-slate-400 mt-0.5">Min: 10</p>
-              </div>
-            </div>
-
-            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/30 border border-slate-200/60 dark:border-slate-700 flex items-center justify-between transition-all duration-200 hover:border-rose-500/30 hover:bg-slate-100/80 dark:hover:bg-slate-700/50">
-              <div class="flex-1 min-w-0 pr-4">
-                <p class="text-xs font-bold text-slate-900 dark:text-white truncate">Copper Wire Spool 50m</p>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">SKU: COP-WIR-50</p>
-              </div>
-              <div class="text-right shrink-0">
-                <span class="inline-block px-2 py-0.5 rounded text-xs font-black bg-rose-500/10 text-rose-600 dark:text-rose-400">1 left</span>
-                <p class="text-[10px] text-slate-400 mt-0.5">Min: 5</p>
-              </div>
-            </div>
-
-          </div>
-
-          <router-link
-            to="/inventory"
-            class="mt-4 w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors border border-slate-200/70 dark:border-slate-700 pointer-events-auto"
-          >
-            Manage Inventory Catalog
-          </router-link>
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- MOCK DATA OVERLAY (Scoped specifically to main content area instead of fixed viewport) -->
-    <div class="absolute inset-0 z-40 pointer-events-none flex items-start justify-center pt-24 rounded-2xl overflow-hidden">
-      <!-- Blue tint overlay covering only the dashboard content -->
-      <div class="absolute inset-0 bg-blue-900/10 dark:bg-blue-900/25 backdrop-blur-[1px]"></div>
-      
-      <!-- Centered Mock Data Badge -->
-      <div class="relative z-10 bg-blue-900/90 dark:bg-slate-800/95 backdrop-blur-md border border-blue-400/30 dark:border-blue-500/30 text-white px-6 py-4 rounded-2xl shadow-2xl flex flex-col items-center gap-2">
-        <div class="flex items-center gap-3">
-          <span class="relative flex h-3 w-3">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-          </span>
-          <h2 class="text-lg md:text-xl font-black tracking-wide text-blue-50">Mock Data Preview</h2>
-        </div>
-        <p class="text-xs md:text-sm text-blue-200/80 font-medium text-center max-w-[250px]">
-          All dashboard metrics and transactions are simulated for demonstration purposes.
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          Welcome back! Here's what's happening with your inventory today.
         </p>
       </div>
+      <div class="flex items-center gap-3">
+        <button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors shadow-sm" :disabled="isLoading">
+          <Download class="w-4 h-4" />
+          <span class="hidden sm:inline">Export Report</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Loading Overlay -->
+    <div v-if="isLoading" class="flex justify-center items-center h-64">
+      <div class="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+
+    <template v-else>
+      <!-- KPI Stats Grid -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div v-for="stat in quickStats" :key="stat.title" class="bg-white dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/70 rounded-2xl p-5 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-start justify-between">
+            <div :class="`p-2.5 rounded-xl ${stat.bgColor} ${stat.textColor}`">
+              <component :is="stat.icon" class="w-5 h-5" />
+            </div>
+            <span v-if="stat.trend" :class="['text-xs font-bold px-2 py-1 rounded-full', stat.trendUp ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400']">
+              {{ stat.trend }}
+            </span>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ stat.title }}</p>
+            <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-1">{{ stat.value }}</h3>
+          </div>
+        </div>
+      </section>
+
+      <!-- Revenue Graph Section -->
+      <section class="bg-white dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/70 rounded-2xl p-5 sm:p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 class="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-2">
+              <ChartColumn class="w-5 h-5 text-brand-500" />
+              Revenue Overview
+            </h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Last 30 Days Performance</p>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+              <span class="w-3 h-3 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></span>
+              Gross Revenue
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart Canvas Container -->
+        <div class="relative w-full h-64 sm:h-72">
+          <canvas ref="chartCanvas"></canvas>
+        </div>
+      </section>
+
+      <!-- Main Content Grid -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left Column: Recent Sell Orders -->
+        <div class="lg:col-span-2 space-y-6">
+          <div class="bg-white dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/70 rounded-2xl shadow-sm flex flex-col h-full">
+            <div class="p-5 border-b border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
+              <h2 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <FileUp class="w-4 h-4 text-brand-500" />
+                Recent Sell Orders
+              </h2>
+              <router-link to="/sell-orders" class="text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300">
+                View All
+              </router-link>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm whitespace-nowrap">
+                <thead class="bg-slate-50/50 dark:bg-slate-800/20 text-slate-500 dark:text-slate-400">
+                  <tr>
+                    <th class="px-5 py-3 font-semibold">SO Number</th>
+                    <th class="px-5 py-3 font-semibold">Date</th>
+                    <th class="px-5 py-3 font-semibold">Status</th>
+                    <th class="px-5 py-3 font-semibold text-right">Amount</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
+                  <tr v-if="mappedSellOrders.length === 0">
+                    <td colspan="4" class="px-5 py-8 text-center text-slate-500">No recent sell orders found.</td>
+                  </tr>
+                  <tr v-for="order in mappedSellOrders" :key="order.id" class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
+                    <td class="px-5 py-3.5 font-medium">{{ order.so_number }}</td>
+                    <td class="px-5 py-3.5 text-slate-500 dark:text-slate-400">{{ formatDate(order.created_at) }}</td>
+                    <td class="px-5 py-3.5">
+                      <span :class="getStatusClass(order.status)">
+                        {{ order.status }}
+                      </span>
+                    </td>
+                    <td class="px-5 py-3.5 text-right font-semibold">{{ formatPrice(order.total_amount) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Low Stock Alerts & Quick Actions -->
+        <div class="space-y-6">
+          
+          <!-- Low Stock Alerts -->
+          <div class="bg-white dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/70 rounded-2xl shadow-sm">
+            <div class="p-5 border-b border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
+              <h2 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <AlertCircle class="w-4 h-4 text-amber-500" />
+                Low Stock Alerts
+              </h2>
+            </div>
+            <div class="p-2">
+              <div v-if="mappedLowStock.length === 0" class="p-4 text-center text-sm text-slate-500">
+                Stock levels are looking good!
+              </div>
+              <div v-for="item in mappedLowStock" :key="item.item_id" class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200/50 dark:border-slate-700/50">
+                    <Package class="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-slate-900 dark:text-white truncate max-w-[120px]" :title="item.title">{{ item.title }}</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ item.sku }}</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm font-black text-amber-600 dark:text-amber-400">{{ item.quantity_available }} left</p>
+                  <button class="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline mt-0.5">
+                    Restock
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Purchase Orders -->
+          <div class="bg-white dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/70 rounded-2xl shadow-sm">
+            <div class="p-5 border-b border-slate-100 dark:border-slate-800/60">
+              <h2 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <FileDown class="w-4 h-4 text-blue-500" />
+                Incoming Purchases
+              </h2>
+            </div>
+            <div class="p-5 space-y-4">
+              <div v-if="mappedPurchaseOrders.length === 0" class="text-center text-sm text-slate-500">
+                No incoming orders.
+              </div>
+              <div v-for="po in mappedPurchaseOrders" :key="po.id" class="flex items-center gap-4">
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ po.po_number }}</p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ formatDate(po.created_at) }} • {{ formatPrice(po.total_amount) }}</p>
+                </div>
+                <span :class="getStatusClass(po.status, true)">
+                  {{ po.status }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </template>
+
+    <!-- Dynamic Backdrop when Maximized -->
+    <transition name="fade">
+      <div 
+        v-if="isNotesOpen && isMaximized" 
+        class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40"
+        @click="isMaximized = false"
+      ></div>
+    </transition>
+
+    <!-- Floating / Maximized Notes Widget Container -->
+    <div 
+      :class="[
+        'fixed z-50 transition-all duration-300 ease-in-out flex flex-col items-end',
+        isMaximized 
+          ? 'inset-4 sm:inset-10' 
+          : 'bottom-6 right-6'
+      ]"
+    >
+      <!-- Notes Panel -->
+      <transition name="slide-up">
+        <div 
+          v-if="isNotesOpen" 
+          :class="[
+            'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out',
+            isMaximized 
+              ? 'w-full h-full' 
+              : 'w-80 sm:w-96 mb-4 h-72 sm:h-80'
+          ]"
+        >
+          <!-- Header -->
+          <div class="bg-slate-50 dark:bg-slate-800/80 px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center select-none">
+            <div class="flex items-center gap-2 cursor-pointer" @click="isMaximized = !isMaximized">
+              <PenLine class="w-4 h-4 text-brand-500" />
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white">Quick Notes</h3>
+              <span class="text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded font-medium ml-1">
+                {{ isMaximized ? 'Expanded' : 'Compact' }}
+              </span>
+            </div>
+            
+            <div class="flex items-center gap-1">
+              <button 
+                @click="isMaximized = !isMaximized" 
+                class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors"
+                :title="isMaximized ? 'Restore' : 'Maximize'"
+              >
+                <Minimize2 v-if="isMaximized" class="w-4 h-4" />
+                <Maximize2 v-else class="w-4 h-4" />
+              </button>
+              <button 
+                @click="closeNotes" 
+                class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors"
+                title="Close"
+              >
+                <X class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          
+          <!-- Body -->
+          <div class="p-0 flex-1 relative flex flex-col">
+            <textarea 
+              v-model="notesContent"
+              placeholder="Jot down quick reminders, draft order IDs, or temporary details here..." 
+              class="w-full flex-1 p-4 bg-transparent text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none outline-none focus:ring-0 border-none"
+            ></textarea>
+            
+            <div class="p-3 bg-slate-50/50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-700/50 flex justify-between items-center text-[11px] font-medium text-slate-400 dark:text-slate-500 select-none">
+              <span>{{ notesContent.length }} characters</span>
+              <div class="flex items-center gap-1.5">
+                <CheckCircle2 class="w-3.5 h-3.5 text-emerald-500" v-if="notesContent.length > 0" />
+                {{ notesContent.length > 0 ? 'Saved locally' : 'Auto-saves as you type' }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <!-- FAB Toggle Button -->
+      <button 
+        v-if="!isMaximized"
+        @click="toggleNotes"
+        :class="[
+          'flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-all duration-300 hover:scale-105 active:scale-95',
+          isNotesOpen 
+            ? 'bg-slate-800 dark:bg-slate-700 text-white' 
+            : 'bg-brand-500 hover:bg-brand-600 text-white shadow-brand-500/30'
+        ]"
+      >
+        <transition name="fade" mode="out-in">
+          <X v-if="isNotesOpen" class="w-5 h-5" />
+          <div v-else class="relative">
+            <StickyNote class="w-5 h-5" />
+            <span v-if="notesContent.length > 0" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 border-2 border-brand-500 rounded-full"></span>
+          </div>
+        </transition>
+      </button>
     </div>
 
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
 import { 
-  Truck, 
-  Package, 
-  Users, 
-  DollarSign, 
   TrendingUp, 
-  ArrowUpRight, 
-  Clock, 
-  AlertTriangle 
+  FileUp, 
+  FileDown, 
+  Package, 
+  AlertCircle, 
+  Download, 
+  Plus, 
+  PenLine, 
+  X, 
+  CheckCircle2, 
+  StickyNote,
+  ChartColumn,
+  Maximize2,
+  Minimize2
 } from 'lucide-vue-next'
+
+import {
+  Chart,
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Tooltip,
+  Filler,
+  type ChartConfiguration
+} from 'chart.js'
+
+import { dashboardService } from '../services/dashboard.service'
+import type { DashboardResponse } from '../types/dashboard.types'
+
+// Register Chart.js modules
+Chart.register(
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Tooltip,
+  Filler
+)
+
+const route = useRoute()
+
+const CURRENCY_SYMBOL = "GBP"
+const LOCALE = "en-GB"
+
+// Data State
+const dashboardData = ref<DashboardResponse | null>(null)
+const isLoading = ref(true)
+
+// Floating Notes State
+const isNotesOpen = ref(false)
+const isMaximized = ref(false)
+const notesContent = ref('')
+
+const toggleNotes = () => {
+  isNotesOpen.value = !isNotesOpen.value
+  if (!isNotesOpen.value) isMaximized.value = false
+}
+
+const closeNotes = () => {
+  isNotesOpen.value = false
+  isMaximized.value = false
+}
+
+// Helpers
+const formatPrice = (priceInCents: number) => {
+  return new Intl.NumberFormat(LOCALE, {
+    style: 'currency',
+    currency: CURRENCY_SYMBOL
+  }).format(priceInCents / 100)
+}
+
+const formatDate = (dateString: string) => {
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(new Date(dateString))
+}
+
+const getStatusClass = (status: string, small = false) => {
+  const base = small ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'
+  const common = `${base} font-bold rounded-full border`
+  
+  switch (status.toUpperCase()) {
+    case 'COMPLETED':
+    case 'FULLFILLED':
+      return `${common} bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400`
+    case 'CONFIRMED':
+    case 'DRAFT':
+    case 'CANCELLED':
+      return `${common} bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400`
+    default:
+      return `${common} bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400`
+  }
+}
+
+// Computed Data Mappings
+const quickStats = computed(() => {
+  if (!dashboardData.value) return []
+  const kpis = dashboardData.value.kpis
+  return [
+    {
+      title: 'Total Revenue',
+      value: formatPrice(kpis.total_revenue),
+      trend: 'TBC',
+      trendUp: true,
+      icon: TrendingUp,
+      bgColor: 'bg-emerald-50 dark:bg-emerald-500/10',
+      textColor: 'text-emerald-600 dark:text-emerald-400'
+    },
+    {
+      title: 'Total Sell Orders',
+      value: kpis.total_sell_orders.toLocaleString(),
+      trend: 'TBC',
+      trendUp: true,
+      icon: FileUp,
+      bgColor: 'bg-brand-50 dark:bg-brand-500/10',
+      textColor: 'text-brand-600 dark:text-brand-400'
+    },
+    {
+      title: 'Total Purchase Orders',
+      value: kpis.total_purchase_orders.toLocaleString(),
+      trend: 'TBC',
+      trendUp: false,
+      icon: FileDown,
+      bgColor: 'bg-blue-50 dark:bg-blue-500/10',
+      textColor: 'text-blue-600 dark:text-blue-400'
+    },
+    {
+      title: 'Low Stock Alerts',
+      value: kpis.items_low_stock.toLocaleString(),
+      trend: 'TBC',
+      trendUp: false,
+      icon: Package,
+      bgColor: 'bg-rose-50 dark:bg-rose-500/10',
+      textColor: 'text-rose-600 dark:text-rose-400'
+    }
+  ]
+})
+
+const mappedSellOrders = computed(() => dashboardData.value?.recent_sell_orders || [])
+const mappedPurchaseOrders = computed(() => dashboardData.value?.incoming_purchase_orders || [])
+const mappedLowStock = computed(() => dashboardData.value?.low_stock_alerts || [])
+
+// Chart Implementation
+const chartCanvas = ref<HTMLCanvasElement | null>(null)
+let chartInstance: Chart | null = null
+
+const initChart = () => {
+  if (!chartCanvas.value || !dashboardData.value?.revenue_chart) return
+
+  const ctx = chartCanvas.value.getContext('2d')
+  if (!ctx) return
+
+  if (chartInstance) {
+    chartInstance.destroy()
+  }
+
+  const chartData = dashboardData.value.revenue_chart
+  const labels = chartData.map(d => formatDate(String(d.date)))
+  // d.revenue is 320000 (cents/pence), divide by 100 to get £3,200
+  const data = chartData.map(d => d.revenue / 100)
+
+  const brandGradient = ctx.createLinearGradient(0, 0, 0, 250)
+  brandGradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)')
+  brandGradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)')
+
+  const config: ChartConfiguration<'line'> = {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Revenue',
+          data,
+          borderColor: '#3b82f6',
+          borderWidth: 3,
+          backgroundColor: brandGradient,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#3b82f6',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 2,
+          pointHoverRadius: 7,
+          pointHoverBorderWidth: 3,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        intersect: false,
+        mode: 'index',
+      },
+      plugins: {
+        legend: { display: false }, 
+        tooltip: {
+          backgroundColor: '#0f172a',
+          titleColor: '#f8fafc',
+          bodyColor: '#cbd5e1',
+          borderColor: '#334155',
+          borderWidth: 1,
+          padding: 12,
+          boxPadding: 6,
+          usePointStyle: true,
+          callbacks: {
+            label: (context) => {
+              const val = context.parsed.y ?? 0;
+              return ` Revenue: £${val.toLocaleString()}`
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: '#94a3b8',
+            font: { size: 11, weight: 600 }
+          }
+        },
+        y: {
+          border: { display: false },
+          grid: { color: 'rgba(148, 163, 184, 0.12)' },
+          ticks: {
+            color: '#94a3b8',
+            font: { size: 11, weight: 600 },
+            callback: (value) => `£${Number(value).toLocaleString()}`
+          }
+        }
+      }
+    }
+  }
+
+  chartInstance = new Chart(ctx, config)
+}
+
+const fetchDashboardInfo = async () => {
+  try {
+    isLoading.value = true
+    const workspaceId = (route.params.workspaceId as string)
+    
+    dashboardData.value = await dashboardService.get(workspaceId)
+    
+    await nextTick()
+
+    requestAnimationFrame(() => {
+      initChart()
+    })
+    
+  } catch (error) {
+    console.error("Failed to fetch dashboard data:", error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchDashboardInfo()
+})
+
+onUnmounted(() => {
+  if (chartInstance) {
+    chartInstance.destroy()
+    chartInstance = null
+  }
+})
 </script>
 
 <style scoped>
-@keyframes slide-in-left {
-  0% {
-    opacity: 0;
-    transform: translateX(-24px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(16px) scale(0.96);
 }
 
-.animate-card-1 {
-  animation: slide-in-left 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
 }
-.animate-card-2 {
-  animation: slide-in-left 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
-}
-.animate-card-3 {
-  animation: slide-in-left 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.19s both;
-}
-.animate-card-4 {
-  animation: slide-in-left 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both;
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

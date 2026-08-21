@@ -33,42 +33,49 @@
       </transition>
     </div>
 
-    <!-- User (Tighter margins and slightly smaller avatar) -->
-    <div
-      :class="[
-        'mx-3 pb-3 mb-1 border-b border-slate-200 dark:border-slate-700/50 flex items-center gap-2.5 transition-all duration-200',
-        collapsed ? 'justify-center px-0' : 'px-2'
-      ]"
-    >
-      <div
-        class="shrink-0 flex items-center justify-center w-8 h-8 rounded-xl bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-400 font-bold text-[11px] uppercase shadow-sm select-none"
-        :title="
-          collapsed && currentUser
-            ? `${currentUser.first_name} ${currentUser.last_name} (${currentUser.email})`
-            : undefined
-        "
+    <!-- User Profile Link -->
+    <div class="mx-3 pb-3 mb-1 border-b border-slate-200 dark:border-slate-700/50">
+      <!-- 
+        Pass user ID if your route eventually requires it, e.g.:
+        :to="{ name: 'user', params: { ...$route.params, userId: currentUser?.id } }"
+      -->
+      <router-link
+        :to="{ name: 'workspace-user' }"
+        :class="[
+          'group flex items-center gap-2.5 transition-all duration-200 p-1.5 -mx-1.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer',
+          collapsed ? 'justify-center' : ''
+        ]"
       >
-        {{ userInitials }}
-      </div>
-
-      <div
-        v-if="!collapsed && currentUser"
-        class="truncate min-w-0 flex-1"
-      >
-        <p
-          class="font-bold text-sm text-slate-900 dark:text-white truncate"
-          :title="`${currentUser.first_name} ${currentUser.last_name}`"
+        <div
+          class="shrink-0 flex items-center justify-center w-8 h-8 rounded-xl bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-400 font-bold text-[11px] uppercase shadow-sm select-none transition-colors group-hover:bg-brand-500/20 dark:group-hover:bg-brand-500/30"
+          :title="
+            collapsed && currentUser
+              ? `${currentUser.first_name} ${currentUser.last_name} (${currentUser.email})`
+              : undefined
+          "
         >
-          {{ currentUser.first_name }} {{ currentUser.last_name }}
-        </p>
+          {{ userInitials }}
+        </div>
 
-        <p
-          class="text-[11px] text-slate-400 dark:text-slate-500 truncate font-medium mt-0.5"
-          :title="currentUser.email"
+        <div
+          v-if="!collapsed && currentUser"
+          class="truncate min-w-0 flex-1"
         >
-          {{ currentUser.email }}
-        </p>
-      </div>
+          <p
+            class="font-bold text-sm text-slate-900 dark:text-white truncate transition-colors group-hover:text-brand-600 dark:group-hover:text-brand-400"
+            :title="`${currentUser.first_name} ${currentUser.last_name}`"
+          >
+            {{ currentUser.first_name }} {{ currentUser.last_name }}
+          </p>
+
+          <p
+            class="text-[11px] text-slate-400 dark:text-slate-500 truncate font-medium mt-0.5"
+            :title="currentUser.email"
+          >
+            {{ currentUser.email }}
+          </p>
+        </div>
+      </router-link>
     </div>
 
     <!-- Navigation (Reduced padding and group spacing) -->

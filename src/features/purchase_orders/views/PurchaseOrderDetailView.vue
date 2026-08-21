@@ -374,9 +374,17 @@ const fetchPODetails = async () => {
   try {
     isLoading.value = true
     po.value = await purchaseOrderService.getOne(workspaceId, poId)
-  } catch (err) {
-    console.error(err)
-    showToast("Failed to retrieve purchase order details", "error")
+  } catch (err: any) {
+    const errorMessage = 
+        err.response?.data?.detail || 
+        err.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
   } finally {
     isLoading.value = false
   }
@@ -413,9 +421,17 @@ const updateStatus = async (nextStatus: PurchaseOrderStatus) => {
     await purchaseOrderService.update(workspaceId, poId, { status: nextStatus })
     showToast(`PO successfully moved to ${nextStatus}`, "success")
     await fetchPODetails()
-  } catch (err) {
-    console.error(err)
-    showToast("Unable to process status state change", "error")
+  } catch (err: any) {
+    const errorMessage = 
+        err.response?.data?.detail || 
+        err.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
   }
 }
 
