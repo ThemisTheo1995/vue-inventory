@@ -47,7 +47,7 @@
       </div>
 
       <!-- Data View Wrapper (Handles Scrolling) -->
-      <div class="flex-1 overflow-y-auto  bg-slate-50/30 dark:bg-slate-900/30">
+      <div class="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-slate-900/30">
         
         <!-- ================= MOBILE LIST VIEW ================= -->
         <div class="md:hidden flex flex-col divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -98,9 +98,12 @@
                       <User class="w-3.5 h-3.5 text-slate-400" />
                       {{ formatCustomerName(so.customer) }}
                     </p>
-                    <p v-if="so.customer?.email" class="text-[11px] font-medium text-slate-450 dark:text-slate-500 pl-4.5">
-                      {{ so.customer.email }}
-                    </p>
+                    <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1">
+                      <Calendar class="w-3 h-3 text-slate-400" />
+                      <span>{{ formatDateTime(so.created_at).date }}</span>
+                      <span v-if="formatDateTime(so.created_at).time" class="text-slate-400 dark:text-slate-600">•</span>
+                      <span>{{ formatDateTime(so.created_at).time }}</span>
+                    </div>
                   </div>
                 </div>
                 <StatusBadge :status="so.status" />
@@ -113,10 +116,33 @@
                     {{ formatCurrency(so.total_amount) }}
                   </p>
                 </div>
-                <div v-if="!isReadOnly">
+                <!-- Dynamic Actions -->
+                <div v-if="!isReadOnly" class="flex items-center gap-1 -mr-2">
+                  <!-- Draft to Confirmed -->
                   <button
+                    v-if="so.status === 'DRAFT'"
+                    @click.stop="updateStatus(so, 'CONFIRMED')"
+                    class="p-2 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
+                    title="Confirm Order"
+                  >
+                    <Send class="w-4 h-4" />
+                  </button>
+                  
+                  <!-- Confirmed to Fulfilled -->
+                  <button
+                    v-if="so.status === 'CONFIRMED'"
+                    @click.stop="updateStatus(so, 'FULLFILLED')"
+                    class="p-2 text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
+                    title="Fulfill Order"
+                  >
+                    <CheckCircle class="w-4 h-4" />
+                  </button>
+
+                  <!-- Delete -->
+                  <button
+                    v-if="so.status === 'DRAFT' || so.status === 'CANCELLED'"
                     @click.stop="deleteSO(so)"
-                    class="p-2 -mr-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-400/10 transition-colors"
+                    class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-400/10 transition-colors"
                     title="Delete"
                   >
                     <Trash2 class="w-4 h-4" />
@@ -132,17 +158,19 @@
           <table class="w-full text-left border-collapse">
             <thead class="sticky top-0 z-10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-[inset_0_-1px_0_0_theme(colors.slate.200)] dark:shadow-[inset_0_-1px_0_0_theme(colors.slate.800)]">
               <tr>
-                <th class="w-[25%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">SO Number</th>
-                <th class="w-[30%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Customer</th>
-                <th class="w-[20%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Status</th>
-                <th class="w-[20%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Total Amount</th>
-                <th v-if="!isReadOnly" class="w-[5%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right">Actions</th>
+                <th class="w-[18%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Date Created</th>
+                <th class="w-[20%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">SO Number</th>
+                <th class="w-[25%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Customer</th>
+                <th class="w-[16%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Status</th>
+                <th class="w-[12%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Total Amount</th>
+                <th v-if="!isReadOnly" class="w-[9%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right">Actions</th>
               </tr>
             </thead>
 
             <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
               <!-- Desktop Skeleton -->
               <tr v-if="isTableLoading" v-for="i in 6" :key="'desk-skel-'+i" class="animate-pulse bg-white/30 dark:bg-slate-900/30">
+                <td class="px-6 py-4"><div class="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-24 mb-1"></div><div class="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-16"></div></td>
                 <td class="px-6 py-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700/50"></div><div class="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-24"></div></div></td>
                 <td class="px-6 py-4"><div class="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-32"></div></td>
                 <td class="px-6 py-4"><div class="h-6 bg-slate-200 dark:bg-slate-700/50 rounded-full w-20"></div></td>
@@ -152,7 +180,7 @@
 
               <!-- Desktop Empty State -->
               <tr v-else-if="!sellOrders.length">
-                <td :colspan="isReadOnly ? 4 : 5" class="py-24 text-center">
+                <td :colspan="isReadOnly ? 5 : 6" class="py-24 text-center">
                   <EmptyStateContent :is-read-only="isReadOnly" @create="isCreateModalOpen = true" />
                 </td>
               </tr>
@@ -165,11 +193,21 @@
                 @click="navigateToSO(so.id)"
                 class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
               >
-                <!-- First cell gets 'relative' -->
+                <!-- First cell gets 'relative' bar indicator -->
                 <td class="px-6 py-4 relative">
-                  <!-- Move the interactive highlight INSIDE the first td -->
                   <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   
+                  <div class="flex flex-col">
+                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                      {{ formatDateTime(so.created_at).date }}
+                    </span>
+                    <span class="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-0.5">
+                      {{ formatDateTime(so.created_at).time }}
+                    </span>
+                  </div>
+                </td>
+
+                <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
                     <div class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-full bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 font-bold group-hover:scale-105 transition-transform shadow-sm">
                       <Hash class="w-4 h-4" />
@@ -211,15 +249,41 @@
                   </span>
                 </td>
 
+                <!-- Dynamic Actions Desktop -->
                 <td v-if="!isReadOnly" class="px-6 py-4 text-right">
                   <div class="flex items-center justify-end" @click.stop>
-                    <button
-                      @click.stop="deleteSO(so)"
-                      class="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95"
-                      title="Delete sell order"
-                    >
-                      <Trash2 class="w-4 h-4" />
-                    </button>
+                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      
+                      <!-- Draft to Confirmed -->
+                      <button
+                        v-if="so.status === 'DRAFT'"
+                        @click.stop="updateStatus(so, 'CONFIRMED')"
+                        class="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all transform active:scale-95"
+                        title="Confirm Order"
+                      >
+                        <Send class="w-4 h-4" />
+                      </button>
+                      
+                      <!-- Confirmed to Fulfilled -->
+                      <button
+                        v-if="so.status === 'CONFIRMED'"
+                        @click.stop="updateStatus(so, 'FULLFILLED')"
+                        class="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all transform active:scale-95"
+                        title="Fulfill Order"
+                      >
+                        <CheckCircle class="w-4 h-4" />
+                      </button>
+
+                      <!-- Delete -->
+                      <button
+                        v-if="so.status === 'DRAFT' || so.status === 'CANCELLED'"
+                        @click.stop="deleteSO(so)"
+                        class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95"
+                        title="Delete sell order"
+                      >
+                        <Trash2 class="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -273,7 +337,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, h } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { Search, Plus, Trash2, ChevronLeft, ChevronRight, FileText, Hash, User } from "lucide-vue-next"
+import { 
+  Search, Plus, Trash2, ChevronLeft, ChevronRight, 
+  FileText, Hash, User, Calendar, Send, CheckCircle 
+} from "lucide-vue-next"
 
 import { useConfirm } from "@/composables/useConfirm"
 import { useToast } from "@/composables/useToast"
@@ -283,11 +350,9 @@ import BaseCard from "@/components/ui/BaseCard.vue"
 import SellOrderCreateModal from "./SellOrderCreateModal.vue"
 
 import { sellOrderService } from "../services/sell_order.service"
-import type { SellOrder } from "../types/sell_order.types"
+import type { SellOrder, SellOrderStatus } from "../types/sell_order.types"
 
 // --- Helper Components ---
-// Defined inline for encapsulation, keeping the single-file modularity high.
-
 const StatusBadge = (props: { status: string }) => {
   const getStyle = () => {
     switch (props.status.toUpperCase()) {
@@ -357,6 +422,22 @@ const formatCustomerName = (customer?: { first_name?: string; last_name?: string
   return fullName || "Unnamed Customer"
 }
 
+const formatDateTime = (dateString?: string) => {
+  if (!dateString) return { date: "—", time: "" }
+  const d = new Date(dateString)
+  const date = new Intl.DateTimeFormat(LOCALE, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(d)
+  const time = new Intl.DateTimeFormat(LOCALE, {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  }).format(d)
+  return { date, time }
+}
+
 const formatCurrency = (cents: number) => {
   return new Intl.NumberFormat(LOCALE, {
     style: "currency",
@@ -409,6 +490,35 @@ const prevPage = async () => {
 
 const navigateToSO = (id: string) => {
   router.push({ name: "sell-order-details", params: { workspaceId, id } })
+}
+
+const updateStatus = async (so: SellOrder, nextStatus: SellOrderStatus) => {
+  const isTransitionConfirmed = await confirm({
+    title: `Transition to ${nextStatus}`,
+    message: `Are you sure you want to transition this sell order status to ${nextStatus}? This action dictates downstream order processing.`,
+    confirmText: "Confirm Change",
+    cancelText: "Cancel",
+    variant: nextStatus === "CANCELLED" ? "danger" : "primary"
+  })
+
+  if (!isTransitionConfirmed) return
+
+  try {
+    await sellOrderService.update(workspaceId, so.id, { status: nextStatus })
+    showToast(`SO successfully moved to ${nextStatus}`, "success")
+    so.status = nextStatus
+  } catch (err: any) {
+    const errorMessage = 
+        err.response?.data?.detail || 
+        err.message || 
+        "An unexpected error occurred"
+
+        const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage
+
+    showToast(displayMessage, "error")
+  }
 }
 
 const deleteSO = async (so: SellOrder) => {

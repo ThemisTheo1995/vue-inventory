@@ -87,10 +87,10 @@
                   </div>
                   <div>
                     <p class="font-bold text-slate-900 dark:text-white text-sm leading-tight">
-                      Item ID
+                      {{ balance.item?.title || 'Unknown Item' }}
                     </p>
-                    <p class="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-1">
-                      {{ balance.item_id }}
+                    <p class="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-1" v-if="balance.item?.sku">
+                      SKU: {{ balance.item.sku }}
                     </p>
                   </div>
                 </div>
@@ -143,28 +143,28 @@
           <table class="w-full text-left border-collapse">
             <thead class="sticky top-0 z-10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-[inset_0_-1px_0_0_theme(colors.slate.200)] dark:shadow-[inset_0_-1px_0_0_theme(colors.slate.800)]">
               <tr>
-                <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 w-[20%]">
+                <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 w-[26%]">
                   Item Details
                 </th>
-                <th class="px-6 py-4 text-right w-[17%]">
+                <th class="px-6 py-4 text-right w-[15%]">
                   <div class="flex items-center justify-end gap-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
                     <span>On Hand</span>
                     <Info class="w-3 h-3 text-slate-300 dark:text-slate-600 cursor-help" />
                   </div>
                 </th>
-                <th class="px-6 py-4 text-right w-[16%]">
+                <th class="px-6 py-4 text-right w-[15%]">
                   <div class="flex items-center justify-end gap-1.5 text-[11px] font-black uppercase tracking-widest text-amber-500/80">
                     <span>Allocated</span>
                     <Info class="w-3 h-3 text-amber-500/40 cursor-help" />
                   </div>
                 </th>
-                <th class="px-6 py-4 text-right w-[17%]">
+                <th class="px-6 py-4 text-right w-[15%]">
                   <div class="flex items-center justify-end gap-1.5 text-[11px] font-black uppercase tracking-widest text-blue-500/80">
                     <span>On Order</span>
                     <Info class="w-3 h-3 text-blue-500/40 cursor-help" />
                   </div>
                 </th>
-                <th class="px-6 py-4 text-right w-[18%]">
+                <th class="px-6 py-4 text-right w-[17%]">
                   <div class="flex items-center justify-end gap-1.5 text-[11px] font-black uppercase tracking-widest text-slate-900 dark:text-white">
                     <CheckCircle class="w-3.5 h-3.5" />
                     <span>Available</span>
@@ -179,15 +179,15 @@
 
             <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
               
-              <!-- Desktop Skeleton (FIXED) -->
+              <!-- Desktop Skeleton -->
               <template v-if="isTableLoading">
                 <tr v-for="i in 6" :key="'desk-skel-'+i" class="animate-pulse bg-white/30 dark:bg-slate-900/30">
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
                       <div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700/50"></div>
                       <div class="space-y-2">
-                        <div class="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-24"></div>
-                        <div class="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-32"></div>
+                        <div class="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-28"></div>
+                        <div class="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-20"></div>
                       </div>
                     </div>
                   </td>
@@ -232,10 +232,10 @@
                     </div>
                     <div class="min-w-0">
                       <p class="font-bold text-slate-900 dark:text-white text-xs truncate">
-                        {{ balance.item_id }}
+                        {{ balance.item?.title || 'Unknown Item' }}
                       </p>
-                      <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider truncate mt-0.5">
-                        System ID: {{ balance.id.slice(0, 8) }}
+                      <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium tracking-wider truncate mt-0.5" v-if="balance.item?.sku">
+                        SKU: {{ balance.item.sku }}
                       </p>
                     </div>
                   </div>
@@ -343,9 +343,6 @@ import {
   Package, 
   RefreshCw, 
   Box,
-  Archive,
-  ShoppingCart,
-  Truck,
   CheckCircle,
   Info
 } from "lucide-vue-next"
@@ -409,7 +406,8 @@ const isTableLoading = computed(() => isLoading.value)
 const fetchBalances = async () => {
   isLoading.value = true
   try {
-    const data = await inventoryService.getInventories(workspaceId, currentPage.value, itemsPerPage.value)
+    // Explicitly requesting expanded item data
+    const data = await inventoryService.getInventories(workspaceId, currentPage.value, itemsPerPage.value, ['item'])
     balances.value = data.items || []
     totalBalances.value = data.total || 0
   } catch (err: any) {
@@ -418,7 +416,7 @@ const fetchBalances = async () => {
         err.message || 
         "An unexpected error occurred"
 
-        const displayMessage = Array.isArray(errorMessage) 
+    const displayMessage = Array.isArray(errorMessage) 
         ? errorMessage[0].msg 
         : errorMessage
 

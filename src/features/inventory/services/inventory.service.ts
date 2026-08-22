@@ -13,11 +13,20 @@ class InventoryService {
 
   // --- Inventory Endpoints ---
 
-  async getInventories(workspaceId: string, page = 1, limit = 20): Promise<PaginatedInventory> {
+  async getInventories(
+    workspaceId: string, 
+    page = 1, 
+    limit = 20,
+    expand?: string[]
+  ): Promise<PaginatedInventory> {
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString()
     })
+    
+    if (expand && expand.length > 0) {
+      params.append('expand', expand.join(','))
+    }
     
     const response = await apiFetch(`/${workspaceId}/inventory?${params}`, { 
       method: 'GET'
@@ -26,8 +35,20 @@ class InventoryService {
     return await response.json()
   }
 
-  async getInventoryByItem(workspaceId: string, itemId: string): Promise<Inventory> {
-    const response = await apiFetch(`/${workspaceId}/inventory/items/${itemId}`, { 
+  async getInventoryByItem(
+    workspaceId: string, 
+    itemId: string,
+    expand?: string[]
+  ): Promise<Inventory> {
+    const params = new URLSearchParams()
+    
+    if (expand && expand.length > 0) {
+      params.append('expand', expand.join(','))
+    }
+    
+    const query = params.toString() ? `?${params.toString()}` : ''
+
+    const response = await apiFetch(`/${workspaceId}/inventory/items/${itemId}${query}`, { 
       method: 'GET'
     })
     

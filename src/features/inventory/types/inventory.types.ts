@@ -7,6 +7,16 @@ export enum OrderType {
   MANUAL_ADJUSTMENT = 'MANUAL_ADJUSTMENT'
 }
 
+export interface Item {
+  id: string;
+  workspace_id: string;
+  title: string;
+  sku: string;
+  base_price: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Inventory {
   id: string;
   workspace_id: string;
@@ -16,6 +26,7 @@ export interface Inventory {
   quantity_on_order: number;
   quantity_available: number;
   expected_available: number;
+  item?: Item | null; // Supported via expansion
   created_at?: string;
   updated_at?: string;
 }

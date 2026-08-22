@@ -486,8 +486,18 @@ const onItemSearchInput = (index: number) => {
     try {
       const data = await itemService.getAll(props.workspaceId, query, 1, 15)
       line.searchResults = data.items
-    } catch (error) {
-      console.error("Item searching error:", error)
+    } catch (error: any) {
+      const errorMessage = 
+          error.response?.data?.detail || 
+          error.message || 
+          "An unexpected error occurred";
+
+      const displayMessage = Array.isArray(errorMessage) 
+          ? errorMessage[0].msg 
+          : errorMessage;
+
+      showToast(displayMessage, "error")
+
     } finally {
       line.isSearching = false
     }

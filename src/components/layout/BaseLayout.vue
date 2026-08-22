@@ -1,3 +1,4 @@
+<!-- MainLayout.vue / App.vue -->
 <template>
   <div class="flex h-[100dvh] overflow-hidden bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300 font-sans">
     
@@ -31,17 +32,26 @@
         </div>
       </main>
     </div>
+
+    <!-- Global Floating Quick Notes Widget -->
+    <NotesView v-if="hasWorkspace" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import Sidebar from './Sidebar.vue'
 import SidebarMobile from './SidebarMobile.vue'
+import NotesView from '@/features/notes/views/NotesView.vue'
 import { Menu } from 'lucide-vue-next'
 
+const route = useRoute()
 const isDark = ref<boolean>(false)
 const isSidebarMobileOpen = ref<boolean>(false)
+
+// Only show notes if we are inside a workspace route
+const hasWorkspace = computed(() => !!route.params.workspaceId)
 
 const toggleDark = (): void => {
   isDark.value = !isDark.value

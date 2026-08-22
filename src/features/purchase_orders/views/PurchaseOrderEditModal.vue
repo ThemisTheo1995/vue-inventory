@@ -203,8 +203,15 @@
                   @focus="onItemInputFocus(index)"
                   type="text"
                   required
+                  :disabled="!!line.id"
+                  :title="line.id ? 'Item cannot be changed once saved. Remove this line and add a new one.' : 'Search product...'"
                   placeholder="Search product..."
-                  class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-950 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
+                  :class="[
+                    'w-full rounded-lg border px-3.5 py-2.5 text-sm font-medium focus:outline-none transition-colors',
+                    line.id 
+                      ? 'border-slate-200/50 dark:border-slate-700/50 bg-slate-100/50 dark:bg-slate-800/30 text-slate-500 cursor-not-allowed select-none shadow-inner' 
+                      : 'border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-950 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 focus:bg-white dark:focus:bg-slate-900'
+                  ]"
                 />
                 
                 <!-- Product Autocomplete Dropdown -->
@@ -217,7 +224,7 @@
                   leave-to-class="transform scale-95 opacity-0"
                 >
                   <div 
-                    v-if="line.isDropdownOpen" 
+                    v-if="line.isDropdownOpen && !line.id"
                     class="absolute z-50 left-0 w-[100%] md:w-[150%] mt-2 max-h-60 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl shadow-2xl ring-1 ring-black/5 "
                   >
                     <div v-if="line.isSearching" class="p-4 text-center text-xs font-medium text-slate-400">
@@ -570,7 +577,7 @@ const markLineDirty = (index: number) => {
 
 const onItemSearchInput = (index: number) => {
   const line = lines.value[index]
-  if (!line) return
+  if (!line || line.id) return
 
   markLineDirty(index)
   const query = line.searchInput.trim()
@@ -604,14 +611,14 @@ const onItemSearchInput = (index: number) => {
 
 const onItemInputFocus = (index: number) => {
   const line = lines.value[index]
-  if (line && line.searchInput.trim().length >= 3) {
+  if (line && !line.item_id && line.searchInput.trim().length >= 3) {
     line.isDropdownOpen = true
   }
 }
 
 const selectItem = (index: number, item: Item) => {
   const line = lines.value[index]
-  if (!line) return
+  if (!line || line.id) return
 
   markLineDirty(index)
   line.item_id = item.id

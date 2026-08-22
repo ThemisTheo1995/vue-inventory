@@ -223,7 +223,7 @@
                   leave-to-class="transform scale-95 opacity-0"
                 >
                   <div 
-                    v-if="line.isDropdownOpen" 
+                    v-if="line.isDropdownOpen && !line.id"
                     class="absolute z-50 left-0 w-[100%] md:w-[150%] mt-2 max-h-60 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl shadow-2xl ring-1 ring-black/5"
                   >
                     <div v-if="line.isSearching" class="p-4 text-center text-xs font-medium text-slate-400">
@@ -577,7 +577,6 @@ const markLineDirty = (index: number) => {
 
 const onItemSearchInput = (index: number) => {
   const line = lines.value[index]
-  
   if (!line || line.id) return
 
   markLineDirty(index)
@@ -602,8 +601,17 @@ const onItemSearchInput = (index: number) => {
     try {
       const data = await itemService.getAll(props.workspaceId, query, 1, 15)
       line.searchResults = data.items
-    } catch (error) {
-      console.error("Item search error:", error)
+    } catch (error: any) {
+    const errorMessage = 
+        error.response?.data?.detail || 
+        error.message || 
+        "An unexpected error occurred";
+
+    const displayMessage = Array.isArray(errorMessage) 
+        ? errorMessage[0].msg 
+        : errorMessage;
+
+    showToast(displayMessage, "error")
     } finally {
       line.isSearching = false
     }
@@ -622,7 +630,7 @@ const onItemInputFocus = (index: number) => {
 
 const selectItem = (index: number, item: Item) => {
   const line = lines.value[index]
-  if (!line) return
+  if (!line || line.id) return
 
   markLineDirty(index)
   line.item_id = item.id
