@@ -26,7 +26,7 @@ export interface Inventory {
   quantity_on_order: number;
   quantity_available: number;
   expected_available: number;
-  item?: Item | null; // Supported via expansion
+  item?: Item | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -46,8 +46,8 @@ export interface StockMovement {
   quantity_change: number;
   reference_type: OrderType | string;
   reference_id: string | null;
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface StockMovementCreate {

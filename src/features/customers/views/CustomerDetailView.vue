@@ -4,20 +4,20 @@
     
     <!-- Breadcrumb Header -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-4 min-w-0">
         <router-link
           :to="{ name: 'customers', params: { workspaceId } }"
-          class="flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-brand-500 hover:border-brand-300 dark:hover:border-brand-500/30 transition-all shadow-sm active:scale-95 group"
+          class="flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-brand-500 hover:border-brand-300 dark:hover:border-brand-500/30 transition-all shadow-sm active:scale-95 group shrink-0"
         >
           <ArrowLeft class="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
         </router-link>
 
-        <div class="space-y-1">
-          <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-wider">
+        <div class="space-y-1 min-w-0">
+          <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-wider break-words whitespace-normal">
             {{ $route.meta.title || 'Customer Details' }}
           </h1>
-          <p class="text-sm sm:text-base font-medium text-slate-500 dark:text-slate-400">
-            {{ $route.meta.description || 'View and manage customer profile and history.' }}
+          <p class="text-sm sm:text-base font-medium text-slate-500 dark:text-slate-400 break-words whitespace-normal">
+            {{ $route.meta.description || 'Manage your customers.' }}
           </p>
         </div>
       </div>
@@ -38,21 +38,29 @@
       <template v-else-if="customer">
         
         <!-- Header Profile Card -->
-        <BaseCard class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-0 shadow-xl shadow-slate-200/50 dark:shadow-none ring-1 ring-slate-200 dark:ring-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-5 sm:p-6">
-          <div class="flex items-center gap-4 sm:gap-5">
+        <BaseCard class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-0 shadow-xl shadow-slate-200/50 dark:shadow-none ring-1 ring-slate-200 dark:ring-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-5 sm:p-6 overflow-hidden">
+          <div class="flex items-center gap-4 sm:gap-5 min-w-0 flex-1 w-full sm:w-auto">
             <!-- Indigo rounded-full customer avatar -->
-            <div class="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-2xl uppercase shadow-sm border border-indigo-100 dark:border-indigo-800/50">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-2xl uppercase shadow-sm border border-indigo-100 dark:border-indigo-800/50 shrink-0">
               {{ customer.first_name.charAt(0) }}{{ customer.last_name?.charAt(0) || '' }}
             </div>
-            <div>
-              <h2 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+            <div class="min-w-0 flex-1">
+              <h2 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white break-words whitespace-normal" :title="`${customer.first_name} ${customer.last_name || ''}`">
                 {{ customer.first_name }} {{ customer.last_name || '' }}
               </h2>
-              <div class="flex items-center gap-2 mt-1.5">
-                <a :href="'mailto:' + customer.email" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 shadow-sm hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-200 dark:hover:border-brand-500/30 transition-colors">
-                  <Mail class="w-3 h-3 text-slate-400" />
-                  {{ customer.email }}
+              <div class="flex items-center gap-2 mt-1.5 min-w-0">
+                <a 
+                  v-if="customer.email" 
+                  :href="'mailto:' + customer.email" 
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 shadow-sm hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-200 dark:hover:border-brand-500/30 transition-colors max-w-full break-all whitespace-normal"
+                  :title="customer.email"
+                >
+                  <Mail class="w-3 h-3 text-slate-400 shrink-0" />
+                  <span class="break-all whitespace-normal">{{ customer.email }}</span>
                 </a>
+                <span v-else class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 text-xs font-mono font-medium text-slate-400 italic">
+                  No email provided
+                </span>
               </div>
             </div>
           </div>
@@ -77,7 +85,7 @@
           
           <!-- Column 1: Details Sidebar -->
           <div class="lg:col-span-1 flex flex-col space-y-6">
-            <BaseCard class="flex-1 border-0 shadow-xl shadow-slate-200/50 dark:shadow-none ring-1 ring-slate-200 dark:ring-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-5 sm:p-6">
+            <BaseCard class="flex-1 border-0 shadow-xl shadow-slate-200/50 dark:shadow-none ring-1 ring-slate-200 dark:ring-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-5 sm:p-6 overflow-hidden">
               <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-6">
                 Customer Details
               </h3>
@@ -86,8 +94,8 @@
                 <!-- Customer ID -->
                 <div>
                   <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1.5">Customer ID</p>
-                  <div class="flex items-center gap-2 group/id">
-                    <span class="font-mono text-sm font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[200px]" :title="customer.id">
+                  <div class="flex items-start gap-2 group/id min-w-0">
+                    <span class="font-mono text-sm font-semibold text-slate-700 dark:text-slate-300 break-all whitespace-normal flex-1" :title="customer.id">
                       {{ customer.id }}
                     </span>
                     <button 
@@ -121,7 +129,7 @@
           <div class="lg:col-span-2 flex flex-col">
             <BaseCard class="flex-1 border-0 shadow-xl shadow-slate-200/50 dark:shadow-none ring-1 ring-slate-200 dark:ring-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
               <section class="h-full min-h-[350px] flex flex-col items-center justify-center p-8 sm:p-12 text-center">
-                <div class="w-16 h-16 mb-4 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner">
+                <div class="w-16 h-16 mb-4 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner shrink-0">
                   <ShoppingBag class="w-8 h-8 text-slate-400 opacity-80" />
                 </div>
                 <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">No Orders Yet</h3>
@@ -166,7 +174,7 @@ import { customerService } from '../services/customer.service'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import CustomerEditModal from './CustomerEditModal.vue'
 
-const LOCALE = 'en-GB' // Standardized to match previously upgraded components
+const LOCALE = 'en-GB'
 
 const route = useRoute()
 const router = useRouter()

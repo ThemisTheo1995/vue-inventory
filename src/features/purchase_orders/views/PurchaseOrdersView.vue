@@ -24,305 +24,208 @@
       </div>
     </header>
 
-    <!-- Main Content Card -->
-    <BaseCard class="flex flex-col h-[calc(100vh-140px)] sm:h-[calc(100vh-180px)] min-h-[500px] border-0 shadow-xl shadow-slate-200/50 dark:shadow-none ring-1 ring-slate-200 dark:ring-slate-800 overflow-hidden bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
-      
-      <!-- Toolbar -->
-      <div class="shrink-0 p-4 sm:p-5 border-b border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50">
-        <div class="relative max-w-md w-full">
-          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-            <svg v-if="isSearching" class="animate-spin h-4 w-4 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <Search v-else class="h-4 w-4 text-slate-400 dark:text-slate-500" />
-          </div>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search PO number or supplier..."
-            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-sm dark:text-white text-slate-900 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-brand-500 dark:focus:border-brand-400 focus:ring-4 focus:ring-brand-500/10 dark:focus:ring-brand-400/10 font-medium transition-all duration-200"
-          />
-        </div>
-      </div>
-
-      <!-- Data View Wrapper (Handles Scrolling) -->
-      <div class="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-slate-900/30">
-        
-        <!-- ================= MOBILE LIST VIEW ================= -->
-        <div class="md:hidden flex flex-col divide-y divide-slate-100 dark:divide-slate-800/60">
-          
-          <!-- Mobile Skeleton -->
-          <template v-if="isTableLoading">
-            <div v-for="i in 5" :key="'mob-skel-'+i" class="p-4 sm:p-5 animate-pulse space-y-4">
-              <div class="flex justify-between items-start">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700/50"></div>
-                  <div class="space-y-2">
-                    <div class="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-24"></div>
-                    <div class="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-16"></div>
-                  </div>
-                </div>
-                <div class="h-6 w-16 rounded-full bg-slate-200 dark:bg-slate-700/50"></div>
+    <!-- Reusable Table Component -->
+    <BaseTable
+      v-model:search-query="searchQuery"
+      :items="purchaseOrders"
+      :is-loading="isTableLoading"
+      :is-searching="isSearching"
+      :is-read-only="isReadOnly"
+      :current-page="currentPage"
+      :total-items="totalItems"
+      :items-per-page="itemsPerPage"
+      :total-pages="totalPages"
+      search-placeholder="Search PO number or supplier..."
+      empty-title="No purchase orders found"
+      :empty-description="isReadOnly ? 'There are currently no purchase orders matching your criteria.' : 'Get started by creating your first purchase order to track supplier items.'"
+      create-button-text="Create First PO"
+      :column-span="isReadOnly ? 5 : 6"
+      @create="isCreateModalOpen = true"
+      @prev-page="prevPage"
+      @next-page="nextPage"
+    >
+      <!-- ================= MOBILE CARDS SLOT ================= -->
+      <template #mobile-cards>
+        <div 
+          v-for="po in purchaseOrders" 
+          :key="po.id"
+          @click="navigateToPO(po.id)"
+          class="relative p-4 sm:p-5
+            rounded-lg
+            hover:bg-slate-50 dark:hover:bg-slate-900
+            active:bg-slate-100 dark:active:bg-slate-900
+            transition-colors cursor-pointer group
+            border-b dark:border-slate-900 last:border-0"
+        >
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center justify-center w-10 h-10 rounded-full bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 font-bold">
+                <Hash class="w-4 h-4" />
               </div>
-              <div class="flex justify-between items-end">
-                <div class="space-y-2">
-                  <div class="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-12"></div>
-                  <div class="h-5 bg-slate-200 dark:bg-slate-700/50 rounded w-20"></div>
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <!-- Mobile Empty State -->
-          <div v-else-if="!purchaseOrders.length" class="p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
-            <EmptyStateContent :is-read-only="isReadOnly" @create="isCreateModalOpen = true" />
-          </div>
-
-          <!-- Mobile Cards -->
-          <template v-else>
-            <div 
-              v-for="po in purchaseOrders" 
-              :key="po.id"
-              @click="navigateToPO(po.id)"
-              class="relative p-4 sm:p-5 hover:bg-slate-50 dark:hover:bg-slate-800/40 active:bg-slate-100 dark:active:bg-slate-800 transition-colors cursor-pointer group"
-            >
-              <div class="flex justify-between items-start mb-3">
-                <div class="flex items-center gap-3">
-                  <div class="flex items-center justify-center w-10 h-10 rounded-full bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 font-bold">
-                    <Hash class="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p class="font-bold text-slate-900 dark:text-white text-base leading-tight">{{ po.po_number }}</p>
-                    <p class="text-xs font-semibold text-slate-700 dark:text-slate-300 mt-1 flex items-center gap-1">
-                      <User class="w-3.5 h-3.5 text-slate-400" />
-                      {{ formatSupplierName(po.supplier) }}
-                    </p>
-                    <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1">
-                      <Calendar class="w-3 h-3 text-slate-400" />
-                      <span>{{ formatDateTime(po.created_at).date }}</span>
-                      <span v-if="formatDateTime(po.created_at).time" class="text-slate-400 dark:text-slate-600">•</span>
-                      <span>{{ formatDateTime(po.created_at).time }}</span>
-                    </div>
-                  </div>
-                </div>
-                <StatusBadge :status="po.status" />
-              </div>
-
-              <div class="flex justify-between items-end mt-4">
-                <div>
-                  <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">Total Amount</p>
-                  <p class="font-mono text-lg font-bold text-slate-900 dark:text-slate-100">
-                    {{ formatCurrency(po.total_amount) }}
-                  </p>
-                </div>
-                <!-- Dynamic Actions -->
-                <div v-if="!isReadOnly" class="flex items-center gap-1 -mr-2">
-                  <!-- Draft to Sent -->
-                  <button
-                    v-if="po.status === 'DRAFT'"
-                    @click.stop="updateStatus(po, 'SENT')"
-                    class="p-2 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
-                    title="Send Order"
-                  >
-                    <Send class="w-4 h-4" />
-                  </button>
-                  
-                  <!-- Sent to Received -->
-                  <button
-                    v-if="po.status === 'SENT'"
-                    @click.stop="updateStatus(po, 'RECEIVED')"
-                    class="p-2 text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
-                    title="Receive Order"
-                  >
-                    <CheckCircle class="w-4 h-4" />
-                  </button>
-
-                  <!-- Delete -->
-                  <button
-                    v-if="po.status === 'DRAFT' || po.status === 'CANCELLED'"
-                    @click.stop="deletePO(po)"
-                    class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-400/10 transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 class="w-4 h-4" />
-                  </button>
+              <div>
+                <p class="font-bold text-slate-900 dark:text-white text-base leading-tight">{{ po.po_number }}</p>
+                <p class="text-xs font-semibold text-slate-700 dark:text-slate-300 mt-1 flex items-center gap-1">
+                  <User class="w-3.5 h-3.5 text-slate-400" />
+                  {{ formatSupplierName(po.supplier) }}
+                </p>
+                <div class="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1">
+                  <Calendar class="w-3 h-3 text-slate-400" />
+                  <span>{{ formatDateTime(po.created_at).date }}</span>
+                  <span v-if="formatDateTime(po.created_at).time" class="text-slate-400 dark:text-slate-600">•</span>
+                  <span>{{ formatDateTime(po.created_at).time }}</span>
                 </div>
               </div>
             </div>
-          </template>
-        </div>
+            <StatusBadge :status="po.status" />
+          </div>
 
-        <!-- ================= DESKTOP TABLE VIEW ================= -->
-        <div class="hidden md:block w-full">
-          <table class="w-full text-left border-collapse">
-            <thead class="sticky top-0 z-10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-[inset_0_-1px_0_0_theme(colors.slate.200)] dark:shadow-[inset_0_-1px_0_0_theme(colors.slate.800)]">
-              <tr>
-                <th class="w-[18%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Date Created</th>
-                <th class="w-[20%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">PO Number</th>
-                <th class="w-[25%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Supplier</th>
-                <th class="w-[16%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Status</th>
-                <th class="w-[12%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Total Amount</th>
-                <th v-if="!isReadOnly" class="w-[9%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
-              <!-- Desktop Skeleton -->
-              <tr v-if="isTableLoading" v-for="i in 6" :key="'desk-skel-'+i" class="animate-pulse bg-white/30 dark:bg-slate-900/30">
-                <td class="px-6 py-4"><div class="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-24 mb-1"></div><div class="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-16"></div></td>
-                <td class="px-6 py-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700/50"></div><div class="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-24"></div></div></td>
-                <td class="px-6 py-4"><div class="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-32"></div></td>
-                <td class="px-6 py-4"><div class="h-6 bg-slate-200 dark:bg-slate-700/50 rounded-full w-20"></div></td>
-                <td class="px-6 py-4"><div class="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-20"></div></td>
-                <td v-if="!isReadOnly" class="px-6 py-4"></td>
-              </tr>
-
-              <!-- Desktop Empty State -->
-              <tr v-else-if="!purchaseOrders.length">
-                <td :colspan="isReadOnly ? 5 : 6" class="py-24 text-center">
-                  <EmptyStateContent :is-read-only="isReadOnly" @create="isCreateModalOpen = true" />
-                </td>
-              </tr>
-
-              <!-- Desktop Rows -->
-              <tr
-                v-else
-                v-for="po in purchaseOrders"
-                :key="po.id"
-                @click="navigateToPO(po.id)"
-                class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
+          <div class="flex justify-between items-end mt-4">
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">Amount</p>
+              <p class="font-mono text-lg font-bold text-slate-900 dark:text-slate-100">
+                {{ formatCurrency(po.total_amount) }}
+              </p>
+            </div>
+            <!-- Dynamic Actions -->
+            <div v-if="!isReadOnly" class="flex items-center gap-1 -mr-2">
+              <button
+                v-if="po.status === 'DRAFT'"
+                @click.stop="updateStatus(po, 'SENT')"
+                class="p-2 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
+                title="Send Order"
               >
-                <!-- First cell gets 'relative' bar indicator -->
-                <td class="px-6 py-4 relative">
-                  <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  
-                  <div class="flex flex-col">
-                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                      {{ formatDateTime(po.created_at).date }}
-                    </span>
-                    <span class="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-0.5">
-                      {{ formatDateTime(po.created_at).time }}
-                    </span>
-                  </div>
-                </td>
+                <Send class="w-4 h-4" />
+              </button>
+              
+              <button
+                v-if="po.status === 'SENT'"
+                @click.stop="updateStatus(po, 'RECEIVED')"
+                class="p-2 text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
+                title="Receive Order"
+              >
+                <CheckCircle class="w-4 h-4" />
+              </button>
 
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-3">
-                    <div class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-full bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 font-bold group-hover:scale-105 transition-transform shadow-sm">
-                      <Hash class="w-4 h-4" />
-                    </div>
-                    <div class="min-w-0">
-                      <p class="font-bold text-slate-900 dark:text-white text-sm truncate">
-                        {{ po.po_number }}
-                      </p>
-                      <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider truncate">
-                        ID: {{ po.id.slice(0, 8) }}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2.5">
-                    <div class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                      <User class="w-4 h-4" />
-                    </div>
-                    <div class="min-w-0">
-                      <p class="font-bold text-sm text-slate-800 dark:text-slate-200 truncate" :title="formatSupplierName(po.supplier)">
-                        {{ formatSupplierName(po.supplier) }}
-                      </p>
-                      <p v-if="po.supplier?.email" class="text-xs text-slate-400 dark:text-slate-500 truncate" :title="po.supplier.email">
-                        {{ po.supplier?.email }}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                
-                <td class="px-6 py-4">
-                  <StatusBadge :status="po.status" />
-                </td>
-                
-                <td class="px-6 py-4">
-                  <span class="font-mono text-sm font-bold text-slate-700 dark:text-slate-200">
-                    {{ formatCurrency(po.total_amount) }}
-                  </span>
-                </td>
-
-                <!-- Dynamic Actions Desktop -->
-                <td v-if="!isReadOnly" class="px-6 py-4 text-right">
-                  <div class="flex items-center justify-end" @click.stop>
-                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      
-                      <!-- Draft to Sent -->
-                      <button
-                        v-if="po.status === 'DRAFT'"
-                        @click.stop="updateStatus(po, 'SENT')"
-                        class="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all transform active:scale-95"
-                        title="Send Order"
-                      >
-                        <Send class="w-4 h-4" />
-                      </button>
-                      
-                      <!-- Sent to Received -->
-                      <button
-                        v-if="po.status === 'SENT'"
-                        @click.stop="updateStatus(po, 'RECEIVED')"
-                        class="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all transform active:scale-95"
-                        title="Receive Order"
-                      >
-                        <CheckCircle class="w-4 h-4" />
-                      </button>
-
-                      <!-- Delete -->
-                      <button
-                        v-if="po.status === 'DRAFT' || po.status === 'CANCELLED'"
-                        @click.stop="deletePO(po)"
-                        class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95"
-                        title="Delete purchase order"
-                      >
-                        <Trash2 class="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Pagination Footer -->
-      <div class="shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 border-t border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-        <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
-          Showing <span class="font-bold text-slate-700 dark:text-slate-300">{{ purchaseOrders.length ? ((currentPage - 1) * itemsPerPage) + 1 : 0 }}</span>
-          to <span class="font-bold text-slate-700 dark:text-slate-300">{{ Math.min(currentPage * itemsPerPage, totalItems) }}</span>
-          of <span class="font-bold text-slate-700 dark:text-slate-300">{{ totalItems }}</span>
-        </p>
-
-        <div v-if="totalPages > 1" class="flex items-center gap-1.5">
-          <button
-            @click="prevPage"
-            :disabled="currentPage === 1 || isTableLoading"
-            class="flex items-center justify-center w-8 h-8 rounded-lg bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-all"
-          >
-            <ChevronLeft class="w-4 h-4" />
-          </button>
-          <div class="px-2 hidden sm:block">
-            <span class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ currentPage }}</span>
-            <span class="text-xs font-medium text-slate-400 mx-1">/</span>
-            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ totalPages }}</span>
+              <button
+                v-if="po.status === 'DRAFT' || po.status === 'CANCELLED'"
+                @click.stop="deletePO(po)"
+                class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-400/10 transition-colors"
+                title="Delete"
+              >
+                <Trash2 class="w-4 h-4" />
+              </button>
+            </div>
           </div>
-          <button
-            @click="nextPage"
-            :disabled="currentPage === totalPages || isTableLoading"
-            class="flex items-center justify-center w-8 h-8 rounded-lg bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-all"
-          >
-            <ChevronRight class="w-4 h-4" />
-          </button>
         </div>
-      </div>
-    </BaseCard>
+      </template>
+
+      <!-- ================= DESKTOP TABLE HEADERS SLOT ================= -->
+      <template #desktop-headers>
+        <th class="w-[18%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Date Created</th>
+        <th class="w-[20%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">PO Number</th>
+        <th class="w-[25%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Supplier</th>
+        <th class="w-[16%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Status</th>
+        <th class="w-[12%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Amount</th>
+        <th v-if="!isReadOnly" class="w-[9%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right">Actions</th>
+      </template>
+
+      <!-- ================= DESKTOP TABLE ROWS SLOT ================= -->
+      <template #desktop-rows>
+        <tr
+          v-for="po in purchaseOrders"
+          :key="po.id"
+          @click="navigateToPO(po.id)"
+          class="group hover:bg-slate-50/80 dark:hover:bg-slate-900/90 transition-colors cursor-pointer"
+        >
+          <td class="px-6 py-4 relative">
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="flex flex-col">
+              <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                {{ formatDateTime(po.created_at).date }}
+              </span>
+              <span class="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-0.5">
+                {{ formatDateTime(po.created_at).time }}
+              </span>
+            </div>
+          </td>
+
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              <div class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-full bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 font-bold group-hover:scale-105 transition-transform shadow-sm">
+                <Hash class="w-4 h-4" />
+              </div>
+              <div class="min-w-0">
+                <p class="font-bold text-slate-900 dark:text-white text-sm truncate">
+                  {{ po.po_number }}
+                </p>
+                <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider truncate">
+                  ID: {{ po.id.slice(0, 8) }}
+                </p>
+              </div>
+            </div>
+          </td>
+          
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-2.5">
+              <div class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                <User class="w-4 h-4" />
+              </div>
+              <div class="min-w-0">
+                <p class="font-bold text-sm text-slate-800 dark:text-slate-200 truncate" :title="formatSupplierName(po.supplier)">
+                  {{ formatSupplierName(po.supplier) }}
+                </p>
+                <p v-if="po.supplier?.email" class="text-xs text-slate-400 dark:text-slate-500 truncate" :title="po.supplier.email">
+                  {{ po.supplier?.email }}
+                </p>
+              </div>
+            </div>
+          </td>
+          
+          <td class="px-6 py-4">
+            <StatusBadge :status="po.status" />
+          </td>
+          
+          <td class="px-6 py-4">
+            <span class="font-mono text-sm font-bold text-slate-700 dark:text-slate-200">
+              {{ formatCurrency(po.total_amount) }}
+            </span>
+          </td>
+
+          <td v-if="!isReadOnly" class="px-6 py-4 text-right">
+            <div class="flex items-center justify-end" @click.stop>
+              <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <button
+                  v-if="po.status === 'DRAFT'"
+                  @click.stop="updateStatus(po, 'SENT')"
+                  class="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all transform active:scale-95"
+                  title="Send Order"
+                >
+                  <Send class="w-4 h-4" />
+                </button>
+                
+                <button
+                  v-if="po.status === 'SENT'"
+                  @click.stop="updateStatus(po, 'RECEIVED')"
+                  class="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all transform active:scale-95"
+                  title="Receive Order"
+                >
+                  <CheckCircle class="w-4 h-4" />
+                </button>
+
+                <button
+                  v-if="po.status === 'DRAFT' || po.status === 'CANCELLED'"
+                  @click.stop="deletePO(po)"
+                  class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95"
+                  title="Delete purchase order"
+                >
+                  <Trash2 class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </template>
+    </BaseTable>
 
     <PurchaseOrderCreateModal 
       v-if="!isReadOnly" 
@@ -338,15 +241,14 @@
 import { computed, onMounted, ref, h } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { 
-  Search, Plus, Trash2, ChevronLeft, ChevronRight, 
-  FileText, Hash, User, Calendar, Send, CheckCircle 
+  Plus, Trash2, Hash, User, Calendar, Send, CheckCircle, FileText 
 } from "lucide-vue-next"
 
 import { useConfirm } from "@/composables/useConfirm"
 import { useToast } from "@/composables/useToast"
 import { useSearch } from "@/composables/useSearch"
 
-import BaseCard from "@/components/ui/BaseCard.vue"
+import BaseTable from "@/components/ui/BaseTable.vue"
 import PurchaseOrderCreateModal from "./PurchaseOrderCreateModal.vue"
 
 import { purchaseOrderService } from "../services/purchase_order.service"
@@ -371,27 +273,6 @@ const StatusBadge = (props: { status: string }) => {
     props.status
   ])
 }
-
-const EmptyStateContent = (props: { isReadOnly: boolean }, { emit }: any) => {
-  return h('div', { class: 'flex flex-col items-center justify-center space-y-4' }, [
-    h('div', { class: 'flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 shadow-inner' }, [
-      h(FileText, { class: 'w-8 h-8 opacity-80' })
-    ]),
-    h('div', { class: 'text-center' }, [
-      h('h3', { class: 'text-lg font-bold text-slate-900 dark:text-white' }, 'No purchase orders found'),
-      h('p', { class: 'text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto' }, 
-        props.isReadOnly 
-          ? 'There are currently no purchase orders matching your criteria.' 
-          : 'Get started by creating your first purchase order to track supplier items.'
-      )
-    ]),
-    !props.isReadOnly ? h('button', {
-      onClick: () => emit('create'),
-      class: 'mt-2 px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-sm hover:opacity-90 transition shadow-md hover:shadow-lg active:scale-95'
-    }, 'Create First PO') : null
-  ])
-}
-EmptyStateContent.emits = ['create']
 
 // --- Logic ---
 const LOCALE = "en-GB"
@@ -539,7 +420,6 @@ const deletePO = async (po: PurchaseOrder) => {
     totalItems.value = Math.max(0, totalItems.value - 1)
     showToast("Purchase order deleted successfully", "success")
     
-    // Auto-fetch if page is now empty but there are previous pages
     if (purchaseOrders.value.length === 0 && currentPage.value > 1) {
       prevPage()
     }

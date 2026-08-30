@@ -88,7 +88,7 @@
                 <FileUp class="w-4 h-4 text-brand-500" />
                 Recent Sell Orders
               </h2>
-              <router-link to="/sell-orders" class="text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300">
+              <router-link :to="{ name: 'sell-orders', params: { workspaceId } }" class="text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300">
                 View All
               </router-link>
             </div>
@@ -327,6 +327,7 @@ const quickStats = computed(() => {
 const mappedSellOrders = computed(() => (dashboardData.value?.recent_sell_orders || []).slice(0, MAX_DISPLAY_RECORDS))
 const mappedPurchaseOrders = computed(() => (dashboardData.value?.incoming_purchase_orders || []).slice(0, MAX_DISPLAY_RECORDS))
 const mappedLowStock = computed(() => (dashboardData.value?.low_stock_alerts || []).slice(0, MAX_DISPLAY_RECORDS))
+const workspaceId = (route.params.workspaceId as string)
 
 // Chart Implementation
 const chartCanvas = ref<HTMLCanvasElement | null>(null)
@@ -413,9 +414,7 @@ const fetchDashboardInfo = async () => {
   error.value = null
   isLoading.value = true
   try {
-    const workspaceId = (route.params.workspaceId as string)
     dashboardData.value = await dashboardService.get(workspaceId)
-    
     await nextTick()
     requestAnimationFrame(() => initChart())
   } catch (err) {

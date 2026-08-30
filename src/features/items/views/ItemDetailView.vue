@@ -39,7 +39,6 @@
         <!-- Header Profile Card -->
         <BaseCard class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-0 shadow-xl shadow-slate-200/50 dark:shadow-none ring-1 ring-slate-200 dark:ring-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-5 sm:p-6">
           <div class="flex items-center gap-4 sm:gap-5">
-            <!-- Teal rounded-xl (squircle) product thumbnail -->
             <div class="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold text-2xl shadow-sm border border-teal-100 dark:border-teal-800/50">
               {{ item.title?.charAt(0)?.toUpperCase() || 'I' }}
             </div>
@@ -48,7 +47,6 @@
                 {{ item.title }}
               </h2>
               <div class="flex items-center gap-2 mt-1.5">
-                <!-- SKU Badge -->
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
                   <Tag class="w-3 h-3 text-slate-400" />
                   {{ item.sku }}
@@ -57,7 +55,6 @@
             </div>
           </div>
 
-          <!-- Actions (Edit button) -->
           <div
             v-if="!isReadOnly"
             class="flex items-center gap-3 w-full sm:w-auto shrink-0"
@@ -83,7 +80,6 @@
               </h3>
               
               <div class="space-y-5">
-                <!-- Base Price -->
                 <div>
                   <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1.5">Base Price</p>
                   <p v-if="item.base_price !== null && item.base_price !== undefined" class="text-2xl font-black text-brand-600 dark:text-brand-400 leading-none">
@@ -96,7 +92,6 @@
 
                 <hr class="border-slate-200/60 dark:border-slate-800/60" />
 
-                <!-- Item ID -->
                 <div>
                   <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1.5">Item ID</p>
                   <div class="flex items-center gap-2 group/id">
@@ -114,7 +109,6 @@
                   </div>
                 </div>
 
-                <!-- Created Date -->
                 <div v-if="item.created_at">
                   <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1.5">Added to System</p>
                   <div class="flex items-center gap-2">
@@ -130,16 +124,126 @@
 
           <!-- Column 2: Stocks / Movement Records Pane -->
           <div class="lg:col-span-2 flex flex-col">
-            <BaseCard class="flex-1 border-0 shadow-xl shadow-slate-200/50 dark:shadow-none ring-1 ring-slate-200 dark:ring-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
-              <section class="h-full min-h-[350px] flex flex-col items-center justify-center p-8 sm:p-12 text-center">
-                <div class="w-16 h-16 mb-4 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner">
-                  <PackageOpen class="w-8 h-8 text-slate-400 opacity-80" />
+            <BaseCard class="flex-1 flex flex-col overflow-hidden border-0 shadow-xl shadow-slate-200/50 dark:shadow-none ring-1 ring-slate-200 dark:ring-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
+              <!-- Pane Header -->
+              <div class="shrink-0 p-5 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between">
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                  Inventory History
+                </h3>
+                <button
+                  v-if="!isReadOnly"
+                  @click="isStockAdjustModalOpen = true"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 hover:bg-brand-100 dark:hover:bg-brand-500/20 text-xs font-bold transition-all shadow-sm active:scale-95"
+                >
+                  <ArrowRightLeft class="w-3.5 h-3.5" />
+                  <span>Adjust Stock</span>
+                </button>
+              </div>
+
+              <!-- Content Area -->
+              <div class="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-slate-900/30 min-h-[350px]">
+                
+                <!-- Loading State -->
+                <div v-if="isMovementsLoading" class="p-5 space-y-4">
+                  <div v-for="i in 4" :key="i" class="animate-pulse flex items-center gap-4 p-4 rounded-xl bg-white/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800/50">
+                    <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700/50 shrink-0"></div>
+                    <div class="flex-1 space-y-2">
+                      <div class="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-1/3"></div>
+                      <div class="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-1/4"></div>
+                    </div>
+                    <div class="w-16 h-8 rounded-lg bg-slate-200 dark:bg-slate-700/50 shrink-0"></div>
+                  </div>
                 </div>
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">No Inventory Records</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-                  When stock mutations, transactions, or warehouse receipts occur for this item, they will be securely registered here.
+
+                <!-- Empty State -->
+                <section v-else-if="!movements.length" class="h-full flex flex-col items-center justify-center p-8 sm:p-12 text-center min-h-[350px]">
+                  <div class="w-16 h-16 mb-4 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner">
+                    <PackageOpen class="w-8 h-8 text-slate-400 opacity-80" />
+                  </div>
+                  <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">No Inventory Records</h3>
+                  <p class="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                    When stock mutations, transactions, or warehouse receipts occur for this item, they will be securely registered here.
+                  </p>
+                </section>
+
+                <!-- Data List -->
+                <div v-else class="p-4 sm:p-5 space-y-3">
+                  <div 
+                    v-for="movement in movements" 
+                    :key="movement.id"
+                    class="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <!-- Movement Icon -->
+                    <div 
+                      :class="[
+                        'flex items-center justify-center w-10 h-10 rounded-full shrink-0 shadow-inner',
+                        movement.quantity_change > 0 
+                          ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' 
+                          : 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                      ]"
+                    >
+                      <TrendingUp v-if="movement.quantity_change > 0" class="w-5 h-5" />
+                      <TrendingDown v-else class="w-5 h-5" />
+                    </div>
+
+                    <!-- Details -->
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-bold text-slate-900 dark:text-white truncate">
+                        {{ formatReferenceType(movement.reference_type) }}
+                      </p>
+                      <div class="flex items-center gap-2 mt-1">
+                        <Clock class="w-3 h-3 text-slate-400 shrink-0" />
+                        <span class="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">
+                          {{ formatDateTime(movement.created_at) }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Quantity Badge -->
+                    <div class="shrink-0 text-right">
+                      <span 
+                        :class="[
+                          'inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-sm font-mono font-black border shadow-sm',
+                          movement.quantity_change > 0 
+                            ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50' 
+                            : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/50'
+                        ]"
+                      >
+                        {{ movement.quantity_change > 0 ? '+' : '' }}{{ movement.quantity_change }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pagination Footer -->
+              <div 
+                v-if="movementsTotalPages > 1"
+                class="shrink-0 flex items-center justify-between px-4 sm:px-5 py-3 border-t border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm"
+              >
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  Showing <span class="font-bold text-slate-700 dark:text-slate-300">{{ movements.length ? ((movementsPage - 1) * movementsLimit) + 1 : 0 }}</span>
+                  to <span class="font-bold text-slate-700 dark:text-slate-300">{{ Math.min(movementsPage * movementsLimit, movementsTotal) }}</span>
+                  of <span class="font-bold text-slate-700 dark:text-slate-300">{{ movementsTotal }}</span>
                 </p>
-              </section>
+
+                <div class="flex items-center gap-1.5">
+                  <button
+                    @click="prevMovementsPage"
+                    :disabled="movementsPage === 1 || isMovementsLoading"
+                    class="flex items-center justify-center w-8 h-8 rounded-lg bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-all"
+                  >
+                    <ChevronLeft class="w-4 h-4" />
+                  </button>
+                  <button
+                    @click="nextMovementsPage"
+                    :disabled="movementsPage === movementsTotalPages || isMovementsLoading"
+                    class="flex items-center justify-center w-8 h-8 rounded-lg bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-all"
+                  >
+                    <ChevronRight class="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             </BaseCard>
           </div>
 
@@ -156,26 +260,48 @@
       @close="isEditModalOpen = false"
       @updated="onItemUpdated"
     />
+
+    <!-- Stock Adjust Modal Integration -->
+    <StockAdjustModal
+      v-if="item && !isReadOnly"
+      :is-open="isStockAdjustModalOpen"
+      :workspace-id="workspaceId"
+      :preselected-item-id="item.id"
+      @close="isStockAdjustModalOpen = false"
+      @created="onStockAdjusted"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-// 1. Vue Core
 import { computed, ref, onMounted } from 'vue'
-
-// 2. Vue Router
 import { useRoute, useRouter } from 'vue-router'
 
-// 3. Icons (Alphabetized)
-import { ArrowLeft, Calendar, Check, Copy, Edit2, PackageOpen, Tag } from 'lucide-vue-next'
+import { 
+  ArrowLeft,
+  ArrowRightLeft,
+  Calendar, 
+  Check, 
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Copy, 
+  Edit2, 
+  PackageOpen, 
+  Tag,
+  TrendingDown,
+  TrendingUp
+} from 'lucide-vue-next'
 
-// 4. Types & Services
 import type { Item } from '../types/item.types'
-import { itemService } from '../services/item.service'
+import type { StockMovement } from '../../inventory/types/inventory.types'
 
-// 5. Components
+import { itemService } from '../services/item.service'
+import { inventoryService } from '../../inventory/services/inventory.service.ts'
+
 import BaseCard from '@/components/ui/BaseCard.vue'
 import ItemEditModal from './ItemEditModal.vue'
+import StockAdjustModal from '@/features/inventory/views/StockAdjustModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -186,11 +312,22 @@ const isReadOnly = computed(() => localStorage.getItem('role') === 'read_only')
 const CURRENCY_CODE = 'GBP'
 const LOCALE = 'en-GB'
 
+// --- Item State ---
 const item = ref<Item | null>(null)
 const isLoading = ref(true)
 const copiedId = ref(false)
 const isEditModalOpen = ref(false)
+const isStockAdjustModalOpen = ref(false)
 
+// --- Movements State ---
+const movements = ref<StockMovement[]>([])
+const isMovementsLoading = ref(true)
+const movementsPage = ref(1)
+const movementsLimit = ref(10) // Display 10 movements per page on the detail view
+const movementsTotal = ref(0)
+const movementsTotalPages = computed(() => Math.max(1, Math.ceil(movementsTotal.value / movementsLimit.value)))
+
+// --- Data Fetching ---
 const fetchItem = async () => {
   try {
     isLoading.value = true
@@ -203,6 +340,38 @@ const fetchItem = async () => {
   }
 }
 
+const fetchMovements = async () => {
+  try {
+    isMovementsLoading.value = true
+    const data = await inventoryService.getStockMovements(
+      workspaceId, 
+      itemId, 
+      movementsPage.value, 
+      movementsLimit.value
+    )
+    movements.value = data.items || []
+    movementsTotal.value = data.total || 0
+  } catch (error) {
+    console.error('Error fetching stock movements:', error)
+  } finally {
+    isMovementsLoading.value = false
+  }
+}
+
+// --- Pagination Controls ---
+const nextMovementsPage = async () => {
+  if (movementsPage.value >= movementsTotalPages.value) return
+  movementsPage.value++
+  await fetchMovements()
+}
+
+const prevMovementsPage = async () => {
+  if (movementsPage.value <= 1) return
+  movementsPage.value--
+  await fetchMovements()
+}
+
+// --- Formatters & Helpers ---
 const copyIdToClipboard = async (text: string) => {
   try {
     await navigator.clipboard.writeText(text)
@@ -228,12 +397,37 @@ const formatDate = (dateString: string) => {
   }).format(new Date(dateString))
 }
 
+const formatDateTime = (dateString: string) => {
+  return new Intl.DateTimeFormat(LOCALE, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(new Date(dateString))
+}
+
+const formatReferenceType = (type: string) => {
+  return type
+    .toLowerCase()
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 const onItemUpdated = (updatedData: Item) => {
   if (isReadOnly.value) return
   item.value = updatedData
 }
 
+const onStockAdjusted = async () => {
+  isStockAdjustModalOpen.value = false
+  movementsPage.value = 1
+  await fetchMovements()
+}
+
 onMounted(() => {
   fetchItem()
+  fetchMovements()
 })
 </script>

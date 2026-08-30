@@ -17,7 +17,7 @@ export function useToast() {
     message: string, 
     variant: ToastVariant = 'info', 
     title?: string, 
-    duration = 4000
+    duration = 10000000
   ) => {
     state.value = { 
       isVisible: true, 
