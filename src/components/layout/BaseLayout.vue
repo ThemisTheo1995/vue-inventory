@@ -1,4 +1,4 @@
-<!-- MainLayout.vue / App.vue -->
+<!-- MainLayout.vue -->
 <template>
   <div class="flex h-[100dvh] overflow-hidden bg-slate-50/50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300 font-sans">
     
@@ -13,13 +13,27 @@
 
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
       
-      <header class="md:hidden sticky top-0 z-30 flex items-center justify-between p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800/70">
-        <h2 class="text-xl font-black tracking-tighter text-slate-900 dark:text-white">
-          SyncFlow<span class="text-brand-500">.</span>
-        </h2>
-        <button @click="isSidebarMobileOpen = true" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors">
-          <Menu class="w-6 h-6" />
-        </button>
+      <header class="sticky top-0 z-30 flex items-center px-4 md:px-8 py-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+        
+        <!-- Mobile Logo & Drawer Trigger (Left side) -->
+        <div class="flex items-center gap-3 md:hidden shrink-0">
+          <button @click="isSidebarMobileOpen = true" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors">
+            <Menu class="w-6 h-6" />
+          </button>
+          <h2 class="text-xl font-black tracking-tighter text-slate-900 dark:text-white">
+            SyncFlow<span class="text-brand-500">.</span>
+          </h2>
+        </div>
+
+        <!-- Global Search Component (Centered) -->
+        <div class="flex-1 flex justify-center w-full">
+          <div class="w-full max-w-md ml-auto md:mx-auto">
+            <GlobalSearch v-if="hasWorkspace" />
+          </div>
+        </div>
+        
+        <!-- Optional: Right side empty div to perfectly balance flex on desktop if needed later -->
+        <!-- <div class="hidden md:block w-8 shrink-0"></div> -->
       </header>
 
       <main class="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10">
@@ -44,13 +58,14 @@ import { useRoute } from 'vue-router'
 import Sidebar from './Sidebar.vue'
 import SidebarMobile from './SidebarMobile.vue'
 import NotesView from '@/features/notes/views/NotesView.vue'
+import GlobalSearch from '@/features/search/components/GlobalSearch.vue'
 import { Menu } from 'lucide-vue-next'
 
 const route = useRoute()
 const isDark = ref<boolean>(false)
 const isSidebarMobileOpen = ref<boolean>(false)
 
-// Only show notes if we are inside a workspace route
+// Only show workspace features if inside a workspace route
 const hasWorkspace = computed(() => !!route.params.workspaceId)
 
 const toggleDark = (): void => {

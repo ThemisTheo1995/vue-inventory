@@ -123,13 +123,18 @@
           </div>
 
           <!-- Column 2: Stocks / Movement Records Pane -->
-          <div class="lg:col-span-2 flex flex-col">
+          <div class="lg:col-span-2 flex flex-col max-h-[600px]"> <!-- Max height set to force Y-scroll -->
             <BaseCard class="flex-1 flex flex-col overflow-hidden border-0 shadow-xl shadow-slate-200/50 dark:shadow-none ring-1 ring-slate-200 dark:ring-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl">
               <!-- Pane Header -->
               <div class="shrink-0 p-5 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between">
-                <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                  Inventory History
-                </h3>
+                <div class="flex items-center gap-3">
+                  <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                    Inventory History
+                  </h3>
+                  <span v-if="movementsTotal > 0" class="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                    {{ movementsTotal }} Total
+                  </span>
+                </div>
                 <button
                   v-if="!isReadOnly"
                   @click="isStockAdjustModalOpen = true"
@@ -143,8 +148,8 @@
               <!-- Content Area -->
               <div class="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-slate-900/30 min-h-[350px]">
                 
-                <!-- Loading State -->
-                <div v-if="isMovementsLoading" class="p-5 space-y-4">
+                <!-- Initial Loading State -->
+                <div v-if="isMovementsLoading && movementsPage === 1" class="p-5 space-y-4">
                   <div v-for="i in 4" :key="i" class="animate-pulse flex items-center gap-4 p-4 rounded-xl bg-white/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800/50">
                     <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700/50 shrink-0"></div>
                     <div class="flex-1 space-y-2">
@@ -166,82 +171,73 @@
                   </p>
                 </section>
 
-                <!-- Data List -->
-                <div v-else class="p-4 sm:p-5 space-y-3">
-                  <div 
-                    v-for="movement in movements" 
-                    :key="movement.id"
-                    class="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    <!-- Movement Icon -->
+                <!-- Data List with Load More -->
+                <div v-else class="p-4 sm:p-5">
+                  <TransitionGroup name="list" tag="div" class="space-y-3">
                     <div 
-                      :class="[
-                        'flex items-center justify-center w-10 h-10 rounded-full shrink-0 shadow-inner',
-                        movement.quantity_change > 0 
-                          ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' 
-                          : 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                      ]"
+                      v-for="movement in movements" 
+                      :key="movement.id"
+                      class="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 shadow-sm hover:shadow-md transition-shadow"
                     >
-                      <TrendingUp v-if="movement.quantity_change > 0" class="w-5 h-5" />
-                      <TrendingDown v-else class="w-5 h-5" />
-                    </div>
+                      <!-- Movement Icon -->
+                      <div 
+                        :class="[
+                          'flex items-center justify-center w-10 h-10 rounded-full shrink-0 shadow-inner',
+                          movement.quantity_change > 0 
+                            ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' 
+                            : 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                        ]"
+                      >
+                        <TrendingUp v-if="movement.quantity_change > 0" class="w-5 h-5" />
+                        <TrendingDown v-else class="w-5 h-5" />
+                      </div>
 
-                    <!-- Details -->
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm font-bold text-slate-900 dark:text-white truncate">
-                        {{ formatReferenceType(movement.reference_type) }}
-                      </p>
-                      <div class="flex items-center gap-2 mt-1">
-                        <Clock class="w-3 h-3 text-slate-400 shrink-0" />
-                        <span class="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">
-                          {{ formatDateTime(movement.created_at) }}
+                      <!-- Details -->
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-slate-900 dark:text-white truncate">
+                          {{ formatReferenceType(movement.reference_type) }}
+                        </p>
+                        <div class="flex items-center gap-2 mt-1">
+                          <Clock class="w-3 h-3 text-slate-400 shrink-0" />
+                          <span class="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">
+                            {{ formatDateTime(movement.created_at) }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <!-- Quantity Badge -->
+                      <div class="shrink-0 text-right">
+                        <span 
+                          :class="[
+                            'inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-sm font-mono font-black border shadow-sm',
+                            movement.quantity_change > 0 
+                              ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50' 
+                              : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/50'
+                          ]"
+                        >
+                          {{ movement.quantity_change > 0 ? '+' : '' }}{{ movement.quantity_change }}
                         </span>
                       </div>
                     </div>
+                  </TransitionGroup>
 
-                    <!-- Quantity Badge -->
-                    <div class="shrink-0 text-right">
-                      <span 
-                        :class="[
-                          'inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-sm font-mono font-black border shadow-sm',
-                          movement.quantity_change > 0 
-                            ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50' 
-                            : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/50'
-                        ]"
-                      >
-                        {{ movement.quantity_change > 0 ? '+' : '' }}{{ movement.quantity_change }}
-                      </span>
-                    </div>
+                  <!-- Dynamic Load More Button -->
+                  <div v-if="hasMoreMovements" class="mt-6 flex justify-center pb-4">
+                    <button
+                      @click="loadMoreMovements"
+                      :disabled="isMovementsLoading"
+                      class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+                    >
+                      <Loader2 v-if="isMovementsLoading" class="w-4 h-4 animate-spin text-brand-500" />
+                      <span>{{ isMovementsLoading ? 'Loading...' : 'Load More Records' }}</span>
+                    </button>
                   </div>
-                </div>
-              </div>
-
-              <!-- Pagination Footer -->
-              <div 
-                v-if="movementsTotalPages > 1"
-                class="shrink-0 flex items-center justify-between px-4 sm:px-5 py-3 border-t border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm"
-              >
-                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
-                  Showing <span class="font-bold text-slate-700 dark:text-slate-300">{{ movements.length ? ((movementsPage - 1) * movementsLimit) + 1 : 0 }}</span>
-                  to <span class="font-bold text-slate-700 dark:text-slate-300">{{ Math.min(movementsPage * movementsLimit, movementsTotal) }}</span>
-                  of <span class="font-bold text-slate-700 dark:text-slate-300">{{ movementsTotal }}</span>
-                </p>
-
-                <div class="flex items-center gap-1.5">
-                  <button
-                    @click="prevMovementsPage"
-                    :disabled="movementsPage === 1 || isMovementsLoading"
-                    class="flex items-center justify-center w-8 h-8 rounded-lg bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-all"
-                  >
-                    <ChevronLeft class="w-4 h-4" />
-                  </button>
-                  <button
-                    @click="nextMovementsPage"
-                    :disabled="movementsPage === movementsTotalPages || isMovementsLoading"
-                    class="flex items-center justify-center w-8 h-8 rounded-lg bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-all"
-                  >
-                    <ChevronRight class="w-4 h-4" />
-                  </button>
+                  
+                  <div v-else-if="movements.length > 0" class="mt-8 text-center pb-4">
+                    <p class="text-xs font-medium text-slate-400 dark:text-slate-500">
+                      You've reached the end of the history
+                    </p>
+                  </div>
                 </div>
               </div>
             </BaseCard>
@@ -281,12 +277,11 @@ import {
   ArrowLeft,
   ArrowRightLeft,
   Calendar, 
-  Check, 
-  ChevronLeft,
-  ChevronRight,
+  Check,
   Clock,
   Copy, 
-  Edit2, 
+  Edit2,
+  Loader2, 
   PackageOpen, 
   Tag,
   TrendingDown,
@@ -323,9 +318,9 @@ const isStockAdjustModalOpen = ref(false)
 const movements = ref<StockMovement[]>([])
 const isMovementsLoading = ref(true)
 const movementsPage = ref(1)
-const movementsLimit = ref(10) // Display 10 movements per page on the detail view
+const movementsLimit = ref(4)
 const movementsTotal = ref(0)
-const movementsTotalPages = computed(() => Math.max(1, Math.ceil(movementsTotal.value / movementsLimit.value)))
+const hasMoreMovements = computed(() => movements.value.length < movementsTotal.value)
 
 // --- Data Fetching ---
 const fetchItem = async () => {
@@ -340,7 +335,7 @@ const fetchItem = async () => {
   }
 }
 
-const fetchMovements = async () => {
+const fetchMovements = async (isLoadMore = false) => {
   try {
     isMovementsLoading.value = true
     const data = await inventoryService.getStockMovements(
@@ -349,7 +344,15 @@ const fetchMovements = async () => {
       movementsPage.value, 
       movementsLimit.value
     )
-    movements.value = data.items || []
+    
+    if (isLoadMore) {
+      // Append the new movements to the existing list
+      movements.value.push(...(data.items || []))
+    } else {
+      // Set fresh movements on first load
+      movements.value = data.items || []
+    }
+    
     movementsTotal.value = data.total || 0
   } catch (error) {
     console.error('Error fetching stock movements:', error)
@@ -359,16 +362,10 @@ const fetchMovements = async () => {
 }
 
 // --- Pagination Controls ---
-const nextMovementsPage = async () => {
-  if (movementsPage.value >= movementsTotalPages.value) return
+const loadMoreMovements = async () => {
+  if (!hasMoreMovements.value || isMovementsLoading.value) return
   movementsPage.value++
-  await fetchMovements()
-}
-
-const prevMovementsPage = async () => {
-  if (movementsPage.value <= 1) return
-  movementsPage.value--
-  await fetchMovements()
+  await fetchMovements(true)
 }
 
 // --- Formatters & Helpers ---
@@ -422,12 +419,26 @@ const onItemUpdated = (updatedData: Item) => {
 
 const onStockAdjusted = async () => {
   isStockAdjustModalOpen.value = false
+  // Reset pagination state when a new adjustment is made
   movementsPage.value = 1
-  await fetchMovements()
+  await fetchMovements(false)
 }
 
 onMounted(() => {
   fetchItem()
-  fetchMovements()
+  fetchMovements(false)
 })
 </script>
+
+<style scoped>
+/* Vue Transition classes for seamless Load More rendering */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.4s ease;
+}
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(15px);
+}
+</style>

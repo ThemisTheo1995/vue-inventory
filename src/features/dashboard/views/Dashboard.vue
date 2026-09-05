@@ -108,16 +108,31 @@
                   <tr v-if="mappedSellOrders.length === 0">
                     <td colspan="4" class="px-5 py-8 text-center text-slate-500">No recent sell orders found.</td>
                   </tr>
-                  <tr v-for="order in mappedSellOrders" :key="order.id" class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
-                    <td class="px-5 py-3.5 font-medium">{{ order.so_number }}</td>
-                    <td class="px-5 py-3.5 text-slate-500 dark:text-slate-400">{{ formatDate(order.created_at) }}</td>
-                    <td class="px-5 py-3.5">
-                      <span :class="getStatusClass(order.status)">
-                        {{ order.status }}
-                      </span>
-                    </td>
-                    <td class="px-5 py-3.5 text-right font-semibold">{{ formatPrice(order.total_amount) }}</td>
-                  </tr>
+                  <router-link
+                    v-for="order in mappedSellOrders"
+                    :key="order.id"
+                    :to="{ name: 'sell-order-details', params: { workspaceId, id: order.id } }"
+                    custom
+                    v-slot="{ href, navigate }"
+                  >
+                    <tr
+                      @click="navigate"
+                      @auxclick.middle="navigate"
+                      :href="href"
+                      class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group cursor-pointer"
+                    >
+                      <td class="px-5 py-3.5 font-medium text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400">
+                        {{ order.so_number }}
+                      </td>
+                      <td class="px-5 py-3.5 text-slate-500 dark:text-slate-400">{{ formatDate(order.created_at) }}</td>
+                      <td class="px-5 py-3.5">
+                        <span :class="getStatusClass(order.status)">
+                          {{ order.status }}
+                        </span>
+                      </td>
+                      <td class="px-5 py-3.5 text-right font-semibold">{{ formatPrice(order.total_amount) }}</td>
+                    </tr>
+                  </router-link>
                 </tbody>
               </table>
             </div>

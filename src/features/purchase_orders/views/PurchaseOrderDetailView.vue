@@ -319,7 +319,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, h } from "vue"
-import { useRoute, useRouter } from "vue-router"
+import { useRoute } from "vue-router"
 import { 
   ArrowLeft, FileText, Printer, AlertTriangle, Edit2, 
   Send, CheckCircle, XCircle, Mail, Calendar 
@@ -330,6 +330,7 @@ import { useToast } from "@/composables/useToast"
 
 import BaseCard from "@/components/ui/BaseCard.vue"
 import PurchaseOrderEditModal from "./PurchaseOrderEditModal.vue"
+import { formatCurrency } from "@/utils/currencyFormatter.ts"
 
 import { purchaseOrderService } from "../services/purchase_order.service"
 import type { PurchaseOrder, PurchaseOrderStatus } from "../types/purchase_order.types"
@@ -388,13 +389,6 @@ const fetchPODetails = async () => {
   } finally {
     isLoading.value = false
   }
-}
-
-const formatCurrency = (cents: number) => {
-  return new Intl.NumberFormat(LOCALE, {
-    style: "currency",
-    currency: "GBP"
-  }).format(cents / 100)
 }
 
 const formatDate = (isoString?: string) => {

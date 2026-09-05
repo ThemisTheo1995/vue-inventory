@@ -174,7 +174,7 @@
           v-for="balance in balances"
           :key="balance.id"
           @click="navigateToItemDetails(balance.item_id)"
-          class="group hover:bg-slate-50/80 dark:hover:bg-slate-900/90 transition-colors cursor-pointer"
+          class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors cursor-pointer"
         >
           <td class="px-6 py-4 relative">
             <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>

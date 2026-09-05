@@ -333,6 +333,7 @@ import SellOrderEditModal from "./SellOrderEditModal.vue"
 
 import { sellOrderService } from "../services/sell_order.service"
 import type { SellOrder, SellOrderStatus } from "../types/sell_order.types"
+import { formatCurrency } from "@/utils/currencyFormatter.ts"
 
 // --- Helper Components ---
 const StatusBadge = (props: { status: string }) => {
@@ -388,13 +389,6 @@ const fetchSODetails = async () => {
   } finally {
     isLoading.value = false
   }
-}
-
-const formatCurrency = (cents: number) => {
-  return new Intl.NumberFormat(LOCALE, {
-    style: "currency",
-    currency: "GBP"
-  }).format(cents / 100)
 }
 
 const formatDate = (isoString?: string) => {

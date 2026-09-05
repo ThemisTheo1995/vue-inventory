@@ -55,7 +55,7 @@
             hover:bg-slate-50 dark:hover:bg-slate-900
             active:bg-slate-100 dark:active:bg-slate-900
             transition-colors cursor-pointer group
-            border-b dark:border-slate-900 last:border-0""
+            border-b dark:border-slate-900 last:border-0"
         >
           <div class="flex justify-between items-start mb-3">
             <div class="flex items-center gap-3">
@@ -135,7 +135,7 @@
           v-for="so in sellOrders"
           :key="so.id"
           @click="navigateToSO(so.id)"
-          class="group hover:bg-slate-50/80 dark:hover:bg-slate-900/90 transition-colors cursor-pointer"
+          class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors cursor-pointer"
         >
           <td class="px-6 py-4 relative">
             <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -253,6 +253,7 @@ import SellOrderCreateModal from "./SellOrderCreateModal.vue"
 
 import { sellOrderService } from "../services/sell_order.service"
 import type { SellOrder, SellOrderStatus } from "../types/sell_order.types"
+import { formatCurrency } from "@/utils/currencyFormatter.ts"
 
 // --- Helper Components ---
 const StatusBadge = (props: { status: string }) => {
@@ -317,13 +318,6 @@ const formatDateTime = (dateString?: string) => {
     hour12: true
   }).format(d)
   return { date, time }
-}
-
-const formatCurrency = (cents: number) => {
-  return new Intl.NumberFormat(LOCALE, {
-    style: "currency",
-    currency: "GBP"
-  }).format(cents / 100)
 }
 
 const fetchSellOrders = async (searchVal = searchQuery.value) => {

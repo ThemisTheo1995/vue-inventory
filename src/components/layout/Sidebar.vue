@@ -1,14 +1,14 @@
 <template>
   <aside
     :class="[
-      'relative shrink-0 border-r-2 border-slate-200/70 dark:border-slate-800/70 bg-white dark:bg-slate-900 flex-col hidden md:flex transition-all duration-300 ease-in-out z-20',
+      'relative shrink-0 border-r-2 border-slate-200/70 dark:border-slate-800/70 bg-white dark:bg-slate-900 flex-col hidden md:flex transition-all duration-300 ease-in-out z-40',
       collapsed ? 'w-20' : 'w-[260px]'
     ]"
   >
     <!-- Collapse Toggle Button -->
     <button
       @click="collapsed = !collapsed"
-      class="absolute -right-3.5 top-6 p-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shadow-sm transition-transform hover:scale-110 z-30"
+      class="absolute -right-3.5 top-10 p-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shadow-sm transition-transform hover:scale-110 z-30"
     >
       <ChevronRight v-if="collapsed" class="w-4 h-4" />
       <ChevronLeft v-else class="w-4 h-4" />

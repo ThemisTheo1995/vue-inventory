@@ -122,7 +122,7 @@
           v-for="item in items"
           :key="item.id"
           @click="navigateToItem(item.id)"
-          class="group hover:bg-slate-50/80 dark:hover:bg-slate-900/90 transition-colors cursor-pointer"
+          class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors cursor-pointer"
         >
           <!-- First cell gets 'relative' for the highlight line -->
           <td class="px-6 py-4 relative">

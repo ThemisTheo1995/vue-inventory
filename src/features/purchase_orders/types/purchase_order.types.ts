@@ -2,8 +2,26 @@
 import type { Item } from '../../items/types/item.types'
 import type { Supplier } from '../../suppliers/types/supplier.types'
 
+export type PurchaseOrderStatus =
+  | 'DRAFT'
+  | 'SENT'
+  | 'IN_TRANSIT'
+  | 'RECEIVED'
+  | 'RETURNED'
+  | 'CANCELLED'
+  | 'CLOSED'
 
-export type PurchaseOrderStatus = 'DRAFT' | 'SENT' | 'RECEIVED' | 'CANCELLED'
+export interface FilterOption {
+  label: string
+  value: string | number | boolean
+}
+
+export interface TableFilter {
+  key: string
+  label?: string
+  placeholder?: string
+  options: FilterOption[]
+}
 
 export interface PurchaseOrderLine {
   id: string
@@ -54,7 +72,8 @@ export interface PurchaseOrderUpdate {
 export interface PaginatedPurchaseOrders {
   items: PurchaseOrder[]
   total: number
-  page: number
-  limit: number
+  page?: number
+  limit?: number
   pages?: number
+  filters?: TableFilter[]
 }

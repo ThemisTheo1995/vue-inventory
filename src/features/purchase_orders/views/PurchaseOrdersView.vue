@@ -27,6 +27,8 @@
     <!-- Reusable Table Component -->
     <BaseTable
       v-model:search-query="searchQuery"
+      v-model:selected-filters="selectedFilters"
+      :filters="tableFilters"
       :items="purchaseOrders"
       :is-loading="isTableLoading"
       :is-searching="isSearching"
@@ -40,6 +42,7 @@
       :empty-description="isReadOnly ? 'There are currently no purchase orders matching your criteria.' : 'Get started by creating your first purchase order to track supplier items.'"
       create-button-text="Create First PO"
       :column-span="isReadOnly ? 5 : 6"
+      @filter-change="onFilterChange"
       @create="isCreateModalOpen = true"
       @prev-page="prevPage"
       @next-page="nextPage"
@@ -135,7 +138,7 @@
           v-for="po in purchaseOrders"
           :key="po.id"
           @click="navigateToPO(po.id)"
-          class="group hover:bg-slate-50/80 dark:hover:bg-slate-900/90 transition-colors cursor-pointer"
+          class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors cursor-pointer"
         >
           <td class="px-6 py-4 relative">
             <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -241,7 +244,7 @@
 import { computed, onMounted, ref, h } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { 
-  Plus, Trash2, Hash, User, Calendar, Send, CheckCircle, FileText 
+  Plus, Trash2, Hash, User, Calendar, Send, CheckCircle 
 } from "lucide-vue-next"
 
 import { useConfirm } from "@/composables/useConfirm"
@@ -252,7 +255,8 @@ import BaseTable from "@/components/ui/BaseTable.vue"
 import PurchaseOrderCreateModal from "./PurchaseOrderCreateModal.vue"
 
 import { purchaseOrderService } from "../services/purchase_order.service"
-import type { PurchaseOrder, PurchaseOrderStatus } from "../types/purchase_order.types"
+import type { PurchaseOrder, PurchaseOrderStatus, TableFilter } from "../types/purchase_order.types"
+import { formatCurrency } from "@/utils/currencyFormatter.ts"
 
 // --- Helper Components ---
 const StatusBadge = (props: { status: string }) => {
@@ -260,8 +264,11 @@ const StatusBadge = (props: { status: string }) => {
     switch (props.status.toUpperCase()) {
       case 'DRAFT': return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
       case 'SENT': return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20'
+      case 'IN_TRANSIT': return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20'
       case 'RECEIVED': return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
+      case 'RETURNED': return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20'
       case 'CANCELLED': return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'
+      case 'CLOSED': return 'bg-gray-200 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
       default: return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
     }
   }
@@ -270,7 +277,7 @@ const StatusBadge = (props: { status: string }) => {
     class: `inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${getStyle()}`
   }, [
     h('span', { class: 'w-1 h-1 rounded-full bg-current opacity-75 mr-1.5' }),
-    props.status
+    props.status.replace('_', ' ')
   ])
 }
 
@@ -286,6 +293,9 @@ const { confirm } = useConfirm()
 const { showToast } = useToast()
 
 const purchaseOrders = ref<PurchaseOrder[]>([])
+const tableFilters = ref<TableFilter[]>([])
+const selectedFilters = ref<Record<string, any>>({ status: '' })
+
 const isLoading = ref(true)
 const isCreateModalOpen = ref(false)
 
@@ -320,18 +330,22 @@ const formatDateTime = (dateString?: string) => {
   return { date, time }
 }
 
-const formatCurrency = (cents: number) => {
-  return new Intl.NumberFormat(LOCALE, {
-    style: "currency",
-    currency: "GBP"
-  }).format(cents / 100)
-}
-
 const fetchPurchaseOrders = async (searchVal = searchQuery.value) => {
   try {
-    const data = await purchaseOrderService.getAll(workspaceId, searchVal, currentPage.value, itemsPerPage.value)
+    const data = await purchaseOrderService.getAll(
+      workspaceId,
+      searchVal,
+      currentPage.value,
+      itemsPerPage.value,
+      selectedFilters.value
+    )
+    
     purchaseOrders.value = data.items || []
     totalItems.value = data.total || 0
+
+    if (data.filters?.length) {
+      tableFilters.value = data.filters
+    }
   } catch (err: any) {
     const errorMessage = 
         err.response?.data?.detail || 
@@ -349,6 +363,13 @@ const fetchPurchaseOrders = async (searchVal = searchQuery.value) => {
 const onSearchTriggered = async (term: string) => {
   currentPage.value = 1
   await fetchPurchaseOrders(term)
+}
+
+const onFilterChange = async () => {
+  currentPage.value = 1
+  isLoading.value = true
+  await fetchPurchaseOrders()
+  isLoading.value = false
 }
 
 const { searchQuery, isSearching } = useSearch(onSearchTriggered)

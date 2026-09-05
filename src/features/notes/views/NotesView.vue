@@ -1,6 +1,6 @@
 <!-- src/views/NotesView.vue -->
 <template>
-  <div>
+  <div class="print:hidden">
     <!-- Dynamic Backdrop when Maximized -->
     <transition name="fade">
       <div 
@@ -13,7 +13,7 @@
     <!-- Floating / Maximized Notes Widget Container -->
     <div 
       :class="[
-        'fixed z-50 transition-all duration-300 ease-in-out flex flex-col items-end',
+        'fixed z-40 transition-all duration-300 ease-in-out flex flex-col items-end',
         isMaximized 
           ? 'inset-4 sm:inset-10' 
           : 'bottom-4 right-4 sm:bottom-6 sm:right-6'
@@ -234,12 +234,12 @@ const handleInput = () => {
 
   saveTimeout = setTimeout(async () => {
     await persistNote()
-  }, 1500)
+  }, 1000)
 }
 
 const persistNote = async () => {
   if (!workspaceId.value) return
-  const MIN_SAVING_DURATION = 700
+  const MIN_SAVING_DURATION = 1000
 
   try {
     isSaving.value = true
