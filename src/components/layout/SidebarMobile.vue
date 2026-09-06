@@ -5,7 +5,7 @@
       @click="$emit('close')"
     ></div>
     
-    <aside class="relative w-72 h-full bg-white dark:bg-slate-800 flex flex-col shadow-2xl animate-slide-in rounded-r-2xl border-r border-slate-200/50 dark:border-slate-700/50">
+    <aside class="relative w-72 h-full bg-white dark:bg-slate-900 flex flex-col shadow-2xl animate-slide-in rounded-r-2xl border-r border-slate-200/50 dark:border-slate-700/50">
       
       <!-- Header / Branding -->
       <div class="p-6 flex items-center justify-between">
@@ -17,20 +17,32 @@
         </button>
       </div>
 
-      <!-- User Profile Block -->
-      <div class="mx-6 pb-4 mb-2 border-b border-slate-100 dark:border-slate-700/50 flex items-center gap-3">
-        <div class="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-400 font-bold text-xs uppercase shadow-sm select-none">
-          {{ userInitials }}
-        </div>
+      <!-- User Profile Link -->
+      <div class="mx-6 pb-4 mb-2 border-b border-slate-100 dark:border-slate-700/50">
+        <router-link
+          :to="{ name: 'workspace-user' }"
+          custom
+          v-slot="{ href, navigate }"
+        >
+          <a
+            :href="href"
+            @click="(e) => { navigate(e); $emit('close'); }"
+            class="group flex items-center gap-3 p-1.5 -mx-1.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-200 cursor-pointer"
+          >
+            <div class="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-400 font-bold text-xs uppercase shadow-sm select-none transition-colors group-hover:bg-brand-500/20 dark:group-hover:bg-brand-500/30">
+              {{ userInitials }}
+            </div>
 
-        <div v-if="currentUser" class="truncate min-w-0 flex-1">
-          <p class="font-bold text-sm text-slate-900 dark:text-white truncate">
-            {{ currentUser.first_name }} {{ currentUser.last_name }}
-          </p>
-          <p class="text-xs text-slate-400 dark:text-slate-500 truncate font-medium">
-            {{ currentUser.email }}
-          </p>
-        </div>
+            <div v-if="currentUser" class="truncate min-w-0 flex-1">
+              <p class="font-bold text-sm text-slate-900 dark:text-white truncate transition-colors group-hover:text-brand-600 dark:group-hover:text-brand-400">
+                {{ currentUser.first_name }} {{ currentUser.last_name }}
+              </p>
+              <p class="text-xs text-slate-400 dark:text-slate-500 truncate font-medium">
+                {{ currentUser.email }}
+              </p>
+            </div>
+          </a>
+        </router-link>
       </div>
       
       <!-- Navigation -->

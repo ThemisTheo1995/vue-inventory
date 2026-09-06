@@ -3,7 +3,9 @@
     <Transition name="toast-slide">
       <div 
         v-if="state.isVisible" 
-        class="fixed top-4 left-4 right-4 sm:left-auto sm:right-5 sm:top-5 z-[100] flex items-start gap-2.5 sm:gap-3 w-auto sm:w-full sm:max-w-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-xl"
+        @mouseenter="pauseToast"
+        @mouseleave="resumeToast"
+        class="fixed overflow-hidden top-4 left-4 right-4 sm:left-auto sm:right-5 sm:top-5 z-[100] flex items-start gap-2.5 sm:gap-3 w-auto sm:w-full sm:max-w-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-xl"
       >
         
         <div :class="[
@@ -16,7 +18,7 @@
           <component :is="iconComponent" class="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
 
-        <div class="space-y-0.5 sm:space-y-1 min-w-0 flex-1 pt-0.5">
+        <div class="space-y-0.5 sm:space-y-1 min-w-0 flex-1 pt-0.5 pb-1">
           <h3 v-if="state.title" class="font-black text-xs sm:text-sm text-slate-900 dark:text-white leading-tight break-words whitespace-normal">
             {{ state.title }}
           </h3>
@@ -32,6 +34,17 @@
           <X class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
 
+        <!-- Progress Bar / Timer -->
+        <div 
+          class="absolute bottom-0 left-0 h-1 transition-none"
+          :class="[
+            state.variant === 'error' ? 'bg-red-500 dark:bg-red-400' :
+            state.variant === 'warning' ? 'bg-amber-500 dark:bg-amber-400' :
+            state.variant === 'success' ? 'bg-emerald-500 dark:bg-emerald-400' :
+            'bg-blue-500 dark:bg-blue-400'
+          ]"
+          :style="{ width: `${state.progress}%` }"
+        ></div>
       </div>
     </Transition>
   </Teleport>
@@ -42,7 +55,7 @@ import { computed } from 'vue'
 import { useToast } from '../../composables/useToast'
 import { AlertCircle, CheckCircle2, AlertTriangle, Info, X } from 'lucide-vue-next'
 
-const { state, hideToast } = useToast()
+const { state, hideToast, pauseToast, resumeToast } = useToast()
 
 const iconComponent = computed(() => {
   switch (state.value.variant) {

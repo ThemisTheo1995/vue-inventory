@@ -111,7 +111,7 @@
         v-if="!isMaximized"
         @click="toggleNotes"
         :class="[
-          'flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-lg transition-all duration-300 hover:scale-105 active:scale-95',
+          'flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full shadow-lg transition-all duration-300 hover:scale-105 active:scale-95',
           isNotesOpen 
             ? 'bg-slate-800 dark:bg-slate-700 text-white' 
             : 'bg-brand-500 hover:bg-brand-600 text-white shadow-brand-500/30'

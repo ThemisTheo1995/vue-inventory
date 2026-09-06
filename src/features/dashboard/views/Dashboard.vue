@@ -270,12 +270,20 @@ const formatPrice = (priceInCents: number) => {
 }
 
 const formatDate = (dateString: string) => {
-  return new Intl.DateTimeFormat('en-US', {
+  const date = new Date(dateString)
+
+  const day = date.toLocaleDateString(LOCALE, {
+    day: 'numeric'
+  })
+
+  const monthYear = date.toLocaleDateString(LOCALE, {
     month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  }).format(new Date(dateString))
+    year: '2-digit'
+  })
+
+  return `${day}, ${monthYear}`
 }
+
 
 const getStatusClass = (status: string, small = false) => {
   const base = small ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'
@@ -343,6 +351,8 @@ const mappedSellOrders = computed(() => (dashboardData.value?.recent_sell_orders
 const mappedPurchaseOrders = computed(() => (dashboardData.value?.incoming_purchase_orders || []).slice(0, MAX_DISPLAY_RECORDS))
 const mappedLowStock = computed(() => (dashboardData.value?.low_stock_alerts || []).slice(0, MAX_DISPLAY_RECORDS))
 const workspaceId = (route.params.workspaceId as string)
+const isSmallScreen = () => window.innerWidth < 640
+
 
 // Chart Implementation
 const chartCanvas = ref<HTMLCanvasElement | null>(null)
