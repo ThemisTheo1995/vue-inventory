@@ -1,11 +1,17 @@
 // src/services/item.service.ts
 
 import { apiFetch } from '@/utils/apiFetch'
-import type { Item, ItemCreate, ItemUpdate, PaginatedItems } from '../types/item.types'
+import type { Item, ItemCreate, ItemUpdate, ItemFilterParams, PaginatedItems } from '../types/item.types'
 
 class ItemService {
 
-  async getAll(workspaceId: string, search?: string, page = 1, limit = 20): Promise<PaginatedItems> {
+  async getAll(
+    workspaceId: string, 
+    search?: string, 
+    page = 1, 
+    limit = 20,
+    filters?: ItemFilterParams
+  ): Promise<PaginatedItems> {
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString()
@@ -13,6 +19,14 @@ class ItemService {
     
     if (search) {
       params.append('search', search)
+    }
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params.append(key, String(value))
+        }
+      })
     }
     
     const response = await apiFetch(`/${workspaceId}/items?${params}`, { 

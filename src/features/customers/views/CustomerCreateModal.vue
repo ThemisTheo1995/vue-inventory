@@ -1,3 +1,4 @@
+<!-- src/views/customers/CustomerCreateModal.vue -->
 <template>
   <BaseModal
     :is-open="isOpen"
@@ -94,26 +95,22 @@
                  bg-white dark:bg-slate-900
                  text-slate-700 dark:text-slate-300
                  hover:bg-slate-50 dark:hover:bg-slate-800
-                 px-4 py-2.5 font-semibold transition"
+                 px-4 py-2.5 font-semibold transition cursor-pointer"
         >
           Cancel
         </button>
 
-        <button
-          type="submit"
-          form="create-customer-form"
-          :disabled="isSubmitting"
+        <AsyncButton
+          :action="submitCustomer"
           class="flex-1 rounded-xl bg-slate-900 dark:bg-white
                  text-white dark:text-slate-900
                  font-bold
                  px-4 py-2.5
                  hover:opacity-90
-                 disabled:opacity-60
-                 disabled:cursor-not-allowed
                  transition"
         >
-          {{ isSubmitting ? "Saving..." : "Save Customer" }}
-        </button>
+          Save Customer
+        </AsyncButton>
       </div>
     </template>
   </BaseModal>
@@ -122,6 +119,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue"
 import { Users } from "lucide-vue-next"
+import AsyncButton from "@/components/layout/AsyncButton.vue"
 
 import BaseModal from "@/components/ui/BaseModal.vue"
 import { customerService } from "../services/customer.service"
@@ -140,8 +138,6 @@ const emit = defineEmits<{
 }>()
 
 const { showToast } = useToast()
-
-const isSubmitting = ref(false)
 
 const form = ref<CustomerCreate>({
   first_name: "",
@@ -162,8 +158,13 @@ watch(
   }
 )
 
-
 const submitCustomer = async () => {
+  const formEl = document.getElementById("create-customer-form") as HTMLFormElement
+  if (formEl && !formEl.checkValidity()) {
+    formEl.reportValidity()
+    return
+  }
+
   const validation = validateCustomerData({
     first_name: form.value.first_name,
     last_name: form.value.last_name,
@@ -176,8 +177,6 @@ const submitCustomer = async () => {
   }
 
   try {
-    isSubmitting.value = true;
-
     const newCustomer = await customerService.create(props.workspaceId, validation.sanitizedData);
     
     showToast("Customer added successfully", "success");
@@ -194,8 +193,6 @@ const submitCustomer = async () => {
         : errorMessage;
 
     showToast(displayMessage, "error")
-  } finally {
-    isSubmitting.value = false;
   }
 };
 </script>

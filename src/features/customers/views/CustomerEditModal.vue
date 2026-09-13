@@ -1,3 +1,4 @@
+<!-- src/views/customers/CustomerEditModal.vue -->
 <template>
   <BaseModal
     :is-open="isOpen"
@@ -96,21 +97,17 @@
           Cancel
         </button>
 
-        <button
-          type="submit"
-          form="edit-customer-form"
-          :disabled="isSubmitting"
+        <AsyncButton
+          :action="handleSubmit"
           class="flex-1 rounded-xl bg-slate-900 dark:bg-white
                  text-white dark:text-slate-900
                  font-bold
                  px-4 py-2.5
                  hover:opacity-90
-                 disabled:opacity-60
-                 disabled:cursor-not-allowed
                  transition"
         >
-          {{ isSubmitting ? "Updating..." : "Save Changes" }}
-        </button>
+          Save Changes
+        </AsyncButton>
       </div>
     </template>
   </BaseModal>
@@ -119,6 +116,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue"
 import { Edit2 } from "lucide-vue-next"
+import AsyncButton from "@/components/layout/AsyncButton.vue"
 
 import BaseModal from "@/components/ui/BaseModal.vue"
 import { customerService } from "../services/customer.service"
@@ -138,8 +136,6 @@ const emit = defineEmits<{
 }>()
 
 const { showToast } = useToast()
-
-const isSubmitting = ref(false)
 
 const form = ref({
   first_name: "",
@@ -161,9 +157,13 @@ watch(
 )
 
 const handleSubmit = async () => {
-  try {
-    isSubmitting.value = true
+  const formEl = document.getElementById("edit-customer-form") as HTMLFormElement
+  if (formEl && !formEl.checkValidity()) {
+    formEl.reportValidity()
+    return
+  }
 
+  try {
     const payload = {
       first_name: form.value.first_name,
       last_name: form.value.last_name.trim() || null,
@@ -184,15 +184,13 @@ const handleSubmit = async () => {
     const errorMessage = 
         error.response?.data?.detail || 
         error.message || 
-        "An unexpected error occurred";
+        "An unexpected error occurred"
 
     const displayMessage = Array.isArray(errorMessage) 
         ? errorMessage[0].msg 
-        : errorMessage;
+        : errorMessage
 
     showToast(displayMessage, "error")
-    } finally {
-    isSubmitting.value = false
   }
 }
 </script>

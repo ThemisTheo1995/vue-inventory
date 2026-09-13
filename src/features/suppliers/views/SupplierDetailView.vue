@@ -72,7 +72,7 @@
           >
             <button
               @click="isEditModalOpen = true"
-              class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 active:scale-95 transition-all duration-200"
+              class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 active:scale-95 transition-all duration-200 cursor-pointer"
             >
               <Edit2 class="w-4 h-4" />
               <span>Edit Profile</span>
@@ -98,14 +98,14 @@
                     <span class="font-mono text-sm font-semibold text-slate-700 dark:text-slate-300 break-all whitespace-normal flex-1" :title="supplier.id">
                       {{ supplier.id }}
                     </span>
-                    <button 
-                      @click="copyIdToClipboard(supplier.id)"
-                      class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10 transition-all opacity-0 group-hover/id:opacity-100 shrink-0"
+                    <AsyncButton
+                      :action="() => copyIdToClipboard(supplier!.id)"
+                      class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10 transition-all opacity-0 group-hover/id:opacity-100 shrink-0 cursor-pointer flex items-center justify-center bg-transparent"
                       title="Copy Supplier ID"
                     >
                       <Check v-if="copiedId" class="w-3.5 h-3.5 text-emerald-500" />
                       <Copy v-else class="w-3.5 h-3.5" />
-                    </button>
+                    </AsyncButton>
                   </div>
                 </div>
 
@@ -172,6 +172,7 @@ import { supplierService } from '../services/supplier.service'
 
 // 5. Components
 import BaseCard from '@/components/ui/BaseCard.vue'
+import AsyncButton from '@/components/layout/AsyncButton.vue'
 import SupplierEditModal from './SupplierEditModal.vue'
 
 const LOCALE = 'en-GB'
@@ -206,6 +207,7 @@ const copyIdToClipboard = async (text: string) => {
     setTimeout(() => { copiedId.value = false }, 2000)
   } catch (err) {
     console.error('Failed to copy ID:', err)
+    throw err
   }
 }
 

@@ -59,17 +59,17 @@
                 <select 
                   :value="member.role"
                   @change="$emit('updateRole', member.id, ($event.target as HTMLSelectElement).value as Role, $event)"
-                  class="text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 font-semibold text-slate-600 dark:text-slate-300 outline-none focus:ring-2 focus:ring-slate-500/20 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity duration-150"
+                  class="text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 font-semibold text-slate-600 dark:text-slate-300 outline-none focus:ring-2 focus:ring-slate-500/20 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity duration-150 cursor-pointer"
                 >
                   <option v-for="(r, key) in roles" :key="key" :value="key">{{ r.name }}</option>
                 </select>
-                <button 
-                  @click="$emit('removeMember', member.id)"
-                  class="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition"
+                <AsyncButton 
+                  :action="() => handleRemove(member.id)"
+                  class="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition cursor-pointer flex items-center justify-center bg-transparent border-0"
                   title="Remove access"
                 >
                   <Trash2 class="w-4 h-4" />
-                </button>
+                </AsyncButton>
               </div>
             </td>
 
@@ -82,6 +82,7 @@
 
 <script setup lang="ts">
 import { Trash2 } from 'lucide-vue-next'
+import AsyncButton from '@/components/layout/AsyncButton.vue'
 import { roles, getRoleStyles } from '../roles'
 import type { TeamMember, Role } from '../types'
 
@@ -90,8 +91,15 @@ defineProps<{
   isReadOnly: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'updateRole', id: string, role: Role, event: Event): void
-  (e: 'removeMember', id: string): void
+  (e: 'removeMember', id: string): Promise<void> | void
 }>()
+
+const handleRemove = async (id: string) => {
+  const result = emit('removeMember', id)
+  if (result instanceof Promise) {
+    await result
+  }
+}
 </script>

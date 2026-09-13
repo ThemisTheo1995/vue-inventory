@@ -1,4 +1,4 @@
-<!-- src/views/sellOrderDetailView.vue -->
+<!-- src/features/sell_orders/views/sellOrderDetailView.vue -->
 <template>
   <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto print:space-y-4 print:pb-0">
     
@@ -87,32 +87,32 @@
             Edit Draft
           </button>
 
-          <button
+          <AsyncButton
             v-if="so.status === 'DRAFT'"
-            @click="updateStatus('CONFIRMED')"
-            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-all shadow-md shadow-indigo-200 dark:shadow-none active:scale-95"
+            :action="() => updateStatus('CONFIRMED')"
+            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-all shadow-md shadow-indigo-200 dark:shadow-none active:scale-95 border-0 cursor-pointer"
           >
             <Send class="w-4 h-4" />
             Mark as Confirmed
-          </button>
+          </AsyncButton>
 
-          <button
+          <AsyncButton
             v-if="so.status === 'CONFIRMED'"
-            @click="updateStatus('FULLFILLED')"
-            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all shadow-md shadow-emerald-200 dark:shadow-none active:scale-95"
+            :action="() => updateStatus('FULLFILLED')"
+            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all shadow-md shadow-emerald-200 dark:shadow-none active:scale-95 border-0 cursor-pointer"
           >
             <CheckCircle class="w-4 h-4" />
             Mark as Fullfilled
-          </button>
+          </AsyncButton>
 
-          <button
+          <AsyncButton
             v-if="['DRAFT', 'CONFIRMED'].includes(so.status)"
-            @click="updateStatus('CANCELLED')"
-            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 font-bold text-sm transition-all active:scale-95"
+            :action="() => updateStatus('CANCELLED')"
+            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 font-bold text-sm transition-all active:scale-95 cursor-pointer"
           >
             <XCircle class="w-4 h-4" />
             Cancel SO
-          </button>
+          </AsyncButton>
         </div>
       </BaseCard>
 
@@ -319,7 +319,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, h } from "vue"
-import { useRoute, useRouter } from "vue-router"
+import { useRoute } from "vue-router"
 import { 
   ArrowLeft, FileText, Printer, AlertTriangle, Edit2, 
   Send, CheckCircle, XCircle, Mail, Calendar 
@@ -329,6 +329,7 @@ import { useConfirm } from "@/composables/useConfirm"
 import { useToast } from "@/composables/useToast"
 
 import BaseCard from "@/components/ui/BaseCard.vue"
+import AsyncButton from "@/components/layout/AsyncButton.vue"
 import SellOrderEditModal from "./SellOrderEditModal.vue"
 
 import { sellOrderService } from "../services/sell_order.service"
@@ -426,6 +427,7 @@ const updateStatus = async (nextStatus: SellOrderStatus) => {
         : errorMessage
 
     showToast(displayMessage, "error")
+    throw err
   }
 }
 

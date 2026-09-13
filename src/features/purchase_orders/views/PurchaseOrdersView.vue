@@ -2,26 +2,30 @@
 <template>
   <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto">
     <!-- Header Section -->
-    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div class="space-y-1">
+    <header class="space-y-1">
+      <!-- Title & Action Button Row -->
+      <div class="flex items-center justify-between gap-4">
         <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-wider">
           {{ $route.meta.title || 'Purchase Orders' }}
         </h1>
-        <p class="text-sm sm:text-base font-medium text-slate-500 dark:text-slate-400">
-          {{ $route.meta.description || 'Manage and track your supplier purchase orders.' }}
-        </p>
+
+        <div v-if="!isReadOnly" class="flex items-center shrink-0">
+          <button
+            @click="isCreateModalOpen = true"
+            v-tooltip="'New Purchase Order'"
+            class="group relative inline-flex items-center justify-center gap-2 p-2.5 sm:px-5 sm:py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-sm overflow-hidden shadow-md hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 transition-all duration-200"
+          >
+            <div class="absolute inset-0 bg-white/20 dark:bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+            <Plus class="w-4 h-4 relative z-10 shrink-0" />
+            <span class="hidden sm:inline relative z-10">New Purchase Order</span>
+          </button>
+        </div>
       </div>
 
-      <div v-if="!isReadOnly" class="flex items-center shrink-0">
-        <button
-          @click="isCreateModalOpen = true"
-          class="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-sm overflow-hidden shadow-md hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 transition-all duration-200"
-        >
-          <div class="absolute inset-0 bg-white/20 dark:bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
-          <Plus class="w-4 h-4 relative z-10" />
-          <span class="relative z-10">New Purchase Order</span>
-        </button>
-      </div>
+      <!-- Description -->
+      <p class="text-sm sm:text-base font-medium text-slate-500 dark:text-slate-400">
+        {{ $route.meta.description || 'Manage and track your supplier purchase orders.' }}
+      </p>
     </header>
 
     <!-- Reusable Table Component -->
@@ -90,33 +94,33 @@
               </p>
             </div>
             <!-- Dynamic Actions -->
-            <div v-if="!isReadOnly" class="flex items-center gap-1 -mr-2">
-              <button
+            <div v-if="!isReadOnly" class="flex items-center gap-1 -mr-2" @click.stop>
+              <AsyncButton
                 v-if="po.status === 'DRAFT'"
-                @click.stop="updateStatus(po, 'SENT')"
-                class="p-2 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
-                title="Send Order"
+                :action="() => handleAction(po.id, () => updateStatus(po, 'SENT'))"
+                v-tooltip="'Send Order'"
+                class="p-2 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors bg-transparent border-0 cursor-pointer"
               >
                 <Send class="w-4 h-4" />
-              </button>
+              </AsyncButton>
               
-              <button
+              <AsyncButton
                 v-if="po.status === 'SENT'"
-                @click.stop="updateStatus(po, 'RECEIVED')"
-                class="p-2 text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
-                title="Receive Order"
+                :action="() => handleAction(po.id, () => updateStatus(po, 'RECEIVED'))"
+                v-tooltip="'Receive Order'"
+                class="p-2 text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors bg-transparent border-0 cursor-pointer"
               >
                 <CheckCircle class="w-4 h-4" />
-              </button>
+              </AsyncButton>
 
-              <button
+              <AsyncButton
                 v-if="po.status === 'DRAFT' || po.status === 'CANCELLED'"
-                @click.stop="deletePO(po)"
-                class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-400/10 transition-colors"
-                title="Delete"
+                :action="() => handleAction(po.id, () => deletePO(po))"
+                v-tooltip="'Delete Purchase Order'"
+                class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-400/10 transition-colors bg-transparent border-0 cursor-pointer"
               >
                 <Trash2 class="w-4 h-4" />
-              </button>
+              </AsyncButton>
             </div>
           </div>
         </div>
@@ -174,10 +178,10 @@
                 <User class="w-4 h-4" />
               </div>
               <div class="min-w-0">
-                <p class="font-bold text-sm text-slate-800 dark:text-slate-200 truncate" :title="formatSupplierName(po.supplier)">
+                <p class="font-bold text-sm text-slate-800 dark:text-slate-200 truncate" v-tooltip="formatSupplierName(po.supplier)">
                   {{ formatSupplierName(po.supplier) }}
                 </p>
-                <p v-if="po.supplier?.email" class="text-xs text-slate-400 dark:text-slate-500 truncate" :title="po.supplier.email">
+                <p v-if="po.supplier?.email" class="text-xs text-slate-400 dark:text-slate-500 truncate" v-tooltip="po.supplier.email">
                   {{ po.supplier?.email }}
                 </p>
               </div>
@@ -196,33 +200,36 @@
 
           <td v-if="!isReadOnly" class="px-6 py-4 text-right">
             <div class="flex items-center justify-end" @click.stop>
-              <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <button
+              <div 
+                class="flex items-center gap-1 transition-opacity duration-200"
+                :class="{ 'opacity-0 group-hover:opacity-100': !loadingRows[po.id] }"
+              >
+                <AsyncButton
                   v-if="po.status === 'DRAFT'"
-                  @click.stop="updateStatus(po, 'SENT')"
-                  class="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all transform active:scale-95"
-                  title="Send Order"
+                  :action="() => handleAction(po.id, () => updateStatus(po, 'SENT'))"
+                  v-tooltip="'Send Order'"
+                  class="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all transform active:scale-95 bg-transparent border-0 cursor-pointer"
                 >
                   <Send class="w-4 h-4" />
-                </button>
+                </AsyncButton>
                 
-                <button
+                <AsyncButton
                   v-if="po.status === 'SENT'"
-                  @click.stop="updateStatus(po, 'RECEIVED')"
-                  class="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all transform active:scale-95"
-                  title="Receive Order"
+                  :action="() => handleAction(po.id, () => updateStatus(po, 'RECEIVED'))"
+                  v-tooltip="'Order received'"
+                  class="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all transform active:scale-95 bg-transparent border-0 cursor-pointer"
                 >
                   <CheckCircle class="w-4 h-4" />
-                </button>
+                </AsyncButton>
 
-                <button
+                <AsyncButton
                   v-if="po.status === 'DRAFT' || po.status === 'CANCELLED'"
-                  @click.stop="deletePO(po)"
-                  class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95"
-                  title="Delete purchase order"
+                  :action="() => handleAction(po.id, () => deletePO(po))"
+                  v-tooltip="'Delete Purchase Order'"
+                  class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95 bg-transparent border-0 cursor-pointer"
                 >
                   <Trash2 class="w-4 h-4" />
-                </button>
+                </AsyncButton>
               </div>
             </div>
           </td>
@@ -251,7 +258,8 @@ import { useConfirm } from "@/composables/useConfirm"
 import { useToast } from "@/composables/useToast"
 import { useSearch } from "@/composables/useSearch"
 
-import BaseTable from "@/components/ui/BaseTable.vue"
+import BaseTable from "@/components/ui/table/BaseTable.vue"
+import AsyncButton from "@/components/layout/AsyncButton.vue"
 import PurchaseOrderCreateModal from "./PurchaseOrderCreateModal.vue"
 
 import { purchaseOrderService } from "../services/purchase_order.service"
@@ -298,6 +306,8 @@ const selectedFilters = ref<Record<string, any>>({ status: '' })
 
 const isLoading = ref(true)
 const isCreateModalOpen = ref(false)
+
+const loadingRows = ref<Record<string, boolean>>({})
 
 const currentPage = ref(1)
 const itemsPerPage = ref(20)
@@ -395,6 +405,15 @@ const navigateToPO = (id: string) => {
   router.push({ name: "purchase-order-details", params: { workspaceId, id } })
 }
 
+const handleAction = async (poId: string, actionFn: () => Promise<any>) => {
+  loadingRows.value[poId] = true
+  try {
+    await actionFn()
+  } finally {
+    loadingRows.value[poId] = false
+  }
+}
+
 const updateStatus = async (po: PurchaseOrder, nextStatus: PurchaseOrderStatus) => {
   const isTransitionConfirmed = await confirm({
     title: `Transition to ${nextStatus}`,
@@ -421,6 +440,7 @@ const updateStatus = async (po: PurchaseOrder, nextStatus: PurchaseOrderStatus) 
         : errorMessage
 
     showToast(displayMessage, "error")
+    throw err
   }
 }
 
@@ -447,6 +467,7 @@ const deletePO = async (po: PurchaseOrder) => {
   } catch (error) {
     console.error(error)
     showToast("Failed to delete purchase order", "error")
+    throw error
   }
 }
 

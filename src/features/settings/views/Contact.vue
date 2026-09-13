@@ -1,10 +1,5 @@
 <template>
   <div class="p-6 max-w-5xl mx-auto">
-    <div class="mb-8">
-      <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Workspace Settings</h1>
-      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your company contact details and address.</p>
-    </div>
-
     <div v-if="isLoading" class="animate-pulse space-y-4">
       <div class="h-64 bg-slate-100 dark:bg-slate-800/50 rounded-2xl w-full max-w-3xl"></div>
     </div>
@@ -26,14 +21,14 @@
               placeholder="e.g. EliteDealsUK"
               :class="[inputBaseClass, editStates.name ? inputEditClass : inputReadClass]" 
             />
-            <button 
+            <AsyncButton 
               v-if="!isReadOnly"
-              @click="toggleEdit('name')"
+              :action="() => toggleEdit('name')"
               :class="[btnBaseClass, editStates.name ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200']"
             >
               <Check v-if="editStates.name" class="w-4 h-4" />
               <Pencil v-else class="w-4 h-4" />
-            </button>
+            </AsyncButton>
           </div>
         </div>
         
@@ -48,10 +43,14 @@
                 placeholder="e.g. support@elitedeals.co.uk"
                 :class="[inputBaseClass, editStates.email ? inputEditClass : inputReadClass]" 
               />
-              <button v-if="!isReadOnly" @click="toggleEdit('email')" :class="[btnBaseClass, editStates.email ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400']">
+              <AsyncButton 
+                v-if="!isReadOnly" 
+                :action="() => toggleEdit('email')" 
+                :class="[btnBaseClass, editStates.email ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400']"
+              >
                 <Check v-if="editStates.email" class="w-4 h-4" />
                 <Pencil v-else class="w-4 h-4" />
-              </button>
+              </AsyncButton>
             </div>
           </div>
 
@@ -65,10 +64,14 @@
                 placeholder="e.g. +447700900077"
                 :class="[inputBaseClass, editStates.phone_number ? inputEditClass : inputReadClass]" 
               />
-              <button v-if="!isReadOnly" @click="toggleEdit('phone_number')" :class="[btnBaseClass, editStates.phone_number ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400']">
+              <AsyncButton 
+                v-if="!isReadOnly" 
+                :action="() => toggleEdit('phone_number')" 
+                :class="[btnBaseClass, editStates.phone_number ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400']"
+              >
                 <Check v-if="editStates.phone_number" class="w-4 h-4" />
                 <Pencil v-else class="w-4 h-4" />
-              </button>
+              </AsyncButton>
             </div>
           </div>
         </div>
@@ -85,10 +88,14 @@
               placeholder="e.g. 102 Business Park"
               :class="[inputBaseClass, editStates.address_line1 ? inputEditClass : inputReadClass]" 
             />
-            <button v-if="!isReadOnly" @click="toggleEdit('address_line1')" :class="[btnBaseClass, editStates.address_line1 ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400']">
+            <AsyncButton 
+              v-if="!isReadOnly" 
+              :action="() => toggleEdit('address_line1')" 
+              :class="[btnBaseClass, editStates.address_line1 ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400']"
+            >
               <Check v-if="editStates.address_line1" class="w-4 h-4" />
               <Pencil v-else class="w-4 h-4" />
-            </button>
+            </AsyncButton>
           </div>
         </div>
 
@@ -102,10 +109,14 @@
               placeholder="e.g. Suite 4B"
               :class="[inputBaseClass, editStates.address_line2 ? inputEditClass : inputReadClass]" 
             />
-            <button v-if="!isReadOnly" @click="toggleEdit('address_line2')" :class="[btnBaseClass, editStates.address_line2 ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400']">
+            <AsyncButton 
+              v-if="!isReadOnly" 
+              :action="() => toggleEdit('address_line2')" 
+              :class="[btnBaseClass, editStates.address_line2 ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400']"
+            >
               <Check v-if="editStates.address_line2" class="w-4 h-4" />
               <Pencil v-else class="w-4 h-4" />
-            </button>
+            </AsyncButton>
           </div>
         </div>
 
@@ -120,10 +131,14 @@
                 placeholder="e.g. London"
                 :class="[inputBaseClass, editStates.city ? inputEditClass : inputReadClass]" 
               />
-              <button v-if="!isReadOnly" @click="toggleEdit('city')" :class="[btnBaseClass, editStates.city ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400']">
+              <AsyncButton 
+                v-if="!isReadOnly" 
+                :action="() => toggleEdit('city')" 
+                :class="[btnBaseClass, editStates.city ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400']"
+              >
                 <Check v-if="editStates.city" class="w-4 h-4" />
                 <Pencil v-else class="w-4 h-4" />
-              </button>
+              </AsyncButton>
             </div>
           </div>
 
@@ -137,10 +152,14 @@
                 placeholder="e.g. E1 6AN"
                 :class="[inputBaseClass, editStates.postal_code ? inputEditClass : inputReadClass]" 
               />
-              <button v-if="!isReadOnly" @click="toggleEdit('postal_code')" :class="[btnBaseClass, editStates.postal_code ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400']">
+              <AsyncButton 
+                v-if="!isReadOnly" 
+                :action="() => toggleEdit('postal_code')" 
+                :class="[btnBaseClass, editStates.postal_code ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400']"
+              >
                 <Check v-if="editStates.postal_code" class="w-4 h-4" />
                 <Pencil v-else class="w-4 h-4" />
-              </button>
+              </AsyncButton>
             </div>
           </div>
 
@@ -154,10 +173,14 @@
                 placeholder="e.g. United Kingdom"
                 :class="[inputBaseClass, editStates.country ? inputEditClass : inputReadClass]" 
               />
-              <button v-if="!isReadOnly" @click="toggleEdit('country')" :class="[btnBaseClass, editStates.country ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400']">
+              <AsyncButton 
+                v-if="!isReadOnly" 
+                :action="() => toggleEdit('country')" 
+                :class="[btnBaseClass, editStates.country ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400']"
+              >
                 <Check v-if="editStates.country" class="w-4 h-4" />
                 <Pencil v-else class="w-4 h-4" />
-              </button>
+              </AsyncButton>
             </div>
           </div>
         </div>
@@ -173,6 +196,7 @@ import { useRoute } from 'vue-router'
 import { Pencil, Check } from 'lucide-vue-next'
 
 import { workspaceContactService } from '../services/contact.service' 
+import AsyncButton from '@/components/layout/AsyncButton.vue'
 import type { WorkspaceContact } from '../types'
 
 const isReadOnly = computed(() => {
@@ -232,7 +256,7 @@ const toggleEdit = async (field: keyof typeof editStates.value) => {
       })
     } catch (error) {
       console.error(`Failed to update ${field}:`, error)
-      return
+      throw error // Ensure AsyncButton knows it failed and stops loading
     }
   }
 
@@ -243,5 +267,5 @@ const toggleEdit = async (field: keyof typeof editStates.value) => {
 const inputBaseClass = 'w-full rounded-xl border px-4 py-3 pr-12 outline-none transition-all duration-200 text-sm font-medium placeholder-slate-400/80 dark:placeholder-slate-500'
 const inputEditClass = 'border-slate-300 dark:border-slate-600 bg-transparent focus:ring-4 focus:ring-slate-500/5 focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white shadow-sm'
 const inputReadClass = 'border-slate-100 dark:border-slate-800/40 bg-slate-50/50 dark:bg-slate-900/30 text-slate-500 dark:text-slate-400 cursor-not-allowed select-none'
-const btnBaseClass = 'absolute right-3 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors duration-200'
+const btnBaseClass = 'absolute right-3 top-1/2 -translate-y-1/2 z-10 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors duration-200'
 </script>

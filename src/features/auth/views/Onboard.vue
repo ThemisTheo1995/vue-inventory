@@ -9,7 +9,7 @@
       </p>
     </div>
 
-    <form @submit.prevent="handleOnboardSubmit" class="space-y-6">
+    <form @submit.prevent class="space-y-6">
 
       <div class="grid grid-cols-2 gap-4">
         <div class="space-y-1.5">
@@ -50,7 +50,7 @@
             <input id="password" v-model="onboardForm.password" :type="showPassword ? 'text' : 'password'" required
               class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-sm dark:text-white text-slate-900 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-brand-500 dark:focus:border-brand-400 focus:ring-4 focus:ring-brand-500/10 dark:focus:ring-brand-400/10 font-medium transition-all duration-200"
               placeholder="••••••••" />
-            <button type="button" @click="showPassword = !showPassword" class="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none focus:text-brand-500 transition-colors duration-200">
+            <button type="button" @click="showPassword = !showPassword" class="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none focus:text-brand-500 transition-colors duration-200 cursor-pointer">
               <EyeOff v-if="showPassword" class="h-5 w-5" />
               <Eye v-else class="h-5 w-5" />
             </button>
@@ -64,7 +64,7 @@
             <input id="confirmPassword" v-model="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" required
               class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-sm dark:text-white text-slate-900 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-brand-500 dark:focus:border-brand-400 focus:ring-4 focus:ring-brand-500/10 dark:focus:ring-brand-400/10 font-medium transition-all duration-200"
               placeholder="••••••••" />
-            <button type="button" @click="showConfirmPassword = !showConfirmPassword" class="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none focus:text-brand-500 transition-colors duration-200">
+            <button type="button" @click="showConfirmPassword = !showConfirmPassword" class="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none focus:text-brand-500 transition-colors duration-200 cursor-pointer">
               <EyeOff v-if="showConfirmPassword" class="h-5 w-5" />
               <Eye v-else class="h-5 w-5" />
             </button>
@@ -79,20 +79,18 @@
       </div>
 
       <div class="pt-2">
-        <button
-          type="submit"
-          :disabled="isLoading"
-          class="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-500/30 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 ease-out active:scale-[0.98]"
+        <AsyncButton
+          :action="handleOnboardSubmit"
+          class="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-500/30 transition-all duration-200 ease-out active:scale-[0.98]"
         >
-          <Loader2 v-if="isLoading" class="w-5 h-5 animate-spin" />
-          <span v-else>Activate & Complete Setup</span>
-        </button>
+          Activate & Complete Setup
+        </AsyncButton>
       </div>
     </form>
 
     <div class="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
       Wrong context or invitation link?
-      <button @click="router.push('/auth')" class="font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-500 transition-colors duration-200 ml-1 focus:outline-none">
+      <button @click="router.push('/auth')" class="font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-500 transition-colors duration-200 ml-1 focus:outline-none cursor-pointer">
         Go to log in
       </button>
     </div>
@@ -102,13 +100,13 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Loader2, User, Mail, Lock, Eye, EyeOff } from 'lucide-vue-next'
+import { User, Mail, Lock, Eye, EyeOff } from 'lucide-vue-next'
+import AsyncButton from '@/components/layout/AsyncButton.vue'
 import { type AuthResponse, authService } from '../services/auth.service'
 
 const router = useRouter()
 const route = useRoute()
 
-const isLoading = ref<boolean>(false)
 const validationError = ref<string>('')
 const confirmPassword = ref<string>('')
 const showPassword = ref<boolean>(false)
@@ -147,7 +145,6 @@ const handleOnboardSubmit = async () => {
   }
 
   validationError.value = ''
-  isLoading.value = true
 
   try {
     const response: AuthResponse = await authService.onboard(onboardForm)
@@ -159,8 +156,7 @@ const handleOnboardSubmit = async () => {
   } catch (err: any) {
     validationError.value = err.message || 'An unexpected onboarding exception occurred. Please try again.'
     console.error('Authentication process failed.')
-  } finally {
-    isLoading.value = false
+    throw err
   }
 }
 </script>

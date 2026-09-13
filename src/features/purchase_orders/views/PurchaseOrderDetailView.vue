@@ -87,32 +87,32 @@
             Edit Draft
           </button>
 
-          <button
+          <AsyncButton
             v-if="po.status === 'DRAFT'"
-            @click="updateStatus('SENT')"
-            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-all shadow-md shadow-indigo-200 dark:shadow-none active:scale-95"
+            :action="() => updateStatus('SENT')"
+            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-all shadow-md shadow-indigo-200 dark:shadow-none active:scale-95 cursor-pointer border-0"
           >
             <Send class="w-4 h-4" />
             Mark as Sent
-          </button>
+          </AsyncButton>
 
-          <button
+          <AsyncButton
             v-if="po.status === 'SENT'"
-            @click="updateStatus('RECEIVED')"
-            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all shadow-md shadow-emerald-200 dark:shadow-none active:scale-95"
+            :action="() => updateStatus('RECEIVED')"
+            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all shadow-md shadow-emerald-200 dark:shadow-none active:scale-95 cursor-pointer border-0"
           >
             <CheckCircle class="w-4 h-4" />
             Mark as Received
-          </button>
+          </AsyncButton>
 
-          <button
+          <AsyncButton
             v-if="['DRAFT', 'SENT'].includes(po.status)"
-            @click="updateStatus('CANCELLED')"
-            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 font-bold text-sm transition-all active:scale-95"
+            :action="() => updateStatus('CANCELLED')"
+            class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 font-bold text-sm transition-all active:scale-95 cursor-pointer"
           >
             <XCircle class="w-4 h-4" />
             Cancel PO
-          </button>
+          </AsyncButton>
         </div>
       </BaseCard>
 
@@ -329,6 +329,7 @@ import { useConfirm } from "@/composables/useConfirm"
 import { useToast } from "@/composables/useToast"
 
 import BaseCard from "@/components/ui/BaseCard.vue"
+import AsyncButton from "@/components/layout/AsyncButton.vue"
 import PurchaseOrderEditModal from "./PurchaseOrderEditModal.vue"
 import { formatCurrency } from "@/utils/currencyFormatter.ts"
 
@@ -426,6 +427,7 @@ const updateStatus = async (nextStatus: PurchaseOrderStatus) => {
         : errorMessage
 
     showToast(displayMessage, "error")
+    throw err
   }
 }
 

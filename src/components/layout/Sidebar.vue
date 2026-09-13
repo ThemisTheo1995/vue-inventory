@@ -8,7 +8,7 @@
     <!-- Collapse Toggle Button -->
     <button
       @click="collapsed = !collapsed"
-      class="absolute -right-3.5 top-10 p-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shadow-sm transition-transform hover:scale-110 z-30"
+      class="absolute -right-3.5 top-12 p-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shadow-sm transition-transform hover:scale-110 z-30"
     >
       <ChevronRight v-if="collapsed" class="w-4 h-4" />
       <ChevronLeft v-else class="w-4 h-4" />

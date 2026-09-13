@@ -16,12 +16,12 @@
               <p class="text-xs font-medium text-slate-400">Grant scoped framework controls instantly</p>
             </div>
           </div>
-          <button @click="closeModal" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+          <button @click="closeModal" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer">
             <X class="w-4 h-4" />
           </button>
         </div>
 
-        <form @submit.prevent="submit" class="p-6 space-y-5">
+        <form ref="formRef" @submit.prevent class="p-6 space-y-5">
           <div class="space-y-2">
             <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Email Address</label>
             <input 
@@ -75,16 +75,16 @@
             <button 
               type="button" 
               @click="closeModal" 
-              class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-300 text-sm hover:bg-slate-50 dark:hover:bg-slate-900 transition"
+              class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-300 text-sm hover:bg-slate-50 dark:hover:bg-slate-900 transition cursor-pointer"
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
-              class="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-950 font-bold text-sm transition shadow-sm"
+            <AsyncButton 
+              :action="handleSubmit" 
+              class="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-950 font-bold text-sm transition shadow-sm cursor-pointer flex items-center justify-center"
             >
               Send Invitation
-            </button>
+            </AsyncButton>
           </div>
         </form>
       </div>
@@ -97,6 +97,7 @@ import { ref, watch } from 'vue'
 import { UserPlus, X } from 'lucide-vue-next'
 import { roles, roleColors, getRoleStyles } from '../roles'
 import type { Role } from '../types'
+import AsyncButton from '@/components/layout/AsyncButton.vue'
 
 const props = defineProps<{
   isOpen: boolean
@@ -105,9 +106,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void
-  (e: 'submit', payload: { email: string; role: Role }): void
+  (e: 'submit', payload: { email: string; role: Role }): Promise<void> | void
 }>()
 
+const formRef = ref<HTMLFormElement | null>(null)
 const inviteForm = ref<{ email: string; role: Role }>({
   email: '',
   role: 'read_only'
@@ -120,8 +122,15 @@ watch(() => props.isOpen, (newVal) => {
 
 const closeModal = () => emit('close')
 
-const submit = () => {
-  emit('submit', inviteForm.value)
+const handleSubmit = async () => {
+  if (formRef.value && !formRef.value.reportValidity()) {
+    throw new Error("Validation failed")
+  }
+
+  const result = emit('submit', inviteForm.value)
+  if (result instanceof Promise) {
+    await result
+  }
 }
 </script>
 

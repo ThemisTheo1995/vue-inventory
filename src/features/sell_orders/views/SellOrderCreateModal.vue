@@ -1,4 +1,4 @@
-<!-- src/components/SellOrderCreateModal.vue -->
+<!-- src/features/sell_orders/views/SellOrderCreateModal.vue -->
 <template>
   <BaseModal
     :is-open="isOpen"
@@ -13,7 +13,7 @@
       </div>
     </template>
 
-    <form id="create-so-form" class="space-y-8 mt-2" @submit.prevent="submitForm">
+    <div class="space-y-8 mt-2">
       
       <!-- Top Metadata Row -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5 bg-slate-50/50 dark:bg-slate-900/30 p-5 sm:p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 shadow-sm">
@@ -280,7 +280,7 @@
           {{ formatPrice(calculatedTotalCents) }}
         </span>
       </div>
-    </form>
+    </div>
 
     <template #footer>
       <div class="flex items-center justify-end gap-3 w-full">
@@ -292,14 +292,13 @@
           Cancel
         </button>
 
-        <button
-          type="submit"
-          form="create-so-form"
-          :disabled="isSubmitting || lines.length === 0 || !form.customer_id"
-          class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-brand-500/30 dark:shadow-none active:scale-95"
+        <AsyncButton
+          :action="submitForm"
+          :disabled="lines.length === 0 || !form.customer_id"
+          class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-brand-500/30 dark:shadow-none active:scale-95 cursor-pointer border-0"
         >
-          {{ isSubmitting ? "Creating Draft..." : "Create Draft" }}
-        </button>
+          Create Draft
+        </AsyncButton>
       </div>
     </template>
   </BaseModal>
@@ -309,6 +308,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from "vue"
 import { Plus, Trash2, X, Users, PackageOpen } from "lucide-vue-next"
 import BaseModal from "@/components/ui/BaseModal.vue"
+import AsyncButton from "@/components/layout/AsyncButton.vue"
 import { useToast } from "@/composables/useToast"
 import { sellOrderService } from "../services/sell_order.service"
 import { itemService } from "../../items/services/item.service"
@@ -332,8 +332,6 @@ const { showToast } = useToast()
 
 const CURRENCY_SYMBOL = "£"
 const LOCALE = "en-GB"
-
-const isSubmitting = ref(false)
 
 // Elements references
 const customerContainerRef = ref<HTMLElement | null>(null)
@@ -586,17 +584,15 @@ onUnmounted(() => {
 const submitForm = async () => {
   if (!form.value.customer_id) {
     showToast("Please choose a Customer", "error")
-    return
+    throw new Error("Please choose a Customer")
   }
 
   if (lines.value.some(l => !l.item_id || l.quantity < 1)) {
     showToast("Please make sure all line items contain resolved products with correct quantities", "error")
-    return
+    throw new Error("Invalid line items")
   }
 
   try {
-    isSubmitting.value = true
-    
     const payload = {
       customer_id: form.value.customer_id,
       so_number: form.value.so_number.trim().toUpperCase(),
@@ -624,8 +620,7 @@ const submitForm = async () => {
         : errorMessage
 
     showToast(displayMessage, "error")
-  } finally {
-    isSubmitting.value = false
+    throw error
   }
 }
 </script>

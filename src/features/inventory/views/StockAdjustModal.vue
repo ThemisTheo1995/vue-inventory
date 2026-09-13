@@ -1,4 +1,4 @@
-<!-- src/views/inventory/StockAdjustModal.vue -->
+<!-- src/features/views/inventory/StockAdjustModal.vue -->
 <template>
   <BaseModal
     :is-open="isOpen"
@@ -13,22 +13,28 @@
       </div>
     </template>
 
-    <form @submit.prevent="submitAdjustment" class="mt-6 space-y-5">
+    <form @submit.prevent class="mt-6 space-y-5">
       
       <!-- Item Selection -->
-    <div class="space-y-1.5 relative">
+      <div class="space-y-1.5 relative">
         <label class="text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 ml-1">
             Item <span class="text-red-500">*</span>
         </label>
     
         <!-- Preselected (Locked) State -->
-        <input
-            v-if="preselectedItemId"
-            :value="preselectedItemId"
-            type="text"
-            readonly
-            class="w-full rounded-xl border border-transparent bg-slate-100 dark:bg-slate-800/50 px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400 cursor-not-allowed outline-none"
-        />
+        <div 
+          v-if="preselectedItemId" 
+          class="flex items-center justify-between w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/50 px-4 py-3 shadow-sm"
+        >
+          <div class="flex flex-col min-w-0">
+            <span class="text-sm font-bold text-slate-900 dark:text-white truncate">
+              {{ selectedItem?.title || preselectedItemTitle || 'Preselected Item' }}
+            </span>
+            <span class="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">
+              SKU: {{ selectedItem?.sku || preselectedItemSku || preselectedItemId }}
+            </span>
+          </div>
+        </div>
     
         <!-- Searchable Combobox -->
         <div v-else class="relative">
@@ -48,7 +54,7 @@
             <button 
                 type="button" 
                 @click="clearSelection"
-                class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors cursor-pointer"
             >
                 <X class="w-4 h-4" />
             </button>
@@ -95,7 +101,7 @@
             </div>
             </div>
         </div>
-    </div>
+      </div>
 
       <!-- Adjustment Type (Add vs Remove) -->
       <div class="space-y-1.5">
@@ -165,19 +171,17 @@
         <button
           type="button"
           @click="handleClose"
-          :disabled="isSubmitting"
-          class="px-4 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors disabled:opacity-50"
+          class="px-4 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
         >
           Cancel
         </button>
-        <button
-          type="submit"
-          :disabled="isSubmitting || !form.itemId || form.quantity < 1"
-          class="inline-flex items-center justify-center min-w-[120px] px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 dark:disabled:bg-brand-800 text-white font-bold text-sm transition-all shadow-md active:scale-95 disabled:cursor-not-allowed"
+        <AsyncButton
+          :action="submitAdjustment"
+          :disabled="!form.itemId || form.quantity < 1"
+          class="inline-flex items-center justify-center min-w-[120px] px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 dark:disabled:bg-brand-800 text-white font-bold text-sm transition-all shadow-md active:scale-95 disabled:cursor-not-allowed cursor-pointer"
         >
-          <Loader2 v-if="isSubmitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
-          <span v-else>Confirm</span>
-        </button>
+          Confirm
+        </AsyncButton>
       </div>
     </form>
   </BaseModal>
@@ -187,6 +191,7 @@
 import { ref, watch } from 'vue'
 import { ArrowRightLeft, PlusCircle, MinusCircle, Search, Loader2, X } from 'lucide-vue-next'
 import BaseModal from '@/components/ui/BaseModal.vue'
+import AsyncButton from '@/components/layout/AsyncButton.vue'
 import { useToast } from '@/composables/useToast'
 import { inventoryService } from '../services/inventory.service'
 import { itemService } from '../../items/services/item.service'
@@ -196,6 +201,8 @@ const props = defineProps<{
   isOpen: boolean
   workspaceId: string
   preselectedItemId?: string | null
+  preselectedItemTitle?: string | null
+  preselectedItemSku?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -204,8 +211,6 @@ const emit = defineEmits<{
 }>()
 
 const { showToast } = useToast()
-
-const isSubmitting = ref(false)
 
 // Item Search State
 const searchQuery = ref('')
@@ -258,11 +263,10 @@ const clearSelection = () => {
   selectedItem.value = null
   form.value.itemId = ''
   searchQuery.value = ''
-  setTimeout(() => showDropdown.value = true, 50) // Allow input to refocus and show empty state
+  setTimeout(() => showDropdown.value = true, 50)
 }
 
 const handleBlur = () => {
-  // Small timeout to allow mousedown event on dropdown items to fire first
   setTimeout(() => {
     showDropdown.value = false
   }, 150)
@@ -278,7 +282,6 @@ watch(() => props.isOpen, (newVal) => {
       referenceId: ''
     }
     
-    // Clear search state entirely when reopened
     searchQuery.value = ''
     searchResults.value = []
     selectedItem.value = null
@@ -297,7 +300,6 @@ const submitAdjustment = async () => {
     return
   }
 
-  isSubmitting.value = true
   try {
     const quantityChange = form.value.mode === 'ADD' 
       ? Math.abs(form.value.quantity) 
@@ -307,7 +309,7 @@ const submitAdjustment = async () => {
       item_id: form.value.itemId,
       quantity_change: quantityChange,
       reference_type: OrderType.MANUAL_ADJUSTMENT,
-      reference_id: null
+      reference_id: form.value.referenceId || null
     })
     
     emit('created')
@@ -317,13 +319,12 @@ const submitAdjustment = async () => {
         error.message || 
         "An unexpected error occurred"
 
-        const displayMessage = Array.isArray(errorMessage) 
+    const displayMessage = Array.isArray(errorMessage) 
         ? errorMessage[0].msg 
         : errorMessage
 
     showToast(displayMessage, "error")
-  } finally {
-    isSubmitting.value = false
+    throw error
   }
 }
 </script>

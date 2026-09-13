@@ -40,7 +40,6 @@
         <!-- Header Profile Card -->
         <BaseCard class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-0 shadow-xl shadow-slate-200/50 dark:shadow-none ring-1 ring-slate-200 dark:ring-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-5 sm:p-6 overflow-hidden">
           <div class="flex items-center gap-4 sm:gap-5 min-w-0 flex-1 w-full sm:w-auto">
-            <!-- Indigo rounded-full customer avatar -->
             <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-2xl uppercase shadow-sm border border-indigo-100 dark:border-indigo-800/50 shrink-0">
               {{ customer.first_name.charAt(0) }}{{ customer.last_name?.charAt(0) || '' }}
             </div>
@@ -65,14 +64,14 @@
             </div>
           </div>
 
-          <!-- Actions (Edit button) -->
+          <!-- Actions (Edit button - synchronous modal trigger) -->
           <div
             v-if="!isReadOnly"
             class="flex items-center gap-3 w-full sm:w-auto shrink-0"
           >
             <button
               @click="isEditModalOpen = true"
-              class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 active:scale-95 transition-all duration-200"
+              class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 active:scale-95 transition-all duration-200 cursor-pointer"
             >
               <Edit2 class="w-4 h-4" />
               <span>Edit Profile</span>
@@ -100,7 +99,7 @@
                     </span>
                     <button 
                       @click="copyIdToClipboard(customer.id)"
-                      class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10 transition-all opacity-0 group-hover/id:opacity-100 shrink-0"
+                      class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-500/10 transition-all opacity-0 group-hover/id:opacity-100 shrink-0 cursor-pointer"
                       title="Copy Customer ID"
                     >
                       <Check v-if="copiedId" class="w-3.5 h-3.5 text-emerald-500" />
@@ -157,20 +156,13 @@
 </template>
 
 <script setup lang="ts">
-// 1. Vue Core
 import { computed, ref, onMounted } from 'vue'
-
-// 2. Vue Router
 import { useRoute, useRouter } from 'vue-router'
-
-// 3. Icons (Alphabetized)
 import { ArrowLeft, Calendar, Check, Copy, Edit2, Mail, ShoppingBag } from 'lucide-vue-next'
 
-// 4. Types & Services
 import type { Customer } from '../types/customer.types'
 import { customerService } from '../services/customer.service'
 
-// 5. Components
 import BaseCard from '@/components/ui/BaseCard.vue'
 import CustomerEditModal from './CustomerEditModal.vue'
 
@@ -183,11 +175,11 @@ const customerId = route.params.id as string
 const isReadOnly = computed(() => localStorage.getItem('role') === 'read_only')
 
 const customer = ref<Customer | null>(null)
-const isLoading = ref(true)
-const copiedId = ref(false)
-const isEditModalOpen = ref(false)
+const isLoading = ref<boolean>(true)
+const copiedId = ref<boolean>(false)
+const isEditModalOpen = ref<boolean>(false)
 
-const fetchCustomer = async () => {
+const fetchCustomer = async (): Promise<void> => {
   try {
     isLoading.value = true
     customer.value = await customerService.getOne(workspaceId, customerId)
@@ -199,7 +191,7 @@ const fetchCustomer = async () => {
   }
 }
 
-const copyIdToClipboard = async (text: string) => {
+const copyIdToClipboard = async (text: string): Promise<void> => {
   try {
     await navigator.clipboard.writeText(text)
     copiedId.value = true
@@ -209,7 +201,7 @@ const copyIdToClipboard = async (text: string) => {
   }
 }
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string): string => {
   return new Intl.DateTimeFormat(LOCALE, {
     month: 'short',
     day: 'numeric',
@@ -217,7 +209,7 @@ const formatDate = (dateString: string) => {
   }).format(new Date(dateString))
 }
 
-const onCustomerUpdated = (updatedData: Customer) => {
+const onCustomerUpdated = (updatedData: Customer): void => {
   if (isReadOnly.value) return
   customer.value = updatedData
 }

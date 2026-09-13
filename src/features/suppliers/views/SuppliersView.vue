@@ -15,7 +15,7 @@
       <div v-if="!isReadOnly" class="flex items-center shrink-0">
         <button
           @click="isCreateModalOpen = true"
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-sm hover:opacity-90 active:scale-95 transition-all"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-sm hover:opacity-90 active:scale-95 transition-all cursor-pointer"
         >
           <Plus class="w-4 h-4" />
           <span>Add Supplier</span>
@@ -77,14 +77,14 @@
                 {{ supplier.email || '—' }}
               </span>
             </div>
-            <div v-if="!isReadOnly" class="shrink-0">
-              <button
-                @click.stop="deleteSupplier(supplier)"
-                class="p-2 -mr-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-100/60 dark:hover:bg-red-950/60 transition-colors"
+            <div v-if="!isReadOnly" class="shrink-0" @click.stop>
+              <AsyncButton
+                :action="() => handleAction(supplier.id, () => deleteSupplier(supplier))"
+                class="p-2 -mr-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-100/60 dark:hover:bg-red-950/60 transition-colors bg-transparent border-0 cursor-pointer flex items-center justify-center"
                 title="Archive supplier"
               >
                 <Trash2 class="w-4 h-4" />
-              </button>
+              </AsyncButton>
             </div>
           </div>
         </div>
@@ -141,13 +141,18 @@
 
           <td v-if="!isReadOnly" class="px-6 py-4 text-right">
             <div class="flex items-center justify-end" @click.stop>
-              <button
-                @click.stop="deleteSupplier(supplier)"
-                class="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-100/60 dark:hover:bg-red-950/60 rounded-lg transition-all active:scale-95"
-                title="Archive supplier"
+              <div 
+                class="flex items-center gap-1 transition-opacity duration-200"
+                :class="{ 'opacity-0 group-hover:opacity-100': !loadingRows[supplier.id] }"
               >
-                <Trash2 class="w-4 h-4" />
-              </button>
+                <AsyncButton
+                  :action="() => handleAction(supplier.id, () => deleteSupplier(supplier))"
+                  class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-100/60 dark:hover:bg-red-950/60 rounded-lg transition-all active:scale-95 bg-transparent border-0 cursor-pointer flex items-center justify-center"
+                  title="Archive supplier"
+                >
+                  <Trash2 class="w-4 h-4" />
+                </AsyncButton>
+              </div>
             </div>
           </td>
         </tr>
@@ -173,7 +178,8 @@ import { useConfirm } from "@/composables/useConfirm"
 import { useToast } from "@/composables/useToast"
 import { useSearch } from "@/composables/useSearch"
 
-import BaseTable from "@/components/ui/BaseTable.vue"
+import BaseTable from "@/components/ui/table/BaseTable.vue"
+import AsyncButton from "@/components/layout/AsyncButton.vue"
 import SupplierCreateModal from "./SupplierCreateModal.vue"
 
 import { supplierService } from "../services/supplier.service"
@@ -190,6 +196,8 @@ const { showToast } = useToast()
 const suppliers = ref<Supplier[]>([])
 const isLoading = ref(true)
 const isCreateModalOpen = ref(false)
+
+const loadingRows = ref<Record<string, boolean>>({})
 
 const currentPage = ref(1)
 const itemsPerPage = ref(20)
@@ -247,6 +255,15 @@ const navigateToSupplier = (id: string) => {
   router.push({ name: "supplier-details", params: { id } })
 }
 
+const handleAction = async (supplierId: string, actionFn: () => Promise<any>) => {
+  loadingRows.value[supplierId] = true
+  try {
+    await actionFn()
+  } finally {
+    loadingRows.value[supplierId] = false
+  }
+}
+
 const deleteSupplier = async (supplier: Supplier) => {
   const confirmed = await confirm({
     title: "Archive Supplier",
@@ -270,6 +287,7 @@ const deleteSupplier = async (supplier: Supplier) => {
   } catch (error) {
     console.error("Error deleting supplier:", error)
     showToast("Failed to archive supplier", "error")
+    throw error
   }
 }
 

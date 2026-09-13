@@ -15,6 +15,7 @@ class InventoryService {
 
   async getInventories(
     workspaceId: string, 
+    search?: string,
     page = 1, 
     limit = 20,
     expand?: string[]
@@ -23,6 +24,10 @@ class InventoryService {
       page: page.toString(),
       limit: limit.toString()
     })
+
+    if (search) {
+      params.append('search', search)
+    }
     
     if (expand && expand.length > 0) {
       params.append('expand', expand.join(','))

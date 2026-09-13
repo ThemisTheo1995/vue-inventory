@@ -10,7 +10,7 @@
       <button 
         v-if="!isReadOnly"
         @click="isInviteModalOpen = true"
-        class="flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-950 font-bold py-2.5 px-4 rounded-xl transition active:scale-[0.98] shadow-sm text-sm shrink-0"
+        class="flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-950 font-bold py-2.5 px-4 rounded-xl transition active:scale-[0.98] shadow-sm text-sm shrink-0 cursor-pointer"
       >
         <UserPlus class="w-4 h-4" />
         Invite Team Member
@@ -68,7 +68,7 @@
         <button 
           v-if="!isReadOnly"
           @click="isInviteModalOpen = true"
-          class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition text-sm"
+          class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition text-sm cursor-pointer"
         >
           Invite your first colleague
         </button>
@@ -112,14 +112,14 @@
               </div>
             </div>
 
-            <button v-if="roleFilter !== 'all' || statusFilter !== 'all' || searchQuery !== ''" @click="clearAllFilters" class="text-xs text-red-500 hover:text-red-600 font-bold px-2 py-1 transition">
+            <button v-if="roleFilter !== 'all' || statusFilter !== 'all' || searchQuery !== ''" @click="clearAllFilters" class="text-xs text-red-500 hover:text-red-600 font-bold px-2 py-1 transition cursor-pointer">
               Reset Filters
             </button>
           </div>
         </div>
 
         <div class="border-b border-slate-100 dark:border-slate-700/50 bg-slate-50/20 dark:bg-slate-900/5">
-          <button @click="isRolesExpanded = !isRolesExpanded" class="w-full px-6 py-3 flex items-center justify-between hover:bg-slate-50/60 dark:hover:bg-slate-900/20 transition outline-none">
+          <button @click="isRolesExpanded = !isRolesExpanded" class="w-full px-6 py-3 flex items-center justify-between hover:bg-slate-50/60 dark:hover:bg-slate-900/20 transition outline-none cursor-pointer">
             <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
               <ShieldCheck class="w-4 h-4" />
               <span class="text-[11px] font-bold uppercase tracking-wider">View Role Definitions</span>
@@ -231,6 +231,7 @@ const submitInvite = async (payload: { email: string; role: Role }) => {
     isInviteModalOpen.value = false
   } catch (error) {
     console.warn('Invitation process aborted.')
+    throw error
   }
 }
 

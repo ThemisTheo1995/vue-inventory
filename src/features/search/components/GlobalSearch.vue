@@ -43,14 +43,17 @@
         >
           <!-- Input Bar -->
           <div class="relative flex items-center px-4 border-b border-slate-100 dark:border-slate-800">
+            <!-- Restored Icon -->
             <Search class="w-5 h-5 text-brand-500 shrink-0 mr-3" />
+
             <input
               ref="searchInput"
               v-model="searchQuery"
               type="text"
-              placeholder="Search across your entire ERP..."
+              placeholder="Type your search here..."
               class="w-full py-4 text-base md:text-lg bg-transparent border-none outline-none focus:ring-0 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
               @keydown="handleKeydown"
+              @input="handleInput"
             />
             
             <Loader2 v-if="isLoading" class="w-5 h-5 text-brand-500 animate-spin shrink-0 ml-2" />
@@ -75,13 +78,13 @@
           <!-- Results List -->
           <div class="flex-1 overflow-y-auto p-2 no-scrollbar">
             
-            <!-- Empty Query State -->
-            <div v-if="!searchQuery.trim()" class="py-12 text-center text-slate-400 dark:text-slate-500 text-sm px-4">
-              Type anything to search customers, suppliers, items, and orders...
+            <!-- Initial State / Need Search Trigger -->
+            <div v-if="!searchQuery.trim() || (!isLoading && results.length === 0 && !hasSearched)" class="py-12 text-center text-slate-400 dark:text-slate-500 text-sm px-4">
+              Type your search and press <kbd class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded font-mono text-[10px] mx-1">Enter</kbd> or click search...
             </div>
 
             <!-- No Results State -->
-            <div v-else-if="!isLoading && results.length === 0" class="py-12 text-center text-slate-500 dark:text-slate-400 text-sm px-4">
+            <div v-else-if="!isLoading && results.length === 0 && hasSearched" class="py-12 text-center text-slate-500 dark:text-slate-400 text-sm px-4">
               No matches found for <span class="font-medium text-slate-900 dark:text-slate-200">"{{ searchQuery }}"</span>
             </div>
 
@@ -130,9 +133,10 @@
             </div>
           </div>
 
-          <!-- Modal Footer (Desktop Only) -->
-          <div class="hidden md:flex px-4 py-3 bg-slate-50/50 dark:bg-slate-900/90 border-t border-slate-100 dark:border-slate-800 items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-            <div class="flex items-center gap-4">
+          <!-- Modal Footer (Now Visible on both Desktop & Mobile) -->
+          <div class="flex px-4 py-3 bg-slate-50/50 dark:bg-slate-900/90 border-t border-slate-100 dark:border-slate-800 items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+            <!-- Desktop Keyboard Shortcuts -->
+            <div class="hidden md:flex items-center gap-4">
               <span class="flex items-center gap-1.5">
                 <kbd class="px-1.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-2xs font-mono text-[10px]">↑</kbd>
                 <kbd class="px-1.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-2xs font-mono text-[10px]">↓</kbd>
@@ -140,13 +144,25 @@
               </span>
               <span class="flex items-center gap-1.5">
                 <kbd class="px-1.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-2xs font-mono text-[10px]">↵</kbd>
-                select
+                select / search
+              </span>
+              <span class="flex items-center gap-1.5">
+                <kbd class="px-1.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-2xs font-mono text-[10px]">esc</kbd>
+                close
               </span>
             </div>
-            <span class="flex items-center gap-1.5">
-              <kbd class="px-1.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-2xs font-mono text-[10px]">esc</kbd>
-              close
-            </span>
+
+            <!-- Mobile spacer to push button right if needed -->
+            <div class="md:hidden"></div>
+
+            <!-- Search Button (Bottom Right) -->
+            <button
+              @click="executeSearch"
+              :disabled="!searchQuery.trim() || isLoading"
+              class="px-5 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-sm shadow-md hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:active:scale-100 transition-all duration-200"
+            >
+              Search
+            </button>
           </div>
         </div>
       </Transition>
@@ -155,7 +171,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { 
   Search,
@@ -180,15 +196,15 @@ const isOpen = ref(false)
 const searchQuery = ref('')
 const results = ref<SearchResult[]>([])
 const isLoading = ref(false)
+const hasSearched = ref(false)
 const selectedIndex = ref(0)
 const searchInput = ref<HTMLInputElement | null>(null)
-
-let debounceTimeout: ReturnType<typeof setTimeout> | null = null
 
 const openModal = async () => {
   isOpen.value = true
   selectedIndex.value = 0
-  document.body.style.overflow = 'hidden' // Lock scroll for mobile
+  hasSearched.value = false
+  document.body.style.overflow = 'hidden'
   await nextTick()
   searchInput.value?.focus()
 }
@@ -197,45 +213,48 @@ const closeModal = () => {
   isOpen.value = false
   searchQuery.value = ''
   results.value = []
-  document.body.style.overflow = '' // Restore scroll
+  hasSearched.value = false
+  document.body.style.overflow = ''
 }
 
 const clearQuery = () => {
   searchQuery.value = ''
   results.value = []
+  hasSearched.value = false
   searchInput.value?.focus()
 }
 
-watch(searchQuery, (newQuery) => {
-  if (debounceTimeout) clearTimeout(debounceTimeout)
-  
-  if (!newQuery.trim()) {
+const handleInput = () => {
+  if (results.value.length > 0) {
     results.value = []
-    isLoading.value = false
-    return
+    hasSearched.value = false
   }
+}
+
+const executeSearch = async () => {
+  if (!searchQuery.value.trim() || isLoading.value) return
 
   isLoading.value = true
-  // Reduced debounce to 300ms for a much snappier experience
-  debounceTimeout = setTimeout(async () => {
-    const workspaceId = route.params.workspaceId as string
-    if (workspaceId) {
-      try {
-        results.value = await searchService.search(workspaceId, newQuery)
-        selectedIndex.value = 0
-      } catch (err) {
-        console.error('Search error:', err)
-        results.value = []
-      } finally {
-        isLoading.value = false
-      }
-    } else {
-      isLoading.value = false
-    }
-  }, 300)
-})
+  hasSearched.value = false
+  results.value = []
 
-// Keyboard Actions inside Modal
+  const workspaceId = route.params.workspaceId as string
+  if (workspaceId) {
+    try {
+      results.value = await searchService.search(workspaceId, searchQuery.value)
+      selectedIndex.value = 0
+    } catch (err) {
+      console.error('Search error:', err)
+      results.value = []
+    } finally {
+      isLoading.value = false
+      hasSearched.value = true
+    }
+  } else {
+    isLoading.value = false
+  }
+}
+
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === 'ArrowDown') {
     e.preventDefault()
@@ -249,16 +268,19 @@ const handleKeydown = (e: KeyboardEvent) => {
     }
   } else if (e.key === 'Enter') {
     e.preventDefault()
-    const selectedItem = results.value[selectedIndex.value]
-    if (selectedItem) {
-      selectResult(selectedItem)
+    if (results.value.length > 0) {
+      const selectedItem = results.value[selectedIndex.value]
+      if (selectedItem) {
+        selectResult(selectedItem)
+      }
+    } else {
+      executeSearch()
     }
   } else if (e.key === 'Escape') {
     closeModal()
   }
 }
 
-// Global Keyboard Shortcut (⌘K / Ctrl+K)
 const handleGlobalKeydown = (e: KeyboardEvent) => {
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
     e.preventDefault()
@@ -280,7 +302,6 @@ const selectResult = (item?: SearchResult) => {
   }
 }
 
-// Visual Helpers
 const getEntityIcon = (type: EntityType) => {
   switch (type) {
     case 'CUSTOMER': return Users
@@ -293,7 +314,6 @@ const getEntityIcon = (type: EntityType) => {
   }
 }
 
-// Added an isActive flag so the icon gets a slight color bump when hovered/selected via keyboard
 const getEntityBadgeClass = (type: EntityType, isActive: boolean = false) => {
   switch (type) {
     case 'CUSTOMER': return isActive ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300' : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
@@ -316,12 +336,11 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleGlobalKeydown)
-  document.body.style.overflow = '' // Cleanup in case component unmounts while open
+  document.body.style.overflow = ''
 })
 </script>
 
 <style scoped>
-/* Backdrop Fade */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease;
@@ -331,7 +350,6 @@ onUnmounted(() => {
   opacity: 0;
 }
 
-/* Modal Snappy Apple-style Animation */
 .cmd-palette-enter-active {
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -339,9 +357,6 @@ onUnmounted(() => {
   transition: all 0.2s ease-in;
 }
 
-/* 
-  Desktop Transform (originating from center)
-*/
 @media (min-width: 768px) {
   .cmd-palette-enter-from,
   .cmd-palette-leave-to {
@@ -355,9 +370,6 @@ onUnmounted(() => {
   }
 }
 
-/* 
-  Mobile Transform (originating from top)
-*/
 @media (max-width: 767px) {
   .cmd-palette-enter-from,
   .cmd-palette-leave-to {
@@ -371,12 +383,11 @@ onUnmounted(() => {
   }
 }
 
-/* Hidden scrollbar functionality for the results list */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 .no-scrollbar {
-  -ms-overflow-style: none; /* IE/Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style>

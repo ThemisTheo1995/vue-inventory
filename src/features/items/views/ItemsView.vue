@@ -15,7 +15,7 @@
       <div v-if="!isReadOnly" class="flex items-center shrink-0">
         <button
           @click="isCreateModalOpen = true"
-          class="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-sm overflow-hidden shadow-md hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 transition-all duration-200"
+          class="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-sm overflow-hidden shadow-md hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 transition-all duration-200 cursor-pointer"
         >
           <div class="absolute inset-0 bg-white/20 dark:bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
           <Plus class="w-4 h-4 relative z-10" />
@@ -27,6 +27,8 @@
     <!-- Reusable Table Component -->
     <BaseTable
       v-model:search-query="searchQuery"
+      v-model:selected-filters="activeFilters"
+      :filters="tableFilters"
       :items="items"
       :is-loading="isTableLoading"
       :is-searching="isSearching"
@@ -40,6 +42,7 @@
       :empty-description="isReadOnly ? 'There are currently no items matching your search.' : 'Get started by adding your first product to the catalog.'"
       create-button-text="Add First Item"
       :column-span="isReadOnly ? 3 : 4"
+      @filter-change="onFilterChange"
       @create="isCreateModalOpen = true"
       @prev-page="prevPage"
       @next-page="nextPage"
@@ -49,36 +52,51 @@
         <div 
           v-for="item in items" 
           :key="item.id"
-          @click="navigateToItem(item.id)"
-          class="relative p-4 sm:p-5
-            rounded-lg
-            hover:bg-slate-50 dark:hover:bg-slate-900
-            active:bg-slate-100 dark:active:bg-slate-900
-            transition-colors cursor-pointer group
-            border-b dark:border-slate-900 last:border-0"
+          @click="!item.is_deleted && navigateToItem(item.id)"
+          :class="[
+            'relative p-4 sm:p-5 rounded-lg transition-colors border-b dark:border-slate-900 last:border-0',
+            item.is_deleted 
+              ? 'bg-red-50/80 dark:bg-red-950/30 border-l-4 border-l-red-500 dark:border-l-red-600 shadow-sm cursor-default' 
+              : 'hover:bg-slate-50 dark:hover:bg-slate-900 active:bg-slate-100 dark:active:bg-slate-900 cursor-pointer'
+          ]"
         >
           <div class="flex justify-between items-start mb-4">
             <div class="flex items-center gap-3">
-              <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 font-bold text-lg shadow-sm border border-teal-100 dark:border-teal-800/50 group-hover:scale-105 transition-transform">
+              <div :class="[
+                'flex items-center justify-center w-12 h-12 rounded-xl font-bold text-lg shadow-sm border group-hover:scale-105 transition-transform',
+                item.is_deleted ? 'bg-red-100 dark:bg-red-900/50 text-red-600 border-red-300 dark:border-red-700' : 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 border-teal-100 dark:border-teal-800/50'
+              ]">
                 {{ item.title?.charAt(0)?.toUpperCase() || 'I' }}
               </div>
               <div>
-                <p class="font-bold text-slate-900 dark:text-white text-base leading-tight">
+                <p class="font-bold text-slate-900 dark:text-white text-base leading-tight flex items-center gap-2">
                   {{ item.title }}
+                  <span v-if="item.is_deleted" class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 uppercase tracking-widest border border-red-200 dark:border-red-800/50">Deleted</span>
                 </p>
                 <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mt-1">
                   ID: {{ item.id.slice(0, 8) }}
                 </p>
               </div>
             </div>
-            <div v-if="!isReadOnly">
-              <button
-                @click.stop="deleteItem(item)"
-                class="p-2 -mt-2 -mr-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-400/10 transition-colors"
+            
+            <!-- Actions for Mobile -->
+            <div v-if="!isReadOnly" @click.stop>
+              <AsyncButton
+                v-if="!item.is_deleted"
+                :action="() => deleteItem(item)"
+                class="opacity-0 group-hover:opacity-100 !p-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:!bg-red-50 dark:hover:!bg-red-400/10 rounded-lg transition-all transform active:scale-95"
                 title="Delete item"
               >
                 <Trash2 class="w-4 h-4" />
-              </button>
+              </AsyncButton>
+              <AsyncButton
+                v-else
+                :action="() => reinstateItem(item)"
+                class="opacity-0 group-hover:opacity-100 !p-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:!bg-emerald-50 dark:hover:!bg-emerald-400/10 rounded-lg transition-all transform active:scale-95"
+                title="Reinstate item"
+              >
+                <RotateCcw class="w-4 h-4" />
+              </AsyncButton>
             </div>
           </div>
 
@@ -121,23 +139,30 @@
         <tr
           v-for="item in items"
           :key="item.id"
-          @click="navigateToItem(item.id)"
-          class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors cursor-pointer"
+          @click="!item.is_deleted && navigateToItem(item.id)"
+          :class="[
+            'group transition-colors',
+            item.is_deleted 
+              ? 'bg-red-50/80 dark:bg-red-950/30 border-l-4 border-l-red-500 dark:border-l-red-600 cursor-default' 
+              : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/30 cursor-pointer'
+          ]"
         >
-          <!-- First cell gets 'relative' for the highlight line -->
           <td class="px-6 py-4 relative">
-            <!-- Interactive left border highlight -->
-            <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div v-if="!item.is_deleted" class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             
             <div class="flex items-center gap-3">
-              <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 font-bold text-sm shadow-sm border border-teal-100 dark:border-teal-800/50 group-hover:scale-105 transition-transform">
+              <div :class="[
+                'flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl font-bold text-sm shadow-sm border group-hover:scale-105 transition-transform',
+                item.is_deleted ? 'bg-red-100 dark:bg-red-900/50 text-red-600 border-red-300 dark:border-red-700' : 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 border-teal-100 dark:border-teal-800/50'
+              ]">
                 {{ item.title?.charAt(0)?.toUpperCase() || 'I' }}
               </div>
               <div class="min-w-0">
-                <p class="font-bold text-slate-900 dark:text-white text-sm truncate" :title="item.title">
+                <p class="font-bold text-slate-900 dark:text-white text-sm truncate flex items-center gap-2" :title="item.title">
                   {{ item.title }}
+                  <span v-if="item.is_deleted" class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 uppercase tracking-widest border border-red-200 dark:border-red-800/50">Deleted</span>
                 </p>
-                <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider truncate">
+                <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider truncate mt-0.5">
                   ID: {{ item.id.slice(0, 8) }}
                 </p>
               </div>
@@ -160,15 +185,25 @@
             </span>
           </td>
 
+          <!-- Actions Column -->
           <td v-if="!isReadOnly" class="px-6 py-4 text-right">
             <div class="flex items-center justify-end" @click.stop>
-              <button
-                @click.stop="deleteItem(item)"
-                class="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95"
+              <AsyncButton
+                v-if="!item.is_deleted"
+                :action="() => deleteItem(item)"
+                class="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95 cursor-pointer"
                 title="Delete item"
               >
                 <Trash2 class="w-4 h-4" />
-              </button>
+              </AsyncButton>
+              <AsyncButton
+                v-else
+                :action="() => reinstateItem(item)"
+                class="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-400/10 rounded-lg transition-all transform active:scale-95 cursor-pointer"
+                title="Reinstate item"
+              >
+                <RotateCcw class="w-4 h-4" />
+              </AsyncButton>
             </div>
           </td>
         </tr>
@@ -188,17 +223,18 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { Plus, Trash2, Tag } from "lucide-vue-next"
+import { Plus, Trash2, Tag, RotateCcw } from "lucide-vue-next"
 
 import { useConfirm } from "@/composables/useConfirm"
 import { useToast } from "@/composables/useToast"
 import { useSearch } from "@/composables/useSearch"
 
-import BaseTable from "@/components/ui/BaseTable.vue"
+import BaseTable, { type TableFilter } from "@/components/ui/table/BaseTable.vue"
+import AsyncButton from "@/components/layout/AsyncButton.vue"
 import ItemCreateModal from "./ItemCreateModal.vue"
 
 import { itemService } from "../services/item.service"
-import type { Item } from "../types/item.types"
+import type { Item, ItemFilterParams } from "../types/item.types"
 
 // --- Logic ---
 const route = useRoute()
@@ -212,6 +248,9 @@ const { confirm } = useConfirm()
 const { showToast } = useToast()
 
 const items = ref<Item[]>([])
+const tableFilters = ref<TableFilter[]>([])
+const activeFilters = ref<ItemFilterParams>({ is_deleted: false })
+
 const isLoading = ref(true)
 const isCreateModalOpen = ref(false)
 
@@ -221,7 +260,6 @@ const totalItems = ref(0)
 
 const totalPages = computed(() => Math.max(1, Math.ceil(totalItems.value / itemsPerPage.value)))
 
-// Match exact column proportions dynamically based on read-only status
 const itemColumnClass = computed(() => (isReadOnly.value ? "w-[45%]" : "w-[40%]"))
 const skuColumnClass = computed(() => (isReadOnly.value ? "w-[30%]" : "w-[25%]"))
 const priceColumnClass = computed(() => (isReadOnly.value ? "w-[25%]" : "w-[20%]"))
@@ -235,9 +273,19 @@ const formatPrice = (priceInCents: number) => {
 
 const fetchItems = async (searchVal = searchQuery.value) => {
   try {
-    const data = await itemService.getAll(workspaceId, searchVal, currentPage.value, itemsPerPage.value)
+    const data = await itemService.getAll(
+      workspaceId, 
+      searchVal, 
+      currentPage.value, 
+      itemsPerPage.value,
+      activeFilters.value
+    )
     items.value = data.items || []
     totalItems.value = data.total || 0
+
+    if (data.filters?.length) {
+      tableFilters.value = data.filters
+    }
   } catch (err: any) {
     const errorMessage = 
         err.response?.data?.detail || 
@@ -250,6 +298,14 @@ const fetchItems = async (searchVal = searchQuery.value) => {
 
     showToast(displayMessage, "error")
   }
+}
+
+// Handlers
+const onFilterChange = async () => {
+  currentPage.value = 1
+  isLoading.value = true
+  await fetchItems()
+  isLoading.value = false
 }
 
 const onSearchTriggered = async (term: string) => {
@@ -293,17 +349,37 @@ const deleteItem = async (item: Item) => {
 
   try {
     await itemService.delete(workspaceId, item.id)
-    items.value = items.value.filter((i) => i.id !== item.id)
-    totalItems.value = Math.max(0, totalItems.value - 1)
+    await fetchItems()
     showToast("Item deleted successfully", "success")
     
-    // Auto-fetch if page is now empty but there are previous pages
     if (items.value.length === 0 && currentPage.value > 1) {
       prevPage()
     }
   } catch (error) {
     console.error(error)
     showToast("Failed to delete item", "error")
+    throw error
+  }
+}
+
+const reinstateItem = async (item: Item) => {
+  const confirmed = await confirm({
+    title: "Reinstate Item",
+    message: `Are you sure you want to reinstate "${item.title}" (SKU: ${item.sku})?`,
+    confirmText: "Reinstate",
+    cancelText: "Cancel",
+    variant: "primary"
+  })
+
+  if (!confirmed) return
+
+  try {
+    await itemService.update(workspaceId, item.id, { is_deleted: false })
+    await fetchItems()
+    showToast("Item reinstated successfully", "success")
+  } catch (error) {
+    showToast("Failed to reinstate item", "error")
+    throw error
   }
 }
 

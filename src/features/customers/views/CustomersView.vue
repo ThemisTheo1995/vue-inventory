@@ -76,13 +76,14 @@
               </span>
             </div>
             <div v-if="!isReadOnly" class="shrink-0">
-              <button
-                @click.stop="deleteCustomer(customer)"
-                class="p-2 -mr-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-400/10 transition-colors"
+              <AsyncButton
+                :action="() => deleteCustomer(customer)"
+                @click.stop
+                class="!p-2 -mr-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:!bg-red-50 dark:hover:!bg-red-400/10 transition-colors"
                 title="Archive customer"
               >
                 <Trash2 class="w-4 h-4" />
-              </button>
+              </AsyncButton>
             </div>
           </div>
         </div>
@@ -138,13 +139,13 @@
 
           <td v-if="!isReadOnly" class="px-6 py-4 text-right">
             <div class="flex items-center justify-end" @click.stop>
-              <button
-                @click.stop="deleteCustomer(customer)"
-                class="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95"
+              <AsyncButton
+                :action="() => deleteCustomer(customer)"
+                class="opacity-0 group-hover:opacity-100 !p-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:!bg-red-50 dark:hover:!bg-red-400/10 rounded-lg transition-all transform active:scale-95"
                 title="Archive customer"
               >
                 <Trash2 class="w-4 h-4" />
-              </button>
+              </AsyncButton>
             </div>
           </td>
         </tr>
@@ -166,11 +167,13 @@ import { computed, onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { Plus, Trash2, Mail } from "lucide-vue-next"
 
+import AsyncButton from "@/components/layout/AsyncButton.vue"
+
 import { useConfirm } from "@/composables/useConfirm"
 import { useToast } from "@/composables/useToast"
 import { useSearch } from "@/composables/useSearch"
 
-import BaseTable from "@/components/ui/BaseTable.vue"
+import BaseTable from "@/components/ui/table/BaseTable.vue"
 import CustomerCreateModal from "./CustomerCreateModal.vue"
 
 import { customerService } from "../services/customer.service"

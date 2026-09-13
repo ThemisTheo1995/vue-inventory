@@ -10,9 +10,9 @@
     </template>
 
     <form
-      id="edit-supplier-form"
+      ref="formRef"
       class="space-y-5"
-      @submit.prevent="handleSubmit"
+      @submit.prevent
     >
       <!-- Consolidated into a single Supplier Name input -->
       <div class="space-y-2">
@@ -71,26 +71,22 @@
                  bg-white dark:bg-slate-900
                  text-slate-700 dark:text-slate-300
                  hover:bg-slate-50 dark:hover:bg-slate-800
-                 px-4 py-2.5 font-semibold transition"
+                 px-4 py-2.5 font-semibold transition cursor-pointer"
         >
           Cancel
         </button>
 
-        <button
-          type="submit"
-          form="edit-supplier-form"
-          :disabled="isSubmitting"
+        <AsyncButton
+          :action="handleSubmit"
           class="flex-1 rounded-xl bg-slate-900 dark:bg-white
-                 text-white dark:text-slate-900
+                 text-white dark:text-slate-950
                  font-bold
                  px-4 py-2.5
                  hover:opacity-90
-                 disabled:opacity-60
-                 disabled:cursor-not-allowed
-                 transition"
+                 transition cursor-pointer flex items-center justify-center shadow-sm"
         >
-          {{ isSubmitting ? "Updating..." : "Save Changes" }}
-        </button>
+          Save Changes
+        </AsyncButton>
       </div>
     </template>
   </BaseModal>
@@ -101,6 +97,7 @@ import { ref, watch } from "vue"
 import { Edit2 } from "lucide-vue-next"
 
 import BaseModal from "@/components/ui/BaseModal.vue"
+import AsyncButton from "@/components/layout/AsyncButton.vue"
 import { supplierService } from "../services/supplier.service"
 import { useToast } from "@/composables/useToast"
 import { sanitizeEmail } from "@/utils/validation"
@@ -119,7 +116,7 @@ const emit = defineEmits<{
 }>()
 
 const { showToast } = useToast()
-const isSubmitting = ref(false)
+const formRef = ref<HTMLFormElement | null>(null)
 
 const form = ref({
   name: "",
@@ -139,9 +136,11 @@ watch(
 )
 
 const handleSubmit = async () => {
-  try {
-    isSubmitting.value = true
+  if (formRef.value && !formRef.value.reportValidity()) {
+    throw new Error("Validation failed")
+  }
 
+  try {
     const payload: SupplierUpdate = {
       name: form.value.name.trim(),
       email: form.value.email.trim() ? sanitizeEmail(form.value.email) : null
@@ -157,18 +156,19 @@ const handleSubmit = async () => {
     emit("updated", updatedSupplier)
     emit("close")
   } catch (error: any) {
-    const errorMessage = 
-        error.response?.data?.detail || 
-        error.message || 
-        "An unexpected error occurred"
+    if (error.message !== "Validation failed") {
+      const errorMessage = 
+          error.response?.data?.detail || 
+          error.message || 
+          "An unexpected error occurred"
 
-    const displayMessage = Array.isArray(errorMessage) 
-        ? errorMessage[0].msg 
-        : errorMessage
+      const displayMessage = Array.isArray(errorMessage) 
+          ? errorMessage[0].msg 
+          : errorMessage
 
-    showToast(displayMessage, "error")
-  } finally {
-    isSubmitting.value = false
+      showToast(displayMessage, "error")
+    }
+    throw error
   }
 }
 </script>

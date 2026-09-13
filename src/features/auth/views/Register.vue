@@ -27,9 +27,9 @@
         </div>
       </div>
       <div class="flex justify-between mt-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-        <button type="button" @click="jumpToStep(1)" class="hover:text-slate-600 dark:hover:text-slate-200">Profile</button>
-        <button type="button" @click="jumpToStep(2)" class="hover:text-slate-600 dark:hover:text-slate-200">Workspace</button>
-        <button type="button" @click="jumpToStep(3)" class="hover:text-slate-600 dark:hover:text-slate-200">Plan</button>
+        <button type="button" @click="jumpToStep(1)" class="hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">Profile</button>
+        <button type="button" @click="jumpToStep(2)" class="hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">Workspace</button>
+        <button type="button" @click="jumpToStep(3)" class="hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">Plan</button>
       </div>
     </div>
 
@@ -113,7 +113,7 @@
                     ]" 
                     placeholder="••••••••"
                   >
-                  <button type="button" @click="showPassword = !showPassword" class="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none">
+                  <button type="button" @click="showPassword = !showPassword" class="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none cursor-pointer">
                     <EyeOff v-if="showPassword" class="h-5 w-5" />
                     <Eye v-else class="h-5 w-5" />
                   </button>
@@ -136,7 +136,7 @@
                     ]" 
                     placeholder="••••••••"
                   >
-                  <button type="button" @click="showConfirmPassword = !showConfirmPassword" class="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none">
+                  <button type="button" @click="showConfirmPassword = !showConfirmPassword" class="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none cursor-pointer">
                     <EyeOff v-if="showConfirmPassword" class="h-5 w-5" />
                     <Eye v-else class="h-5 w-5" />
                   </button>
@@ -146,7 +146,7 @@
             </div>
 
             <div class="pt-4">
-              <button type="button" @click="handleNextStep" class="group w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-500/30 transition-all duration-200 ease-out active:scale-[0.98]">
+              <button type="button" @click="handleNextStep" class="group w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-500/30 transition-all duration-200 ease-out active:scale-[0.98] cursor-pointer">
                 Continue to Workspace 
                 <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
               </button>
@@ -194,10 +194,10 @@
             </div>
 
             <div class="pt-4 flex flex-col-reverse sm:flex-row gap-3">
-              <button type="button" @click="handleBackStep" class="w-full sm:w-1/3 flex justify-center items-center gap-2 py-3 px-4 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none transition-all duration-200 active:scale-[0.98]">
+              <button type="button" @click="handleBackStep" class="w-full sm:w-1/3 flex justify-center items-center gap-2 py-3 px-4 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none transition-all duration-200 active:scale-[0.98] cursor-pointer">
                 Back
               </button>
-              <button type="button" @click="handleWorkspaceStep" class="group w-full sm:w-2/3 flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-500/30 transition-all duration-200 ease-out active:scale-[0.98]">
+              <button type="button" @click="handleWorkspaceStep" class="group w-full sm:w-2/3 flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-500/30 transition-all duration-200 ease-out active:scale-[0.98] cursor-pointer">
                 Choose Plan 
                 <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
               </button>
@@ -209,13 +209,15 @@
             <BillingPlans v-model="form.plan" />
 
             <div class="pt-2 flex flex-col-reverse sm:flex-row gap-3">
-              <button type="button" @click="handleBackStep" class="w-full sm:w-1/3 flex justify-center items-center gap-2 py-3 px-4 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none transition-all duration-200 active:scale-[0.98]">
+              <button type="button" @click="handleBackStep" class="w-full sm:w-1/3 flex justify-center items-center gap-2 py-3 px-4 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none transition-all duration-200 active:scale-[0.98] cursor-pointer">
                 Back
               </button>
-              <button type="submit" :disabled="isLoading" class="w-full sm:w-2/3 flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-500/30 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 ease-out active:scale-[0.98]">
-                <Loader2 v-if="isLoading" class="w-5 h-5 animate-spin" />
-                <span v-else>Complete Registration</span>
-              </button>
+              <AsyncButton 
+                :action="handleSubmit" 
+                class="w-full sm:w-2/3 flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-500/30 transition-all duration-200 ease-out active:scale-[0.98]"
+              >
+                Complete Registration
+              </AsyncButton>
             </div>
           </div>
 
@@ -235,7 +237,8 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowRight, Loader2, User, Mail, Lock, Building2, Eye, EyeOff } from 'lucide-vue-next'
+import { ArrowRight, User, Mail, Lock, Building2, Eye, EyeOff } from 'lucide-vue-next'
+import AsyncButton from '@/components/layout/AsyncButton.vue'
 import BillingPlans from '@/features/settings/components/BillingPlans.vue'
 import { authService } from '../services/auth.service'
 import { validateAndFormatName, sanitizeEmail } from '@/utils/validation'
@@ -246,7 +249,6 @@ const router = useRouter()
 const { showToast } = useToast()
 
 const signupStep = ref(1)
-const isLoading = ref(false)
 const confirmPassword = ref('')
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
@@ -410,7 +412,6 @@ const handleSubmit = async () => {
     return
   }
 
-  isLoading.value = true
   try {
     const response = await authService.register(form)
     showToast('Registration successful! Welcome aboard.', 'success')
@@ -463,8 +464,7 @@ const handleSubmit = async () => {
     }
 
     showToast(displayMessage, "error");
-  } finally {
-    isLoading.value = false
+    throw error;
   }
 }
 </script>

@@ -9,7 +9,7 @@
       </p>
     </div>
 
-    <form @submit.prevent="handleSubmit" class="space-y-6">
+    <form @submit.prevent class="space-y-6">
       
       <!-- Email Input -->
       <div class="space-y-1.5">
@@ -49,7 +49,7 @@
             type="button" 
             @click="showPassword = !showPassword" 
             tabindex="-1"
-            class="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none focus:text-brand-500 transition-colors duration-200"
+            class="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none focus:text-brand-500 transition-colors duration-200 cursor-pointer"
             aria-label="Toggle password visibility"
           >
             <EyeOff v-if="showPassword" class="h-5 w-5" />
@@ -66,14 +66,12 @@
       </div>
 
       <div class="pt-2">
-        <button 
-          type="submit" 
-          :disabled="isLoading" 
-          class="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-500/30 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 ease-out active:scale-[0.98]"
+        <AsyncButton 
+          :action="handleSubmit" 
+          class="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-500/30 transition-all duration-200 ease-out active:scale-[0.98]"
         >
-          <Loader2 v-if="isLoading" class="w-5 h-5 animate-spin" />
-          <span v-else>Sign In</span>
-        </button>
+          Sign In
+        </AsyncButton>
       </div>
     </form>
 
@@ -89,14 +87,14 @@
 <script setup lang="ts">
 import { reactive, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-vue-next'
+import { Mail, Lock, Eye, EyeOff } from 'lucide-vue-next'
+import AsyncButton from '@/components/layout/AsyncButton.vue'
 import { authService } from '../services/auth.service'
 import { useToast } from '@/composables/useToast'
 
 const router = useRouter()
 const { showToast } = useToast()
 
-const isLoading = ref(false)
 const showPassword = ref(false)
 const loginForm = reactive({ email: '', password: '' })
 
@@ -121,7 +119,6 @@ onUnmounted(() => {
 })
 
 const handleSubmit = async () => {
-  isLoading.value = true
   try {
     const response = await authService.login(loginForm)
     showToast('Welcome back!', 'success')
@@ -133,8 +130,7 @@ const handleSubmit = async () => {
       'error', 
       'Authentication Failed'
     )
-  } finally {
-    isLoading.value = false
+    throw err
   }
 }
 </script>

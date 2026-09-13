@@ -1,3 +1,4 @@
+<!-- src/features/sell_orders/views/SellOrderEditModal.vue -->
 <template>
   <BaseModal
     :is-open="isOpen"
@@ -19,7 +20,7 @@
           <h3 class="text-sm font-black tracking-wide text-slate-900 dark:text-white">SO DETAILS</h3>
         </div>
 
-        <form @submit.prevent="updateHeader" class="grid grid-cols-1 md:grid-cols-4 gap-5 bg-slate-50/50 dark:bg-slate-900/30 p-5 sm:p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 shadow-sm items-end">
+        <form @submit.prevent class="grid grid-cols-1 md:grid-cols-4 gap-5 bg-slate-50/50 dark:bg-slate-900/30 p-5 sm:p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 shadow-sm items-end">
           
           <!-- Customer Autocomplete Search (50%) -->
           <div class="space-y-2 relative md:col-span-2" ref="customerContainerRef">
@@ -105,15 +106,15 @@
 
           <!-- Header Save (25%) -->
           <div class="md:col-span-1 flex flex-col justify-end w-full">
-            <button
-              type="submit"
-              :disabled="isSavingHeader || !headerForm.customer_id"
-              class="w-full flex items-center justify-center bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white px-4 py-3 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95 disabled:cursor-not-allowed"
+            <AsyncButton
+              :action="updateHeader"
+              :disabled="!headerForm.customer_id"
+              class="w-full flex items-center justify-center bg-brand-600 hover:bg-brand-700 disabled:bg-brand-400 text-white px-4 py-3 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95 disabled:cursor-not-allowed border-0 cursor-pointer"
               title="Save SO Details"
             >
               <Save class="w-4 h-4 mr-2" />
               Save SO
-            </button>
+            </AsyncButton>
           </div>
         </form>
       </div>
@@ -170,29 +171,22 @@
                 <div class="md:hidden flex justify-between items-center mb-2">
                   <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Product</span>
                   <div class="flex items-center gap-2">
-                    <button
+                    <AsyncButton
                       v-if="line.isDirty"
-                      type="button"
-                      @click="saveLineItem(index)"
-                      :disabled="line.isSaving || !line.item_id"
-                      class="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg border border-emerald-100 dark:border-emerald-800/50 shadow-sm active:scale-95 transition-all flex items-center justify-center disabled:opacity-50"
+                      :action="() => saveLineItem(index)"
+                      :disabled="!line.item_id"
+                      class="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg border border-emerald-100 dark:border-emerald-800/50 shadow-sm active:scale-95 transition-all flex items-center justify-center disabled:opacity-50 cursor-pointer"
                       title="Save Line"
                     >
-                      <Save v-if="!line.isSaving" class="w-4 h-4" />
-                      <svg v-else class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
-                        <path class="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      @click="removeLineItem(index)"
-                      :disabled="line.isSaving"
-                      class="text-slate-400 hover:text-red-500 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg border border-slate-200/60 dark:border-slate-700 shadow-sm active:scale-95 transition-all flex items-center justify-center disabled:opacity-50"
+                      <Save class="w-4 h-4" />
+                    </AsyncButton>
+                    <AsyncButton
+                      :action="() => removeLineItem(index)"
+                      class="text-slate-400 hover:text-red-500 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg border border-slate-200/60 dark:border-slate-700 shadow-sm active:scale-95 transition-all flex items-center justify-center disabled:opacity-50 cursor-pointer"
                       title="Remove row"
                     >
                       <Trash2 class="w-4 h-4" />
-                    </button>
+                    </AsyncButton>
                   </div>
                 </div>
 
@@ -295,30 +289,23 @@
 
               <!-- Desktop Actions (Save & Delete) -->
               <div class="hidden md:flex md:col-span-1 justify-center gap-1.5 items-center">
-                <button
+                <AsyncButton
                   v-if="line.isDirty"
-                  type="button"
-                  @click="saveLineItem(index)"
-                  :disabled="line.isSaving || !line.item_id"
-                  class="text-emerald-600 dark:text-emerald-400 p-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all disabled:opacity-50 active:scale-95"
+                  :action="() => saveLineItem(index)"
+                  :disabled="!line.item_id"
+                  class="text-emerald-600 dark:text-emerald-400 p-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all disabled:opacity-50 active:scale-95 border-0 cursor-pointer"
                   title="Save Line"
                 >
-                  <Save v-if="!line.isSaving" class="w-4 h-4" />
-                  <svg v-else class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
-                    <path class="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                </button>
+                  <Save class="w-4 h-4" />
+                </AsyncButton>
                 
-                <button
-                  type="button"
-                  @click="removeLineItem(index)"
-                  :disabled="line.isSaving"
-                  class="text-slate-300 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 active:scale-95 disabled:opacity-50"
+                <AsyncButton
+                  :action="() => removeLineItem(index)"
+                  class="text-slate-300 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 active:scale-95 disabled:opacity-50 border-0 cursor-pointer"
                   title="Remove row"
                 >
                   <Trash2 class="w-4 h-4" />
-                </button>
+                </AsyncButton>
               </div>
 
             </div>
@@ -345,6 +332,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from "vue"
 import { Edit2, Plus, Trash2, X, User, PackageOpen, Save } from "lucide-vue-next"
 import BaseModal from "@/components/ui/BaseModal.vue"
+import AsyncButton from "@/components/layout/AsyncButton.vue"
 import { useToast } from "@/composables/useToast"
 import { useConfirm } from "@/composables/useConfirm"
 import { sellOrderService } from "../services/sell_order.service"
@@ -373,7 +361,6 @@ const CURRENCY_SYMBOL = "£"
 const LOCALE = "en-GB"
 
 // Header State
-const isSavingHeader = ref(false)
 const customerContainerRef = ref<HTMLElement | null>(null)
 const customers = ref<Customer[]>([])
 const customerSearchInput = ref("")
@@ -522,11 +509,10 @@ const updateHeader = async () => {
   if (!props.so) return
   if (!headerForm.value.customer_id) {
     showToast("Customer selection is required", "error")
-    return
+    throw new Error("Customer selection is required")
   }
 
   try {
-    isSavingHeader.value = true
     await sellOrderService.update(props.workspaceId, props.so.id, {
       customer_id: headerForm.value.customer_id,
       so_number: headerForm.value.so_number.trim().toUpperCase()
@@ -544,8 +530,7 @@ const updateHeader = async () => {
         : errorMessage
 
     showToast(displayMessage, "error")
-  } finally {
-    isSavingHeader.value = false
+    throw error
   }
 }
 
@@ -674,7 +659,6 @@ const saveLineItem = async (index: number) => {
   if (!props.so || !line || !line.item_id) return
 
   try {
-    line.isSaving = true
     const payload = {
       item_id: line.item_id,
       quantity: line.quantity,
@@ -693,7 +677,6 @@ const saveLineItem = async (index: number) => {
     line.isDirty = false
     emit("updated")
   } catch (error: any) {
-
     const errorMessage = 
         error.response?.data?.detail || 
         error.message || 
@@ -704,8 +687,7 @@ const saveLineItem = async (index: number) => {
         : errorMessage
 
     showToast(displayMessage, "error")
-  } finally {
-    line.isSaving = false
+    throw error
   }
 }
 
@@ -724,7 +706,6 @@ const removeLineItem = async (index: number) => {
     if (!isConfirmed) return
 
     try {
-      line.isSaving = true
       await sellOrderService.removeLine(props.workspaceId, props.so.id, line.id)
       showToast("Line removed successfully", "success")
       emit("updated")
@@ -739,8 +720,7 @@ const removeLineItem = async (index: number) => {
         : errorMessage
 
       showToast(displayMessage, "error")
-      line.isSaving = false
-      return
+      throw error
     }
   }
 

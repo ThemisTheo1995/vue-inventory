@@ -1,3 +1,4 @@
+<!-- src/features/items/views/EditItemModal.vue -->
 <template>
   <BaseModal
     :is-open="isOpen"
@@ -12,7 +13,7 @@
     <form
       id="edit-item-form"
       class="space-y-5"
-      @submit.prevent="handleSubmit"
+      @submit.prevent
     >
       <!-- Item Title (Full Width) -->
       <div class="space-y-2">
@@ -106,26 +107,22 @@
                  bg-white dark:bg-slate-900
                  text-slate-700 dark:text-slate-300
                  hover:bg-slate-50 dark:hover:bg-slate-800
-                 px-4 py-2.5 font-semibold transition"
+                 px-4 py-2.5 font-semibold transition cursor-pointer"
         >
           Cancel
         </button>
 
-        <button
-          type="submit"
-          form="edit-item-form"
-          :disabled="isSubmitting"
+        <AsyncButton
+          :action="handleSubmit"
           class="flex-1 rounded-xl bg-slate-900 dark:bg-white
                  text-white dark:text-slate-900
                  font-bold
                  px-4 py-2.5
                  hover:opacity-90
-                 disabled:opacity-60
-                 disabled:cursor-not-allowed
-                 transition"
+                 transition cursor-pointer"
         >
-          {{ isSubmitting ? "Saving..." : "Save Changes" }}
-        </button>
+          Save Changes
+        </AsyncButton>
       </div>
     </template>
   </BaseModal>
@@ -136,6 +133,7 @@ import { ref, watch } from "vue"
 import { Edit2 } from "lucide-vue-next"
 
 import BaseModal from "@/components/ui/BaseModal.vue"
+import AsyncButton from "@/components/layout/AsyncButton.vue"
 import { itemService } from "../services/item.service"
 import { useToast } from "@/composables/useToast"
 import { priceFormatter } from "@/utils/priceFormatter"
@@ -154,8 +152,6 @@ const emit = defineEmits<{
 }>()
 
 const { showToast } = useToast()
-
-const isSubmitting = ref(false)
 
 // Configured local currency constant
 const CURRENCY_SYMBOL = "£"
@@ -202,19 +198,17 @@ const handleSubmit = async () => {
 
   if (!trimmedTitle) {
     showToast("Item Title is required", "error")
-    return
+    throw new Error("Item Title is required")
   }
 
   if (!trimmedSku) {
     showToast("SKU is required", "error")
-    return
+    throw new Error("SKU is required")
   }
 
   const basePriceInCents = priceFormatter.toCents(displayPrice.value)
 
   try {
-    isSubmitting.value = true
-
     const payload = {
       title: trimmedTitle,
       sku: trimmedSku,
@@ -242,8 +236,7 @@ const handleSubmit = async () => {
         : errorMessage
 
     showToast(displayMessage, "error")
-  } finally {
-    isSubmitting.value = false
+    throw error
   }
 }
 </script>

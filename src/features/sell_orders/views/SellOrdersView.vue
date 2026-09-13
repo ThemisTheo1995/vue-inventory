@@ -15,7 +15,7 @@
       <div v-if="!isReadOnly" class="flex items-center shrink-0">
         <button
           @click="isCreateModalOpen = true"
-          class="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-sm overflow-hidden shadow-md hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 transition-all duration-200"
+          class="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-sm overflow-hidden shadow-md hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 transition-all duration-200 cursor-pointer"
         >
           <div class="absolute inset-0 bg-white/20 dark:bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
           <Plus class="w-4 h-4 relative z-10" />
@@ -87,33 +87,33 @@
               </p>
             </div>
             <!-- Dynamic Actions -->
-            <div v-if="!isReadOnly" class="flex items-center gap-1 -mr-2">
-              <button
+            <div v-if="!isReadOnly" class="flex items-center gap-1 -mr-2" @click.stop>
+              <AsyncButton
                 v-if="so.status === 'DRAFT'"
-                @click.stop="updateStatus(so, 'CONFIRMED')"
-                class="p-2 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
+                :action="() => handleAction(so.id, () => updateStatus(so, 'CONFIRMED'))"
+                class="p-2 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors border-0 cursor-pointer flex items-center justify-center bg-transparent"
                 title="Confirm Order"
               >
                 <Send class="w-4 h-4" />
-              </button>
+              </AsyncButton>
               
-              <button
+              <AsyncButton
                 v-if="so.status === 'CONFIRMED'"
-                @click.stop="updateStatus(so, 'FULLFILLED')"
-                class="p-2 text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
+                :action="() => handleAction(so.id, () => updateStatus(so, 'FULLFILLED'))"
+                class="p-2 text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors border-0 cursor-pointer flex items-center justify-center bg-transparent"
                 title="Fulfill Order"
               >
                 <CheckCircle class="w-4 h-4" />
-              </button>
+              </AsyncButton>
 
-              <button
+              <AsyncButton
                 v-if="so.status === 'DRAFT' || so.status === 'CANCELLED'"
-                @click.stop="deleteSO(so)"
-                class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-400/10 transition-colors"
+                :action="() => handleAction(so.id, () => deleteSO(so))"
+                class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-400/10 transition-colors border-0 cursor-pointer flex items-center justify-center bg-transparent"
                 title="Delete"
               >
                 <Trash2 class="w-4 h-4" />
-              </button>
+              </AsyncButton>
             </div>
           </div>
         </div>
@@ -193,33 +193,36 @@
 
           <td v-if="!isReadOnly" class="px-6 py-4 text-right">
             <div class="flex items-center justify-end" @click.stop>
-              <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <button
+              <div 
+                class="flex items-center gap-1 transition-opacity duration-200"
+                :class="{ 'opacity-0 group-hover:opacity-100': !loadingRows[so.id] }"
+              >
+                <AsyncButton
                   v-if="so.status === 'DRAFT'"
-                  @click.stop="updateStatus(so, 'CONFIRMED')"
-                  class="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all transform active:scale-95"
+                  :action="() => handleAction(so.id, () => updateStatus(so, 'CONFIRMED'))"
+                  class="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all transform active:scale-95 border-0 cursor-pointer flex items-center justify-center bg-transparent"
                   title="Confirm Order"
                 >
                   <Send class="w-4 h-4" />
-                </button>
+                </AsyncButton>
                 
-                <button
+                <AsyncButton
                   v-if="so.status === 'CONFIRMED'"
-                  @click.stop="updateStatus(so, 'FULLFILLED')"
-                  class="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all transform active:scale-95"
+                  :action="() => handleAction(so.id, () => updateStatus(so, 'FULLFILLED'))"
+                  class="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all transform active:scale-95 border-0 cursor-pointer flex items-center justify-center bg-transparent"
                   title="Fulfill Order"
                 >
                   <CheckCircle class="w-4 h-4" />
-                </button>
+                </AsyncButton>
 
-                <button
+                <AsyncButton
                   v-if="so.status === 'DRAFT' || so.status === 'CANCELLED'"
-                  @click.stop="deleteSO(so)"
-                  class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95"
+                  :action="() => handleAction(so.id, () => deleteSO(so))"
+                  class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95 border-0 cursor-pointer flex items-center justify-center bg-transparent"
                   title="Delete sell order"
                 >
                   <Trash2 class="w-4 h-4" />
-                </button>
+                </AsyncButton>
               </div>
             </div>
           </td>
@@ -248,7 +251,8 @@ import { useConfirm } from "@/composables/useConfirm"
 import { useToast } from "@/composables/useToast"
 import { useSearch } from "@/composables/useSearch"
 
-import BaseTable from "@/components/ui/BaseTable.vue"
+import BaseTable from "@/components/ui/table/BaseTable.vue"
+import AsyncButton from "@/components/layout/AsyncButton.vue"
 import SellOrderCreateModal from "./SellOrderCreateModal.vue"
 
 import { sellOrderService } from "../services/sell_order.service"
@@ -289,6 +293,8 @@ const { showToast } = useToast()
 const sellOrders = ref<SellOrder[]>([])
 const isLoading = ref(true)
 const isCreateModalOpen = ref(false)
+
+const loadingRows = ref<Record<string, boolean>>({})
 
 const currentPage = ref(1)
 const itemsPerPage = ref(20)
@@ -367,6 +373,15 @@ const navigateToSO = (id: string) => {
   router.push({ name: "sell-order-details", params: { workspaceId, id } })
 }
 
+const handleAction = async (soId: string, actionFn: () => Promise<any>) => {
+  loadingRows.value[soId] = true
+  try {
+    await actionFn()
+  } finally {
+    loadingRows.value[soId] = false
+  }
+}
+
 const updateStatus = async (so: SellOrder, nextStatus: SellOrderStatus) => {
   const isTransitionConfirmed = await confirm({
     title: `Transition to ${nextStatus}`,
@@ -393,6 +408,7 @@ const updateStatus = async (so: SellOrder, nextStatus: SellOrderStatus) => {
         : errorMessage
 
     showToast(displayMessage, "error")
+    throw err
   }
 }
 
@@ -416,9 +432,10 @@ const deleteSO = async (so: SellOrder) => {
     if (sellOrders.value.length === 0 && currentPage.value > 1) {
       prevPage()
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error(error)
     showToast("Failed to delete sell order", "error")
+    throw error
   }
 }
 
