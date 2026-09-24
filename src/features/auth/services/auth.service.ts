@@ -35,6 +35,7 @@ export interface AuthUser {
 
 export interface AuthResponse {
   workspace_id: string
+  is_whitelisted?: boolean
 }
 
 export interface OnboardPayload {
@@ -45,6 +46,21 @@ export interface OnboardPayload {
 }
 
 export const authService = {
+
+  async verifyEmail(token: string) {
+    const response = await apiFetch(`/auth/verify?token=${encodeURIComponent(token)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.detail || 'Email verification failed.')
+    }
+
+    return await response.json()
+  },
+
   async register(payload: RegisterPayload): Promise<AuthResponse> {
     const response = await apiFetch('/auth/register', {
       method: 'POST',

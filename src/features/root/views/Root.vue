@@ -7,17 +7,9 @@
         
         <!-- Logo -->
         <div class="flex items-center gap-3 cursor-pointer group">
-          <div class="relative w-10 h-10 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-all duration-300">
-            <div class="absolute inset-0 bg-white/20 rounded-xl rounded-b-none h-1/2"></div>
-            <svg class="w-5 h-5 text-white relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M2 12L12 2L22 12"/>
-              <path d="M12 2v20"/>
-              <path d="M2 12h20"/>
-              <circle cx="12" cy="12" r="3" fill="currentColor"/>
-            </svg>
-          </div>
+          
           <span class="text-2xl font-black tracking-tighter text-slate-900 dark:text-white">
-            SyncFlow<span class="text-brand-600">.</span>
+            Aegis<span class="text-brand-600">.</span>
           </span>
         </div>
         
@@ -75,7 +67,7 @@
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
             </div>
-            SyncFlow Engine v1.0 is now live
+            Aegis Engine v1.0 is now live
           </div>
         </div>
 
@@ -394,7 +386,7 @@ const applyTheme = (t: Theme) => {
 
 const setTheme = (t: Theme) => {
   theme.value = t
-  localStorage.setItem('syncflow-theme', t)
+  localStorage.setItem('aegis-theme', t)
   applyTheme(t)
 }
 
@@ -405,7 +397,7 @@ const handleSystemThemeChange = () => {
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
-  const savedTheme = localStorage.getItem('syncflow-theme') as Theme | null
+  const savedTheme = localStorage.getItem('aegis-theme') as Theme | null
   if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
     theme.value = savedTheme
   }

@@ -21,7 +21,7 @@
           v-if="!collapsed"
           class="text-xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-slate-900 to-slate-500 dark:from-white dark:to-slate-400 whitespace-nowrap"
         >
-          SyncFlow<span class="text-brand-500">.</span>
+          Aegis<span class="text-brand-500">.</span>
         </h2>
 
         <h2

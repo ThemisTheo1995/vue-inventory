@@ -20,7 +20,7 @@
             <Menu class="w-6 h-6" />
           </button>
           <h2 class="text-xl font-black tracking-tighter text-slate-900 dark:text-white">
-            SyncFlow<span class="text-brand-500">.</span>
+            Aegis<span class="text-brand-500">.</span>
           </h2>
         </div>
 

@@ -10,7 +10,7 @@
       <!-- Header / Branding -->
       <div class="p-6 flex items-center justify-between">
         <h2 class="text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-slate-900 to-slate-500 dark:from-white dark:to-slate-400">
-          SyncFlow<span class="text-brand-500">.</span>
+          Aegis<span class="text-brand-500">.</span>
         </h2>
         <button @click="$emit('close')" class="p-2 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-all">
           <X class="w-5 h-5" />

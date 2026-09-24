@@ -7,7 +7,7 @@
       :class="[
         'p-4 border rounded-xl cursor-pointer transition-all flex justify-between items-center gap-4 select-none', 
         modelValue === plan.id 
-          ? 'border-brand-600 bg-brand-50/30 dark:bg-brand-950/20 ring-2 ring-brand-500/10' 
+          ? 'border-brand-600 bg-brand-50/30 dark:bg-brand-900 ring-2 ring-brand-500/10' 
           : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
       ]"
     >

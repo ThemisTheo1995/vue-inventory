@@ -28,6 +28,12 @@ export const authRoutes: RouteRecordRaw = {
       name: 'auth-onboard',
       component: () => import('./views/Onboard.vue'),
       meta: { public: true }
+    },
+    {
+      path: 'verify',
+      name: 'auth-verify',
+      component: () => import('./views/Verify.vue'),
+      meta: { public: true }
     }
   ]
 }
