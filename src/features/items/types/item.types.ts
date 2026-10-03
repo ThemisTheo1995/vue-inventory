@@ -28,6 +28,7 @@ export interface Item {
   sku: string;
   title: string;
   base_price: number | null; 
+  barcode_id: string | null;
   is_deleted?: boolean;
   created_at?: string;
   updated_at?: string;
