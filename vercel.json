@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://fast-inventory.fastapicloud.dev/$1"
+      "destination": "https://ki1evvl660.execute-api.eu-west-1.amazonaws.com/$1"
     },
     {
       "source": "/(.*)",

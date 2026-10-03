@@ -45,6 +45,19 @@ export interface OnboardPayload {
   password: string
 }
 
+export interface RequestPasswordResetPayload {
+  email: string
+}
+
+export interface ResetPasswordPayload {
+  token: string
+  new_password: string
+}
+
+export interface MessageResponse {
+  detail: string
+}
+
 export const authService = {
 
   async verifyEmail(token: string) {
@@ -118,6 +131,36 @@ export const authService = {
     if (!response.ok) {
       throw new Error('Session expired')
     }
+  },
+
+  async requestPasswordReset(email: string): Promise<MessageResponse> {
+    const response = await apiFetch('/auth/request-password-reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.detail || 'Failed to request password reset.')
+    }
+
+    return await response.json()
+  },
+
+  async resetPassword(payload: ResetPasswordPayload): Promise<MessageResponse> {
+    const response = await apiFetch('/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.detail || 'Failed to reset password.')
+    }
+
+    return await response.json()
   },
 
   async getCurrentUser(explicitWorkspaceId?: string): Promise<AuthUser> {

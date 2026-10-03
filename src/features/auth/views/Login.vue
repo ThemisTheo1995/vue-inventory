@@ -1,3 +1,4 @@
+<!-- src/features/auth/views/Login.vue -->
 <template>
   <div class="w-full">
     <div class="mb-8">
@@ -57,9 +58,13 @@
         </div>
         
         <div class="flex justify-end pt-1">
-          <a href="#" tabindex="-1" class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors duration-200">
+          <RouterLink 
+            :to="{ name: 'auth-request-password' }" 
+            tabindex="-1"
+            class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors duration-200"
+          >
             Forgot your password?
-          </a>
+          </RouterLink>
         </div>
       </div>
 

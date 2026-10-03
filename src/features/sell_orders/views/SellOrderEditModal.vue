@@ -36,7 +36,7 @@
                 @input="onCustomerSearchInput"
                 @focus="onCustomerInputFocus"
                 type="text"
-                placeholder="Search customers by name..."
+                placeholder="Type at least 3 letters of a customer"
                 required
                 class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 pl-11 pr-10 py-3 text-sm font-medium text-slate-900 dark:text-white shadow-sm outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition duration-200 ease-out placeholder:font-normal placeholder:text-slate-400"
               />
