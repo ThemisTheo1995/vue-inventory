@@ -29,7 +29,6 @@
                 :class="[inputBaseClass, editStates.first_name ? inputEditClass : inputReadClass]" 
               />
               <button 
-                v-if="!isReadOnly"
                 @click="toggleEdit('first_name')"
                 :class="[btnBaseClass, editStates.first_name ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200']"
               >
@@ -50,7 +49,6 @@
                 :class="[inputBaseClass, editStates.last_name ? inputEditClass : inputReadClass]" 
               />
               <button 
-                v-if="!isReadOnly"
                 @click="toggleEdit('last_name')"
                 :class="[btnBaseClass, editStates.last_name ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200']"
               >
@@ -73,7 +71,6 @@
               :class="[inputBaseClass, editStates.email ? inputEditClass : inputReadClass]" 
             />
             <button 
-              v-if="!isReadOnly" 
               @click="toggleEdit('email')" 
               :class="[btnBaseClass, editStates.email ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200']"
             >
@@ -95,12 +92,19 @@ import { Pencil, Check } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
 
 import { useAuthStore } from '@/features/auth/services/auth.store'
-import { userService } from '../services/user.services' 
+import { userService } from '../services/user.services'
+import { authService } from '@/features/auth/services/auth.service'
 import type { User, UserUpdate } from '../types/user.types'
+import { useToast } from "@/composables/useToast"
+import {
+  validateAndFormatName,
+  validateEmail,
+} from '@/utils/validation'
 
 const route = useRoute()
 const authStore = useAuthStore()
 const { user: currentUser } = storeToRefs(authStore)
+const { showToast } = useToast()
 
 const isLoading = ref(true)
 const isReadOnly = computed(() => currentUser.value?.role === 'read_only')
@@ -134,29 +138,86 @@ watchEffect(() => {
 })
 
 const toggleEdit = async (field: EditableField) => {
-  if (isReadOnly.value || !currentUser.value) return
+  if (!currentUser.value) return
 
-  if (editStates.value[field]) {
-    try {
-      const workspaceId = (route.params.workspaceId as string) || currentUser.value.workspace_id
-
-      if (!workspaceId) throw new Error('No workspace context found')
-
-      const updatedUser = await userService.updateUser(workspaceId, {
-        [field]: form.value[field],
-      })
-
-      authStore.updateUserData(updatedUser)
-    } catch (error) {
-      console.error(`Failed to update ${field}:`, error)
-      return
-    }
+  if (!editStates.value[field]) {
+    editStates.value[field] = true
+    return
   }
 
-  editStates.value[field] = !editStates.value[field]
+  try {
+    const workspaceId =
+      (route.params.workspaceId as string) ||
+      currentUser.value.workspace_id
+
+    if (!workspaceId) {
+      throw new Error('No workspace context found')
+    }
+
+    let value = form.value[field]
+
+    // Field-specific validation
+    if (field === 'first_name' || field === 'last_name') {
+      const isLastName = field === 'last_name'
+      const result = validateAndFormatName(String(value ?? ''), isLastName)
+      if (!result.valid) {
+        showToast(result.error!, 'error')
+        return
+      }
+      value = result.formatted
+    }
+
+    // SPECIAL WORKFLOW: Email Change
+    if (field === 'email') {
+      const result = validateEmail(String(value ?? ''))
+      if (!result.valid) {
+        showToast(result.error!, 'error')
+        return
+      }
+
+      // If user didn't change the value, close edit mode without API call
+      if (value === currentUser.value.email) {
+        editStates.value.email = false
+        return
+      }
+
+      // Request email update via verification link
+      const res = await authService.requestEmailChange(result.formatted)
+      
+      // Revert local field visually until confirmed via email
+      form.value.email = currentUser.value.email 
+      editStates.value.email = false
+
+      showToast(
+        `Verification link sent to ${result.formatted}. Complete the process within 5 minutes.`,
+        'info',
+        'Email Change Requested',
+        300000
+      )
+      return
+    }
+    // Regular field update (e.g. name fields)
+    const updatedUser = await userService.updateUser(workspaceId, {
+      [field]: value,
+    })
+
+    form.value[field] = value as never
+    authStore.updateUserData(updatedUser)
+
+    editStates.value[field] = false
+    showToast('Profile updated successfully.', 'success')
+  } catch (error: any) {
+    const responseData = error.response?.data
+    const errorMessage =
+      responseData?.errors?.[0]?.message ||
+      responseData?.detail ||
+      error.message ||
+      'An unexpected error occurred'
+
+    showToast(errorMessage, 'error')
+  }
 }
 
-// Styling Classes
 const inputBaseClass = 'w-full rounded-xl border px-4 py-3 pr-12 outline-none transition-all duration-200 text-sm font-medium placeholder-slate-400/80 dark:placeholder-slate-500'
 const inputEditClass = 'border-slate-300 dark:border-slate-600 bg-transparent focus:ring-4 focus:ring-slate-500/5 focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white shadow-sm'
 const inputReadClass = 'border-slate-100 dark:border-slate-800/40 bg-slate-50/50 dark:bg-slate-900/30 text-slate-500 dark:text-slate-400 cursor-not-allowed select-none'

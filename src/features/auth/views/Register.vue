@@ -246,7 +246,10 @@
 
             <!-- STEP 3: PLAN SELECTION -->
             <div v-else-if="signupStep === 3" class="space-y-6">
-              <BillingPlans v-model="form.plan" />
+              <BillingPlans
+                v-model="form.plan"
+                value-key="name"
+              />
 
               <div class="pt-2 flex flex-col-reverse sm:flex-row gap-3">
                 <button type="button" @click="handleBackStep" class="w-full sm:w-1/3 flex justify-center items-center gap-2 py-3 px-4 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none transition-all duration-200 active:scale-[0.98] cursor-pointer">
@@ -280,7 +283,7 @@ import { ref, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowRight, ArrowLeft, User, Mail, MailCheck, Lock, Building2, Eye, EyeOff, CheckCircle2 } from 'lucide-vue-next'
 import AsyncButton from '@/components/layout/AsyncButton.vue'
-import BillingPlans from '@/features/settings/components/BillingPlans.vue'
+import BillingPlans from '@/features/pricing/components/BillingPlans.vue'
 import { authService } from '../services/auth.service'
 import { validateAndFormatName, sanitizeEmail } from '@/utils/validation'
 import { useToast } from '@/composables/useToast'

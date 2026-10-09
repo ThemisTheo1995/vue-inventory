@@ -13,11 +13,14 @@
           <button
             @click="isCreateModalOpen = true"
             v-tooltip="'New Purchase Order'"
-            class="group relative inline-flex items-center justify-center gap-2 p-2.5 sm:px-5 sm:py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-sm overflow-hidden shadow-md hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 transition-all duration-200"
+            aria-label="New Purchase Order"
+            class="group relative inline-flex items-center justify-center p-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 shadow-md hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 transition-all duration-200"
           >
-            <div class="absolute inset-0 bg-white/20 dark:bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
-            <Plus class="w-4 h-4 relative z-10 shrink-0" />
-            <span class="hidden sm:inline relative z-10">New Purchase Order</span>
+            <div
+              class="absolute inset-0 rounded-xl bg-white/20 dark:bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"
+            ></div>
+
+            <Plus class="w-5 h-5 relative z-10 shrink-0" />
           </button>
         </div>
       </div>

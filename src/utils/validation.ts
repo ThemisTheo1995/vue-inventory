@@ -1,8 +1,6 @@
-// src/utils/validation.ts
-
 /**
  * Validates and formats names.
- * Matches backend: 
+ * Matches backend:
  * 1. No numbers allowed.
  * 2. Min length 2, Max 50.
  * 3. Formats: "mary-jane" -> "Mary-Jane", "van der beek" -> "Van Der Beek"
@@ -39,12 +37,51 @@ export const sanitizeEmail = (email: string): string => {
 };
 
 /**
+ * Validates email format.
+ */
+export const validateEmail = (email: string) => {
+  const sanitized = sanitizeEmail(email);
+
+  if (!sanitized) {
+    return {
+      valid: false,
+      error: "Email address is required",
+      formatted: sanitized,
+    };
+  }
+
+  if (sanitized.length > 254) {
+    return {
+      valid: false,
+      error: "Email address must not exceed 254 characters",
+      formatted: sanitized,
+    };
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(sanitized)) {
+    return {
+      valid: false,
+      error: "Please enter a valid email address",
+      formatted: sanitized,
+    };
+  }
+
+  return {
+    valid: true,
+    error: null,
+    formatted: sanitized,
+  };
+};
+
+/**
  * Main validation function used by modals
  */
-export const validateCustomerData = (data: { 
-  first_name: string; 
+export const validateCustomerData = (data: {
+  first_name: string;
   last_name: string | null | undefined;
-  email: string 
+  email: string;
 }) => {
   const errors: string[] = [];
 
@@ -61,14 +98,18 @@ export const validateCustomerData = (data: {
     if (!ln.valid) errors.push(ln.error!);
   }
 
+  // Validate Email
+  const email = validateEmail(data.email);
+  if (!email.valid) errors.push(email.error!);
+
   return {
     isValid: errors.length === 0,
     errors,
     sanitizedData: {
       first_name: fn.formatted,
-      // 2. Explicitly ensure this is a string or null (never undefined)
+      // Explicitly ensure this is a string or null (never undefined)
       last_name: rawLastName ? validateAndFormatName(rawLastName, true).formatted : null,
-      email: sanitizeEmail(data.email)
-    }
+      email: email.formatted,
+    },
   };
 };

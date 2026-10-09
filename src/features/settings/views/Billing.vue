@@ -1,56 +1,114 @@
 <template>
   <div class="space-y-8 pb-12 animate-slide-up-fade">
     
+    <!-- Metrics Section -->
     <div class="bg-white dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700/70 rounded-2xl p-6 shadow-sm space-y-6">
       <div>
         <h3 class="font-black text-lg text-slate-900 dark:text-white tracking-tight">Plan Metrics & Usage</h3>
         <p class="text-xs font-medium text-slate-400 dark:text-slate-500 mt-0.5">Real-time status tracking for your current billing cycle.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Usage Skeleton Loading -->
+      <div v-if="isLoadingUsage" class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
+        <div v-for="i in 2" :key="'usage-skel-' + i" class="space-y-2">
+          <div class="h-4 w-32 bg-slate-200 dark:bg-slate-700 rounded"></div>
+          <div class="h-2.5 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+          <div class="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded"></div>
+        </div>
+      </div>
+
+      <!-- Usage Metrics Loaded -->
+      <div v-else-if="usage" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Listings Usage (Handles missing backend metrics gracefully) -->
         <div class="space-y-2">
           <div class="flex justify-between text-sm">
             <span class="font-bold text-slate-600 dark:text-slate-300">Listings Capacity</span>
-            <span class="font-black text-slate-900 dark:text-white">842 <span class="text-slate-400 font-medium">/ 1,000</span></span>
+            <span class="font-black text-slate-900 dark:text-white">
+              {{ listingsUsed.toLocaleString() }} 
+              <span class="text-slate-400 font-medium">/ {{ listingsTotal > 0 ? listingsTotal.toLocaleString() : 'N/A' }}</span>
+            </span>
           </div>
           <div class="h-2.5 rounded-full bg-slate-100 dark:bg-slate-700/60 overflow-hidden p-[2px]">
             <div 
-              :style="{ width: isMounted ? '84.2%' : '0%' }"
+              :style="{ width: isMounted ? `${listingsPct}%` : '0%' }"
               class="h-full bg-brand-500 rounded-full shadow-sm transition-all duration-[1200ms] ease-out"
             ></div>
           </div>
           <div class="flex justify-between text-[11px] font-medium text-slate-400">
-            <span>84.2% consumed</span>
-            <span>158 remaining</span>
+            <span>{{ listingsPct }}% consumed</span>
+            <span>{{ listingsRemaining.toLocaleString() }} remaining</span>
           </div>
         </div>
 
+        <!-- API Allowance Usage -->
         <div class="space-y-2">
           <div class="flex justify-between text-sm">
             <span class="font-bold text-slate-600 dark:text-slate-300">API Call Allowances</span>
-            <span class="font-black text-slate-900 dark:text-white">72,400 <span class="text-slate-400 font-medium">/ 100,000</span></span>
+            <span class="font-black text-slate-900 dark:text-white">
+              {{ apiUsed.toLocaleString() }} 
+              <span class="text-slate-400 font-medium">/ {{ apiTotal.toLocaleString() }}</span>
+            </span>
           </div>
           <div class="h-2.5 rounded-full bg-slate-100 dark:bg-slate-700/60 overflow-hidden p-[2px]">
             <div 
-              :style="{ width: isMounted ? '72.4%' : '0%' }"
+              :style="{ width: isMounted ? `${apiPct}%` : '0%' }"
               class="h-full bg-emerald-500 rounded-full shadow-sm transition-all duration-[1200ms] ease-out"
             ></div>
           </div>
           <div class="flex justify-between text-[11px] font-medium text-slate-400">
-            <span>72.4% consumed</span>
-            <span>27,600 remaining</span>
+            <span>{{ apiPct }}% consumed</span>
+            <span>{{ apiRemaining.toLocaleString() }} remaining</span>
           </div>
         </div>
+
       </div>
     </div>
 
+    <!-- Plans Grid Section -->
     <div class="space-y-4">
       <div>
         <h3 class="font-black text-xl text-slate-900 dark:text-white tracking-tight">Available Subscription Plans</h3>
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Scale your pipeline allowances seamlessly as your marketplace store expands.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <!-- Loading State -->
+      <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div v-for="i in 4" :key="'skeleton-' + i" class="rounded-2xl p-6 flex flex-col justify-between border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/40 animate-pulse h-[360px]">
+          <div class="space-y-4">
+            <div class="flex justify-between">
+              <div class="space-y-2">
+                <div class="h-5 w-24 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                <div class="h-3 w-32 bg-slate-200 dark:bg-slate-700 rounded"></div>
+              </div>
+              <div class="h-5 w-5 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+            </div>
+            <div class="py-2 border-y border-slate-100 dark:border-slate-700/40">
+              <div class="h-8 w-20 bg-slate-200 dark:bg-slate-700 rounded"></div>
+            </div>
+            <div class="space-y-3 pt-2">
+              <div v-for="j in 3" :key="j" class="h-3 w-full bg-slate-200 dark:bg-slate-700 rounded"></div>
+            </div>
+          </div>
+          <div class="pt-6 mt-6 border-t border-slate-100 dark:border-slate-700/40">
+            <div class="h-10 w-full bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="error" class="p-6 text-center border border-red-200 bg-red-50 dark:bg-red-900/10 dark:border-red-800/50 rounded-2xl">
+        <p class="text-sm text-red-600 dark:text-red-400 mb-4">{{ error }}</p>
+        <button 
+          @click="fetchPlans" 
+          class="font-medium px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+        >
+          Retry Loading Plans
+        </button>
+      </div>
+
+      <!-- Loaded State -->
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <div 
           v-for="plan in displayPlans" 
           :key="plan.id"
@@ -74,7 +132,7 @@
                 <h4 class="font-black text-lg text-slate-900 dark:text-white tracking-tight">{{ plan.name }}</h4>
                 <p class="text-xs font-medium text-slate-400 dark:text-slate-500 mt-0.5">{{ plan.tagline }}</p>
               </div>
-              <component :is="plan.icon" :class="['w-5 h-5', plan.isCurrent ? 'text-brand-500' : 'text-slate-400']" />
+              <component :is="iconMap[plan.icon]" v-if="iconMap[plan.icon]" :class="['w-5 h-5 shrink-0', plan.isCurrent ? 'text-brand-500' : 'text-slate-400']" />
             </div>
 
             <div class="flex items-baseline gap-1 py-2 border-y border-slate-100 dark:border-slate-700/40">
@@ -116,13 +174,7 @@
                   : 'bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-950 shadow-sm'
               ]"
             >
-              {{ 
-                plan.isCurrent 
-                  ? 'Active Plan' 
-                  : (typeof plan.price === 'string' 
-                    ? 'Contact Support' 
-                    : (plan.price > 49 ? 'Upgrade Tier' : 'Downgrade Tier')) 
-              }}
+              {{ plan.isCurrent ? 'Active Plan' : 'Contact Support' }}
             </button>
           </div>
         </div>
@@ -134,25 +186,117 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { Check } from 'lucide-vue-next'
-// Make sure this path correctly points to your constants file
-import { TIER_PLANS } from '../billing-plans'
+import type { Component } from 'vue'
+import { useRoute } from 'vue-router'
+import { Check, Store, Zap, Sparkles, Headphones } from 'lucide-vue-next'
+import { usePlans } from '@/features/pricing/composables/usePlans'
+import { apiFetch } from '@/utils/apiFetch'
 
+// Response interfaces for nested backend payload
+interface MetricUsage {
+  used: number
+  total: number
+}
+
+interface PlanMetrics {
+  api_request?: MetricUsage
+  listings?: MetricUsage
+}
+
+interface PlanUsage {
+  metrics: PlanMetrics
+}
+
+interface UsageResponse {
+  workspace_id: string
+  plans: Record<string, PlanUsage>
+}
+
+const route = useRoute()
+const workspaceId = computed(() => route.params.workspaceId as string)
+
+const { plans, isLoading, error, fetchPlans } = usePlans()
 const isMounted = ref(false)
 
-// This represents the user's current plan ID. 
-// In a real app, you would fetch this from a Pinia store or API response.
-const currentActivePlanId = ref('growth')
+const usage = ref<UsageResponse | null>(null)
+const isLoadingUsage = ref(false)
 
-// We map over the global constant and inject the `isCurrent` property dynamically
+const iconMap: Record<string, Component> = {
+  Store,
+  Zap,
+  Sparkles,
+  Headphones
+}
+
+// Fetch Usage Data
+const fetchUsage = async () => {
+  if (!workspaceId.value) return
+  
+  isLoadingUsage.value = true
+  try {
+    const response = await apiFetch(
+      `/${workspaceId.value}/usage`,
+      { method: 'GET' },
+      false
+    )
+    if (response.ok) {
+      usage.value = await response.json()
+    }
+  } catch (err) {
+    console.error('Failed to fetch usage metrics:', err)
+  } finally {
+    isLoadingUsage.value = false
+  }
+}
+
+// Active plan key (e.g. "growth") extracted from response keys
+const activePlanKey = computed(() => {
+  if (!usage.value?.plans) return null
+  const keys = Object.keys(usage.value.plans)
+  return keys.length > 0 ? keys[0] : null
+})
+
+const activePlan = computed(() => {
+  if (!activePlanKey.value || !usage.value?.plans) return null
+  return usage.value.plans[activePlanKey.value]
+})
+
+// API Call Allowance Metrics
+const apiUsed = computed(() => activePlan.value?.metrics?.api_request?.used ?? 0)
+const apiTotal = computed(() => activePlan.value?.metrics?.api_request?.total ?? 0)
+
+const apiPct = computed(() => {
+  if (!apiTotal.value) return 0
+  const pct = (apiUsed.value / apiTotal.value) * 100
+  return Math.min(100, Math.round(pct * 10) / 10)
+})
+
+const apiRemaining = computed(() => Math.max(0, apiTotal.value - apiUsed.value))
+
+// Listings Capacity Metrics (Defaults to 0 until backend adds them)
+const listingsUsed = computed(() => activePlan.value?.metrics?.listings?.used ?? 0)
+const listingsTotal = computed(() => activePlan.value?.metrics?.listings?.total ?? 0)
+
+const listingsPct = computed(() => {
+  if (!listingsTotal.value) return 0
+  const pct = (listingsUsed.value / listingsTotal.value) * 100
+  return Math.min(100, Math.round(pct * 10) / 10)
+})
+
+const listingsRemaining = computed(() => Math.max(0, listingsTotal.value - listingsUsed.value))
+
+// Match Active Plan Card
 const displayPlans = computed(() => {
-  return TIER_PLANS.map(plan => ({
+  const activeKey = activePlanKey.value?.toLowerCase()
+  return plans.value.map(plan => ({
     ...plan,
-    isCurrent: plan.id === currentActivePlanId.value
+    isCurrent: activeKey ? plan.id.toString().toLowerCase() === activeKey : false
   }))
 })
 
 onMounted(() => {
+  fetchPlans()
+  fetchUsage()
   setTimeout(() => {
     isMounted.value = true
   }, 50)

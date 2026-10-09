@@ -2,27 +2,34 @@
 <template>
   <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto">
     <!-- Header Section -->
-    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div class="space-y-1">
-        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-wider">
-          {{ $route.meta.title || 'Sell Orders' }}
-        </h1>
-        <p class="text-sm sm:text-base font-medium text-slate-500 dark:text-slate-400">
-          {{ $route.meta.description || 'Manage and track your customer sell orders.' }}
-        </p>
-      </div>
+    <header class="space-y-1">
+  <!-- Title & Action Button Row -->
+  <div class="flex items-center justify-between gap-4">
+    <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-wider">
+      {{ $route.meta.title || 'Sell Orders' }}
+    </h1>
 
-      <div v-if="!isReadOnly" class="flex items-center shrink-0">
-        <button
-          @click="isCreateModalOpen = true"
-          class="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-sm overflow-hidden shadow-md hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 transition-all duration-200 cursor-pointer"
-        >
-          <div class="absolute inset-0 bg-white/20 dark:bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
-          <Plus class="w-4 h-4 relative z-10" />
-          <span class="relative z-10">New Sell Order</span>
-        </button>
-      </div>
-    </header>
+    <div v-if="!isReadOnly" class="flex items-center shrink-0">
+      <button
+        @click="isCreateModalOpen = true"
+        v-tooltip="'New Sell Order'"
+        aria-label="New Sell Order"
+        class="group relative inline-flex items-center justify-center p-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 shadow-md hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 transition-all duration-200 cursor-pointer"
+      >
+        <div
+          class="absolute inset-0 rounded-xl bg-white/20 dark:bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"
+        ></div>
+
+        <Plus class="w-5 h-5 relative z-10 shrink-0" />
+      </button>
+    </div>
+  </div>
+
+  <!-- Description -->
+  <p class="text-sm sm:text-base font-medium text-slate-500 dark:text-slate-400">
+    {{ $route.meta.description || 'Manage and track your customer sell orders.' }}
+  </p>
+</header>
 
     <!-- Reusable Table Component -->
     <BaseTable

@@ -26,9 +26,9 @@
 
         <h2
           v-else
-          class="text-xl font-black tracking-tighter text-brand-500"
+          class="text-xl font-black tracking-tighter dark:from-white dark:to-slate-400 from-slate-900 to-slate-500"
         >
-          S.
+          A.
         </h2>
       </transition>
     </div>

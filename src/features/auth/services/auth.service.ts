@@ -198,4 +198,33 @@ export const authService = {
       }
     }
   },
+
+  async requestEmailChange(newEmail: string): Promise<MessageResponse> {
+    const response = await apiFetch('/auth/request-email-change', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ new_email: newEmail }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.detail || 'Failed to request email change.')
+    }
+
+    return await response.json()
+  },
+
+  async confirmEmailChange(token: string): Promise<MessageResponse> {
+    const response = await apiFetch(`/auth/confirm-email-change?token=${encodeURIComponent(token)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.detail || 'Email update confirmation failed.')
+    }
+
+    return await response.json()
+  }
 }

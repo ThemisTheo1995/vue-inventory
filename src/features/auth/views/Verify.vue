@@ -96,26 +96,34 @@ const errorMessage = ref('')
 
 onMounted(async () => {
   const token = route.query.token as string
+  const type = route.query.type as string
 
   if (!token) {
     isLoading.value = false
     isError.value = true
-    errorMessage.value = 'Missing activation token in the URL.'
+    errorMessage.value = 'Missing token in the URL.'
     return
   }
 
   try {
-    const response = await authService.verifyEmail(token)
+    let response: { detail: string }
+
+    if (type === 'email_change') {
+      response = await authService.confirmEmailChange(token)
+    } else {
+      response = await authService.verifyEmail(token)
+    }
+
     isLoading.value = false
     isSuccess.value = true
-    successMessage.value = response.detail || 'Account successfully verified.'
+    successMessage.value = response.detail || 'Email updated successfully.'
   } catch (error: any) {
     isLoading.value = false
     isError.value = true
     errorMessage.value = 
       error.response?.data?.detail || 
-      error.response?.data?.message || 
-      'This verification link is invalid or has expired.'
+      error.message || 
+      'This link is invalid or has expired.'
   }
 })
 </script>
