@@ -35,10 +35,6 @@
 
     <!-- User Profile Link -->
     <div class="mx-3 pb-3 mb-1 border-b border-slate-200 dark:border-slate-700/50">
-      <!-- 
-        Pass user ID if your route eventually requires it, e.g.:
-        :to="{ name: 'user', params: { ...$route.params, userId: currentUser?.id } }"
-      -->
       <router-link
         :to="{ name: 'workspace-user' }"
         :class="[
@@ -47,14 +43,14 @@
         ]"
       >
         <div
-          class="shrink-0 flex items-center justify-center w-8 h-8 rounded-xl bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-400 font-bold text-[11px] uppercase shadow-sm select-none transition-colors group-hover:bg-brand-500/20 dark:group-hover:bg-brand-500/30"
+          class="shrink-0 flex items-center justify-center w-8 h-8 rounded-xl bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-400 shadow-sm select-none transition-colors group-hover:bg-brand-500/20 dark:group-hover:bg-brand-500/30"
           :title="
             collapsed && currentUser
               ? `${currentUser.first_name} ${currentUser.last_name} (${currentUser.email})`
               : undefined
           "
         >
-          {{ userInitials }}
+          <User class="w-4 h-4 fill-brand-600/20 dark:fill-slate-100/60 dark:text-white text-brand-600 dark:text-brand-400 shrink-0" />
         </div>
 
         <div
@@ -214,6 +210,7 @@ import {
   Tag,
   Package,
   Users,
+  User,
   Truck,
   Settings,
   Moon,
@@ -238,14 +235,6 @@ const isLoggingOut = ref(false)
 
 const authStore = useAuthStore()
 const { user: currentUser } = storeToRefs(authStore)
-
-const userInitials = computed(() => {
-  if (!currentUser.value) return '??'
-  return (
-    currentUser.value.first_name.charAt(0) +
-    currentUser.value.last_name.charAt(0)
-  ).toUpperCase()
-})
 
 const navGroups = [
   {

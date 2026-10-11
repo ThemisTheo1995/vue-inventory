@@ -16,7 +16,13 @@ class SellOrderService {
   // Sell Order Headers
   // =======================================================
 
-  async getAll(workspaceId: string, search?: string, page = 1, limit = 20): Promise<PaginatedSellOrders> {
+  async getAll(
+    workspaceId: string,
+    search?: string,
+    page = 1,
+    limit = 20,
+    filters?: Record<string, any>
+  ): Promise<PaginatedSellOrders> {
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString()
@@ -24,6 +30,14 @@ class SellOrderService {
     
     if (search) {
       params.append('search', search)
+    }
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params.append(key, String(value))
+        }
+      })
     }
     
     const response = await apiFetch(`/${workspaceId}/sell-orders?${params}`, { 

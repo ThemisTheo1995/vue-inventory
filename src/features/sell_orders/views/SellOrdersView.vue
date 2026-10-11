@@ -34,6 +34,8 @@
     <!-- Reusable Table Component -->
     <BaseTable
       v-model:search-query="searchQuery"
+      v-model:selected-filters="selectedFilters"
+      :filters="tableFilters"
       :items="sellOrders"
       :is-loading="isTableLoading"
       :is-searching="isSearching"
@@ -47,6 +49,7 @@
       :empty-description="isReadOnly ? 'There are currently no sell orders matching your criteria.' : 'Get started by creating your first sell order to track customer items.'"
       create-button-text="Create First SO"
       :column-span="isReadOnly ? 5 : 6"
+      @filter-change="onFilterChange"
       @create="isCreateModalOpen = true"
       @prev-page="prevPage"
       @next-page="nextPage"
@@ -263,7 +266,7 @@ import AsyncButton from "@/components/layout/AsyncButton.vue"
 import SellOrderCreateModal from "./SellOrderCreateModal.vue"
 
 import { sellOrderService } from "../services/sell_order.service"
-import type { SellOrder, SellOrderStatus } from "../types/sell_order.types"
+import type { SellOrder, SellOrderStatus, TableFilter } from "../types/sell_order.types"
 import { formatCurrency } from "@/utils/currencyFormatter.ts"
 
 // --- Helper Components ---
@@ -298,6 +301,9 @@ const { confirm } = useConfirm()
 const { showToast } = useToast()
 
 const sellOrders = ref<SellOrder[]>([])
+const tableFilters = ref<TableFilter[]>([])
+const selectedFilters = ref<Record<string, any>>({ status: '' })
+
 const isLoading = ref(true)
 const isCreateModalOpen = ref(false)
 
@@ -335,9 +341,20 @@ const formatDateTime = (dateString?: string) => {
 
 const fetchSellOrders = async (searchVal = searchQuery.value) => {
   try {
-    const data = await sellOrderService.getAll(workspaceId, searchVal, currentPage.value, itemsPerPage.value)
+    const data = await sellOrderService.getAll(
+      workspaceId,
+      searchVal,
+      currentPage.value,
+      itemsPerPage.value,
+      selectedFilters.value
+    )
     sellOrders.value = data.items || []
     totalItems.value = data.total || 0
+
+    if (data.filters?.length) {
+      tableFilters.value = data.filters
+    }
+
   } catch (err: any) {
     const errorMessage = 
         err.response?.data?.detail || 
@@ -355,6 +372,13 @@ const fetchSellOrders = async (searchVal = searchQuery.value) => {
 const onSearchTriggered = async (term: string) => {
   currentPage.value = 1
   await fetchSellOrders(term)
+}
+
+const onFilterChange = async () => {
+  currentPage.value = 1
+  isLoading.value = true
+  await fetchSellOrders()
+  isLoading.value = false
 }
 
 const { searchQuery, isSearching } = useSearch(onSearchTriggered)

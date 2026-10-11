@@ -5,6 +5,18 @@ import type { Customer } from '../../customers/types/customer.types'
 
 export type SellOrderStatus = 'DRAFT' | 'CONFIRMED' | 'FULLFILLED' | 'CANCELLED' | 'RETURNED' | 'CLOSED'
 
+export interface FilterOption {
+  label: string
+  value: string | number | boolean
+}
+
+export interface TableFilter {
+  key: string
+  label?: string
+  placeholder?: string
+  options: FilterOption[]
+}
+
 export interface SellOrderLine {
   id: string
   sell_order_id: string
@@ -57,4 +69,5 @@ export interface PaginatedSellOrders {
   page: number
   limit: number
   pages?: number
+  filters?: TableFilter[]
 }
