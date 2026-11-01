@@ -1,7 +1,7 @@
-// src/types/sell_orders.types.ts
+// src/features/sell_orders/types/sell_order.types.ts
+
 import type { Item } from '../../items/types/item.types'
 import type { Customer } from '../../customers/types/customer.types'
-
 
 export type SellOrderStatus = 'DRAFT' | 'CONFIRMED' | 'FULLFILLED' | 'CANCELLED' | 'RETURNED' | 'CLOSED'
 
@@ -60,6 +60,7 @@ export interface SellOrderUpdate {
   customer_id?: string | null
   so_number?: string
   status?: SellOrderStatus
+  bin_id?: string | null
   sell_order_lines?: SellOrderLineCreate[]
 }
 

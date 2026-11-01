@@ -44,7 +44,7 @@
       :total-items="totalItems"
       :items-per-page="itemsPerPage"
       :total-pages="totalPages"
-      search-placeholder="Search PO number or supplier..."
+      search-placeholder="PO number, Item name, SKU..."
       empty-title="No purchase orders found"
       :empty-description="isReadOnly ? 'There are currently no purchase orders matching your criteria.' : 'Get started by creating your first purchase order to track supplier items.'"
       create-button-text="Create First PO"
@@ -343,33 +343,39 @@ const formatDateTime = (dateString?: string) => {
   return { date, time }
 }
 
-const fetchPurchaseOrders = async (searchVal = searchQuery.value) => {
+const fetchPurchaseOrders = async (
+  searchVal = searchQuery.value,
+) => {
   try {
+    const requestFilters = {
+      ...selectedFilters.value,
+      search: searchVal?.trim() || undefined,
+    }
+
     const data = await purchaseOrderService.getAll(
       workspaceId,
-      searchVal,
       currentPage.value,
       itemsPerPage.value,
-      selectedFilters.value
+      requestFilters,
     )
-    
+
     purchaseOrders.value = data.items || []
     totalItems.value = data.total || 0
 
-    if (data.filters?.length) {
+    if (data.filters) {
       tableFilters.value = data.filters
     }
   } catch (err: any) {
-    const errorMessage = 
-        err.response?.data?.detail || 
-        err.message || 
-        "An unexpected error occurred"
+    const errorMessage =
+      err.response?.data?.detail ||
+      err.message ||
+      'An unexpected error occurred'
 
-    const displayMessage = Array.isArray(errorMessage) 
-        ? errorMessage[0].msg 
-        : errorMessage
+    const displayMessage = Array.isArray(errorMessage)
+      ? errorMessage[0].msg
+      : errorMessage
 
-    showToast(displayMessage, "error")
+    showToast(displayMessage, 'error')
   }
 }
 

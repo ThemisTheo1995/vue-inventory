@@ -125,6 +125,7 @@ import {
   FileUp, 
   Tag, 
   Package, 
+  ShelvingUnit,
   Users, 
   Truck,
   Settings, 
@@ -166,7 +167,8 @@ const navGroups = [
       { name: 'purchase-orders', label: 'Purchase Orders', icon: FileDown },
       { name: 'sell-orders', label: 'Sell Orders', icon: FileUp },
       { name: 'items', label: 'Items', icon: Tag },
-      { name: 'inventory', label: 'Inventory', icon: Package }
+      { name: 'inventory', label: 'Inventory', icon: Package },
+      { name: 'bins', label: 'Bins', icon: ShelvingUnit }
     ]
   },
   {

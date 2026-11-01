@@ -1,14 +1,14 @@
-<!-- src/features/views/inventory/InventoryView.vue -->
+<!-- src/features/inventory/views/InventoryBinView.vue -->
 <template>
   <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto">
     <!-- Header Section -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div class="space-y-1">
         <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-wider">
-          {{ $route.meta.title || 'Inventory' }}
+          {{ $route.meta.title || 'Stock & Bins' }}
         </h1>
         <p class="text-sm sm:text-base font-medium text-slate-500 dark:text-slate-400">
-          {{ $route.meta.description || 'Monitor stock levels and manage inventory movements.' }}
+          {{ $route.meta.description || 'Monitor physical stock levels across bins and manage inventory movements.' }}
         </p>
       </div>
 
@@ -40,19 +40,19 @@
       empty-title="No inventory tracked"
       :empty-description="isReadOnly ? 'There are currently no inventory balances in this workspace.' : 'Stock balances will appear here when items are received or adjusted.'"
       create-button-text="Make Manual Adjustment"
-      :column-span="isReadOnly ? 5 : 6"
+      :column-span="isReadOnly ? 3 : 4"
       @create="openAdjustModal()"
       @prev-page="prevPage"
       @next-page="nextPage"
     >
-      <!-- ================= CUSTOM TOOLBAR TITLE SLOT ================= -->
+      <!-- ================= TOOLBAR TITLE SLOT ================= -->
       <template #toolbar-title>
         <h2 class="text-sm font-black tracking-widest text-slate-500 dark:text-slate-400 uppercase">
           Current Balances
         </h2>
       </template>
 
-      <!-- ================= CUSTOM TOOLBAR ACTIONS SLOT ================= -->
+      <!-- ================= TOOLBAR ACTIONS SLOT ================= -->
       <template #toolbar-actions>
         <AsyncButton
           :action="fetchBalances"
@@ -68,7 +68,7 @@
         <div 
           v-for="balance in balances" 
           :key="balance.id"
-          @click="navigateToItemDetails(balance.item_id)"
+          @click="navigateToInventoryDetails(balance.id)"
           class="relative p-4 sm:p-5
             rounded-lg
             hover:bg-slate-50 dark:hover:bg-slate-900
@@ -88,11 +88,21 @@
                 <p class="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-1" v-if="balance.item?.sku">
                   SKU: {{ balance.item.sku }}
                 </p>
+                <!-- Bin Badge in Mobile -->
+                <div class="mt-2" v-if="balance.bin">
+                  <span 
+                    @click.stop="navigateToBinDetails(balance.bin.id)"
+                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    <ShelvingUnit class="w-3 h-3 text-slate-400" />
+                    Bin: {{ balance.bin.code || balance.bin.zone }}
+                  </span>
+                </div>
               </div>
             </div>
             <div v-if="!isReadOnly">
               <button
-                @click.stop="openAdjustModal(balance.item_id)"
+                @click.stop="openAdjustModal(balance.item_id, balance.bin_id, balance.item?.title, balance.item?.sku, balance.bin?.code)"
                 v-tooltip="'Adjust stock for this item'"
                 class="p-2 -mt-2 -mr-2 text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 rounded-full hover:bg-brand-50 dark:hover:bg-brand-400/10 transition-colors cursor-pointer"
               >
@@ -101,33 +111,11 @@
             </div>
           </div>
 
-          <!-- Mobile Stats Grid -->
-          <div class="grid grid-cols-3 gap-2 mb-4 bg-slate-100/50 dark:bg-slate-800/30 rounded-xl p-2 border border-slate-100 dark:border-slate-800/50">
-            <div class="text-center p-1.5 rounded-lg">
-              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-0.5">On Hand</p>
-              <p class="font-mono text-sm font-bold text-slate-900 dark:text-white">{{ balance.quantity_on_hand }}</p>
-            </div>
-            <div class="text-center p-1.5 rounded-lg bg-amber-50/50 dark:bg-amber-900/10">
-              <p class="text-[10px] font-bold uppercase tracking-wider text-amber-600/80 dark:text-amber-500/80 mb-0.5">Allocated</p>
-              <p :class="['font-mono text-sm font-bold', balance.quantity_allocated > 0 ? 'text-amber-600 dark:text-amber-500' : 'text-slate-400']">{{ balance.quantity_allocated }}</p>
-            </div>
-            <div class="text-center p-1.5 rounded-lg bg-blue-50/50 dark:bg-blue-900/10">
-              <p class="text-[10px] font-bold uppercase tracking-wider text-blue-600/80 dark:text-blue-500/80 mb-0.5">On Order</p>
-              <p :class="['font-mono text-sm font-bold', balance.quantity_on_order > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400']">{{ balance.quantity_on_order }}</p>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between pt-1">
-            <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Available Stock</span>
-            <span 
-              :class="[
-                'font-mono text-base font-black px-3 py-1 rounded-md shadow-sm border',
-                balance.quantity_available > 0 
-                  ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50' 
-                  : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/50'
-              ]"
-            >
-              {{ balance.quantity_available }}
+          <!-- Mobile Quantity Card -->
+          <div class="flex items-center justify-between pt-2 pb-1 bg-slate-100/50 dark:bg-slate-800/30 rounded-xl px-4 border border-slate-100 dark:border-slate-800/50">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">On Hand Stock</span>
+            <span class="font-mono text-base font-black text-slate-900 dark:text-white">
+              {{ balance.quantity_on_hand }}
             </span>
           </div>
         </div>
@@ -135,47 +123,19 @@
 
       <!-- ================= DESKTOP TABLE HEADERS SLOT ================= -->
       <template #desktop-headers>
-        <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 w-[26%]">
+        <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 w-[40%]">
           Item Details
         </th>
-        <th class="px-6 py-4 text-right w-[15%]">
-          <div class="flex items-center justify-end gap-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
-            <span>On Hand</span>
-            <Info 
-              class="w-3 h-3 text-slate-300 dark:text-slate-600 cursor-help" 
-              v-tooltip="'Total physical inventory currently in stock'" 
-            />
-          </div>
+        <th class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 w-[25%]">
+          Bin Location
         </th>
-        <th class="px-6 py-4 text-right w-[15%]">
-          <div class="flex items-center justify-end gap-1.5 text-[11px] font-black uppercase tracking-widest text-amber-500/80">
-            <span>Allocated</span>
-            <Info 
-              class="w-3 h-3 text-amber-500/40 cursor-help" 
-              v-tooltip="'Quantity reserved for CONFIRMED sell orders'" 
-            />
-          </div>
-        </th>
-        <th class="px-6 py-4 text-right w-[15%]">
-          <div class="flex items-center justify-end gap-1.5 text-[11px] font-black uppercase tracking-widest text-blue-500/80">
-            <span>On Order</span>
-            <Info 
-              class="w-3 h-3 text-blue-500/40 cursor-help" 
-              v-tooltip="'Quantity currently on incoming (SENT) purchase order'" 
-            />
-          </div>
-        </th>
-        <th class="px-6 py-4 text-right w-[17%]">
+        <th class="px-6 py-4 text-right w-[20%]">
           <div class="flex items-center justify-end gap-1.5 text-[11px] font-black uppercase tracking-widest text-slate-900 dark:text-white">
-            <CheckCircle class="w-3.5 h-3.5" />
-            <span>Available</span>
-            <Info 
-              class="w-3 h-3 text-slate-300 dark:text-slate-600 cursor-help" 
-              v-tooltip="'Ready-to-use stock (ON HAND minus ALLOCATED)'" 
-            />
+            <span>On Hand</span>
+            <Info class="w-3 h-3 text-slate-300 dark:text-slate-600 cursor-help" v-tooltip="'Total physical inventory in this bin'" />
           </div>
         </th>
-        <th v-if="!isReadOnly" class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right w-[12%]">
+        <th v-if="!isReadOnly" class="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right w-[15%]">
           Actions
         </th>
       </template>
@@ -185,7 +145,7 @@
         <tr
           v-for="balance in balances"
           :key="balance.id"
-          @click="navigateToItemDetails(balance.item_id)"
+          @click="navigateToInventoryDetails(balance.id)"
           class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors cursor-pointer"
         >
           <td class="px-6 py-4 relative">
@@ -204,6 +164,16 @@
               </div>
             </div>
           </td>
+
+          <td class="px-6 py-4">
+            <div v-if="balance.bin" @click.stop="navigateToBinDetails(balance.bin.id)">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">
+                <ShelvingUnit class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span class="truncate">{{ balance.bin.code || balance.bin.zone }}</span>
+              </span>
+            </div>
+            <span v-else class="text-xs text-slate-400 dark:text-slate-600 italic">Unassigned</span>
+          </td>
           
           <td class="px-6 py-4 text-right">
             <span class="font-mono text-sm font-bold text-slate-900 dark:text-slate-300">
@@ -211,35 +181,10 @@
             </span>
           </td>
 
-          <td class="px-6 py-4 text-right">
-            <span :class="['font-mono text-sm font-bold', balance.quantity_allocated > 0 ? 'text-amber-600 dark:text-amber-500' : 'text-slate-400 dark:text-slate-500']">
-              {{ balance.quantity_allocated }}
-            </span>
-          </td>
-
-          <td class="px-6 py-4 text-right">
-            <span :class="['font-mono text-sm font-bold', balance.quantity_on_order > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500']">
-              {{ balance.quantity_on_order }}
-            </span>
-          </td>
-
-          <td class="px-6 py-4 text-right">
-            <span 
-              :class="[
-                'inline-flex items-center justify-center min-w-[3rem] px-2.5 py-1 rounded-md text-sm font-mono font-black shadow-sm border',
-                balance.quantity_available > 0 
-                  ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50' 
-                  : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/50'
-              ]"
-            >
-              {{ balance.quantity_available }}
-            </span>
-          </td>
-
           <td v-if="!isReadOnly" class="px-6 py-4 text-right">
             <div class="flex items-center justify-end" @click.stop>
               <button
-                @click.stop="openAdjustModal(balance.item_id)"
+                @click.stop="openAdjustModal(balance.item_id, balance.bin_id, balance.item?.title, balance.item?.sku, balance.bin?.code)"
                 v-tooltip="'Adjust Stock'"
                 class="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-400/10 rounded-lg transition-all transform active:scale-95 cursor-pointer"
               >
@@ -259,6 +204,8 @@
       :preselected-item-id="selectedItemId"
       :preselected-item-title="selectedItemTitle"
       :preselected-item-sku="selectedItemSku"
+      :preselected-bin-id="selectedBinId"
+      :preselected-bin-code="selectedBinCode"
       @close="closeAdjustModal" 
       @created="onStockAdjusted" 
     />
@@ -271,21 +218,19 @@ import { useRoute, useRouter } from "vue-router"
 import { 
   ArrowRightLeft, 
   Package, 
+  ShelvingUnit,
   RefreshCw, 
-  CheckCircle,
   Info
 } from "lucide-vue-next"
 
 import { useToast } from "@/composables/useToast"
 import BaseTable from "@/components/ui/table/BaseTable.vue"
 import AsyncButton from "@/components/layout/AsyncButton.vue"
-
 import StockAdjustModal from "./StockAdjustModal.vue" 
 
-import { inventoryService } from "../services/inventory.service"
-import type { Inventory } from "../types/inventory.types"
+import { inventoryService } from "../services/inventory.service.ts"
+import type { InventoryExpanded } from "../types/inventory.types.ts"
 
-// --- Logic ---
 const route = useRoute()
 const router = useRouter()
 const workspaceId = route.params.workspaceId as string
@@ -293,7 +238,7 @@ const isReadOnly = computed(() => localStorage.getItem("role") === "read_only")
 
 const { showToast } = useToast()
 
-const balances = ref<Inventory[]>([])
+const balances = ref<InventoryExpanded[]>([])
 const isLoading = ref(true)
 
 // Search & Pagination State
@@ -311,11 +256,13 @@ const isAdjustModalOpen = ref(false)
 const selectedItemId = ref<string | null>(null)
 const selectedItemTitle = ref<string | null>(null)
 const selectedItemSku = ref<string | null>(null)
+const selectedBinId = ref<string | null>(null)
+const selectedBinCode = ref<string | null>(null)
 
 const isTableLoading = computed(() => isLoading.value && !isSearching.value)
 
-// --- Watchers for Search Debounce ---
-watch(searchQuery, (newVal) => {
+// Search Debounce Watcher
+watch(searchQuery, () => {
   isSearching.value = true
   if (searchTimeout.value) {
     clearTimeout(searchTimeout.value)
@@ -328,17 +275,17 @@ watch(searchQuery, (newVal) => {
   }, 400)
 })
 
-// --- API Calls ---
+// API Calls
 const fetchBalances = async () => {
   if (!isSearching.value) isLoading.value = true
 
   try {
     const data = await inventoryService.getInventories(
       workspaceId,
-      searchQuery.value || undefined, // Search query
-      currentPage.value,              // Page
-      itemsPerPage.value,             // Limit
-      ['item']                        // Expand
+      searchQuery.value || undefined, 
+      currentPage.value,              
+      itemsPerPage.value,             
+      ['item', 'bin']                 
     )
     
     balances.value = data.items || []
@@ -360,7 +307,7 @@ const fetchBalances = async () => {
   }
 }
 
-// --- Pagination Controls ---
+// Pagination Controls
 const nextPage = async () => {
   if (currentPage.value >= totalPages.value) return
   currentPage.value++
@@ -373,21 +320,28 @@ const prevPage = async () => {
   await fetchBalances()
 }
 
-const navigateToItemDetails = (itemId: string) => {
-  router.push({ name: "item-details", params: { id: itemId } })
+const navigateToInventoryDetails = (inventoryId: string) => {
+  router.push({ name: "inventory-details", params: { id: inventoryId } })
 }
 
-// --- Modal Controls ---
-const openAdjustModal = (itemId?: string) => {
+const navigateToBinDetails = (binId: string) => {
+  router.push({ name: "bin-details", params: { id: binId } })
+}
+
+// Modal Controls
+const openAdjustModal = (
+  itemId?: string, 
+  binId?: string | null, 
+  itemTitle?: string | null, 
+  itemSku?: string | null, 
+  binCode?: string | null
+) => {
   selectedItemId.value = itemId || null
-  if (itemId) {
-    const found = balances.value.find(b => b.item_id === itemId)
-    selectedItemTitle.value = found?.item?.title || null
-    selectedItemSku.value = found?.item?.sku || null
-  } else {
-    selectedItemTitle.value = null
-    selectedItemSku.value = null
-  }
+  selectedBinId.value = binId || null
+  selectedItemTitle.value = itemTitle || null
+  selectedItemSku.value = itemSku || null
+  selectedBinCode.value = binCode || null
+  
   isAdjustModalOpen.value = true
 }
 
@@ -397,6 +351,8 @@ const closeAdjustModal = () => {
     selectedItemId.value = null 
     selectedItemTitle.value = null
     selectedItemSku.value = null
+    selectedBinId.value = null
+    selectedBinCode.value = null
   }, 200)
 }
 

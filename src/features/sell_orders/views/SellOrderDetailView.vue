@@ -26,7 +26,7 @@
       <div class="flex items-center shrink-0 print:hidden">
         <button
           @click="printSO"
-          class="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 active:scale-95 transition-all duration-200"
+          class="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 active:scale-95 transition-all duration-200 cursor-pointer"
         >
           <Printer class="w-4 h-4" />
           <span>Print / PDF</span>
@@ -81,38 +81,38 @@
           <button
             v-if="so.status === 'DRAFT'"
             @click="isEditModalOpen = true"
-            class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700/80 transition-all shadow-sm active:scale-95"
+            class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700/80 transition-all shadow-sm active:scale-95 cursor-pointer"
           >
             <Edit2 class="w-4 h-4" />
             Edit Draft
           </button>
 
-          <AsyncButton
+          <button
             v-if="so.status === 'DRAFT'"
-            :action="() => updateStatus('CONFIRMED')"
+            @click="openTransitionModal('CONFIRMED')"
             class="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-all shadow-md shadow-indigo-200 dark:shadow-none active:scale-95 border-0 cursor-pointer"
           >
             <Send class="w-4 h-4" />
             Mark as Confirmed
-          </AsyncButton>
+          </button>
 
-          <AsyncButton
+          <button
             v-if="so.status === 'CONFIRMED'"
-            :action="() => updateStatus('FULLFILLED')"
+            @click="openTransitionModal('FULLFILLED')"
             class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all shadow-md shadow-emerald-200 dark:shadow-none active:scale-95 border-0 cursor-pointer"
           >
             <CheckCircle class="w-4 h-4" />
             Mark as Fullfilled
-          </AsyncButton>
+          </button>
 
-          <AsyncButton
+          <button
             v-if="['DRAFT', 'CONFIRMED'].includes(so.status)"
-            :action="() => updateStatus('CANCELLED')"
+            @click="openTransitionModal('CANCELLED')"
             class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 font-bold text-sm transition-all active:scale-95 cursor-pointer"
           >
             <XCircle class="w-4 h-4" />
             Cancel SO
-          </AsyncButton>
+          </button>
         </div>
       </BaseCard>
 
@@ -132,7 +132,7 @@
               </p>
             </div>
 
-            <div class="flex-1 overflow-y-auto  bg-slate-50/30 dark:bg-slate-900/30 print:!bg-transparent">
+            <div class="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-slate-900/30 print:!bg-transparent">
               
               <!-- Empty State -->
               <div v-if="so.sell_order_lines.length === 0" class="p-12 text-center">
@@ -192,7 +192,6 @@
                         :key="line.id"
                         class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors print:!bg-transparent"
                       >
-                        <!-- First cell gets relative for hover line (HTML spec compliant) -->
                         <td class="px-6 py-4 relative print:!px-2">
                           <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity print:hidden"></div>
                           <div class="min-w-0">
@@ -314,6 +313,16 @@
       @close="isEditModalOpen = false"
       @updated="fetchSODetails"
     />
+
+    <!-- Status Transition Modal -->
+    <StatusTransitionModal
+      :is-open="isTransitionModalOpen"
+      :workspace-id="workspaceId"
+      :target-status="transitionTargetStatus"
+      :require-bin="transitionTargetStatus === 'FULLFILLED'"
+      @close="isTransitionModalOpen = false"
+      @confirm="handleTransitionConfirmed"
+    />
   </div>
 </template>
 
@@ -325,12 +334,11 @@ import {
   Send, CheckCircle, XCircle, Mail, Calendar 
 } from "lucide-vue-next"
 
-import { useConfirm } from "@/composables/useConfirm"
 import { useToast } from "@/composables/useToast"
 
 import BaseCard from "@/components/ui/BaseCard.vue"
-import AsyncButton from "@/components/layout/AsyncButton.vue"
 import SellOrderEditModal from "./SellOrderEditModal.vue"
+import StatusTransitionModal from "../components/StatusTransitionModal.vue"
 
 import { sellOrderService } from "../services/sell_order.service"
 import type { SellOrder, SellOrderStatus } from "../types/sell_order.types"
@@ -365,12 +373,15 @@ const soId = route.params.id as string
 
 const isReadOnly = computed(() => localStorage.getItem("role") === "read_only")
 
-const { confirm } = useConfirm()
 const { showToast } = useToast()
 
 const so = ref<SellOrder | null>(null)
 const isLoading = ref(true)
 const isEditModalOpen = ref(false)
+
+// Transition Modal State
+const isTransitionModalOpen = ref(false)
+const transitionTargetStatus = ref<SellOrderStatus>('CONFIRMED')
 
 const fetchSODetails = async () => {
   try {
@@ -382,7 +393,7 @@ const fetchSODetails = async () => {
         err.message || 
         "An unexpected error occurred"
 
-        const displayMessage = Array.isArray(errorMessage) 
+    const displayMessage = Array.isArray(errorMessage) 
         ? errorMessage[0].msg 
         : errorMessage
 
@@ -401,20 +412,22 @@ const formatDate = (isoString?: string) => {
   })
 }
 
-const updateStatus = async (nextStatus: SellOrderStatus) => {
-  const isTransitionConfirmed = await confirm({
-    title: `Transition to ${nextStatus}`,
-    message: `Are you sure you want to transition this sell order status to ${nextStatus}? This action dictates downstream order processing.`,
-    confirmText: "Confirm Change",
-    cancelText: "Cancel",
-    variant: nextStatus === "CANCELLED" ? "danger" : "primary"
-  })
+const openTransitionModal = (status: SellOrderStatus) => {
+  transitionTargetStatus.value = status
+  isTransitionModalOpen.value = true
+}
 
-  if (!isTransitionConfirmed) return
+const handleTransitionConfirmed = async (payload?: { binId?: string }) => {
+  const nextStatus = transitionTargetStatus.value
 
   try {
-    await sellOrderService.update(workspaceId, soId, { status: nextStatus })
+    await sellOrderService.update(workspaceId, soId, { 
+      status: nextStatus,
+      bin_id: payload?.binId 
+    })
+    
     showToast(`SO successfully moved to ${nextStatus}`, "success")
+    isTransitionModalOpen.value = false
     await fetchSODetails()
   } catch (err: any) {
     const errorMessage = 
@@ -422,7 +435,7 @@ const updateStatus = async (nextStatus: SellOrderStatus) => {
         err.message || 
         "An unexpected error occurred"
 
-        const displayMessage = Array.isArray(errorMessage) 
+    const displayMessage = Array.isArray(errorMessage) 
         ? errorMessage[0].msg 
         : errorMessage
 
@@ -441,7 +454,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Base print settings - highly specific overrides are handled by Tailwind print:* modifiers directly in the template */
 @media print {
   @page {
     margin: 1.5cm;

@@ -266,7 +266,6 @@ const persistNote = async () => {
 
     hasUnsavedChanges.value = false
   } catch (error) {
-    console.error("Failed to save note:", error)
     saveError.value = true
   } finally {
     isSaving.value = false

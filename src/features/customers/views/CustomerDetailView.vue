@@ -165,8 +165,7 @@ import { customerService } from '../services/customer.service'
 
 import BaseCard from '@/components/ui/BaseCard.vue'
 import CustomerEditModal from './CustomerEditModal.vue'
-
-const LOCALE = 'en-GB'
+import { formatDate } from '@/utils/dateFormatter'
 
 const route = useRoute()
 const router = useRouter()
@@ -199,14 +198,6 @@ const copyIdToClipboard = async (text: string): Promise<void> => {
   } catch (err) {
     console.error('Failed to copy ID:', err)
   }
-}
-
-const formatDate = (dateString: string): string => {
-  return new Intl.DateTimeFormat(LOCALE, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  }).format(new Date(dateString))
 }
 
 const onCustomerUpdated = (updatedData: Customer): void => {

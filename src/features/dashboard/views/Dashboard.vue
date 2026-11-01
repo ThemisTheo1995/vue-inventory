@@ -25,6 +25,8 @@
 
       <DashboardRevenueChart :chart-data="dashboardData.revenue_chart" />
 
+      <hr class="my-6 border-slate-200 dark:border-slate-700">
+
       <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div class="xl:col-span-2 space-y-6">
           <DashboardRecentSellOrders 

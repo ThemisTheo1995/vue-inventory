@@ -10,13 +10,6 @@ export const formatPrice = (priceInCents: number): string => {
   }).format(priceInCents / 100)
 }
 
-export const formatDate = (dateString: string): string => {
-  const date = new Date(dateString)
-  const day = date.toLocaleDateString(LOCALE, { day: 'numeric' })
-  const monthYear = date.toLocaleDateString(LOCALE, { month: 'short', year: '2-digit' })
-  return `${day}, ${monthYear}`
-}
-
 export const getStatusClass = (status: string, small = false): string => {
   const base = small ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'
   const common = `${base} font-bold rounded-full border whitespace-nowrap`

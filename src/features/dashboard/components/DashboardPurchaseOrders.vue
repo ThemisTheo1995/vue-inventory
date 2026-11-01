@@ -26,7 +26,8 @@
 
 <script setup lang="ts">
 import { FileDown } from 'lucide-vue-next'
-import { formatPrice, formatDate, getStatusClass } from '../utils/formatters'
+import { formatPrice, getStatusClass } from '../utils/formatters'
+import { formatDate } from '@/utils/dateFormatter'
 
 defineProps<{ orders: any[] }>()
 </script>

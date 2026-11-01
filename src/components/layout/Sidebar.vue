@@ -138,7 +138,7 @@
     <!-- Footer (Tighter padding and spacing) -->
     <div class="p-3 border-t-2 border-slate-200/70 dark:border-slate-800/70 space-y-2.5 bg-slate-50/30 dark:bg-slate-900/50">
       
-      <!-- Assume UsageIndicator component scales down natively or handles its own tightness -->
+      <!-- UsageIndicator component -->
       <UsageIndicator
         :collapsed="collapsed"
         :api-used="72400"
@@ -147,7 +147,7 @@
         :listings-total="1000"
       />
 
-      <!-- Combined Footer Action Row (Slightly shorter buttons) -->
+      <!-- Combined Footer Action Row -->
       <div :class="['gap-2', collapsed ? 'flex flex-col' : 'flex flex-row w-full']">
         <button
           @click="$emit('toggle-dark')"
@@ -217,7 +217,8 @@ import {
   Sun,
   ChevronLeft,
   ChevronRight,
-  LogOut
+  LogOut,
+  ShelvingUnit
 } from 'lucide-vue-next'
 
 import UsageIndicator from '@/features/settings/components/UsageIndicator.vue'
@@ -251,7 +252,8 @@ const navGroups = [
       { name: 'purchase-orders', label: 'Purchase Orders', icon: FileDown },
       { name: 'sell-orders', label: 'Sell Orders', icon: FileUp },
       { name: 'items', label: 'Items', icon: Tag },
-      { name: 'inventory', label: 'Inventory', icon: Package }
+      { name: 'inventory', label: 'Inventory', icon: Package },
+      { name: 'bins', label: 'Bins', icon: ShelvingUnit }
     ]
   },
   {

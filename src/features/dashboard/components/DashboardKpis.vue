@@ -32,8 +32,8 @@ const stats = computed(() => [
   {
     title: 'Total Revenue',
     value: formatPrice(props.kpis.total_revenue || 0),
-    trend: '+12%',
-    trendUp: true,
+    trend: props.kpis.revenue_trend,
+    trendUp: props.kpis.revenue_trend_up,
     icon: TrendingUp,
     bgColor: 'bg-emerald-50 dark:bg-emerald-500/10',
     textColor: 'text-emerald-600 dark:text-emerald-400'
@@ -41,8 +41,8 @@ const stats = computed(() => [
   {
     title: 'Total Sell Orders',
     value: (props.kpis.total_sell_orders || 0).toLocaleString(),
-    trend: '+5%',
-    trendUp: true,
+    trend: props.kpis.sell_orders_trend,
+    trendUp: props.kpis.sell_orders_trend_up,
     icon: FileUp,
     bgColor: 'bg-brand-50 dark:bg-brand-500/10',
     textColor: 'text-brand-600 dark:text-brand-400'
@@ -50,8 +50,8 @@ const stats = computed(() => [
   {
     title: 'Total Purchase Orders',
     value: (props.kpis.total_purchase_orders || 0).toLocaleString(),
-    trend: '-2%',
-    trendUp: false,
+    trend: props.kpis.purchase_orders_trend,
+    trendUp: props.kpis.purchase_orders_trend_up,
     icon: FileDown,
     bgColor: 'bg-blue-50 dark:bg-blue-500/10',
     textColor: 'text-blue-600 dark:text-blue-400'

@@ -1,123 +1,151 @@
-// src/services/purchase_orders.service.ts
 
 import { apiFetch } from '@/utils/apiFetch'
-import type { 
-  PurchaseOrder, 
-  PurchaseOrderCreate, 
-  PurchaseOrderUpdate, 
+import type {
+  PurchaseOrder,
+  PurchaseOrderCreate,
+  PurchaseOrderUpdate,
   PaginatedPurchaseOrders,
   PurchaseOrderLine,
-  PurchaseOrderLineCreate
+  PurchaseOrderLineCreate,
 } from '../types/purchase_order.types'
 
 class PurchaseOrderService {
-
   // =======================================================
   // Purchase Order Headers
   // =======================================================
 
   async getAll(
-    workspaceId: string, 
-    search?: string, 
-    page = 1, 
+    workspaceId: string,
+    page = 1,
     limit = 20,
-    filters?: Record<string, any>
+    filters?: Record<string, any>,
   ): Promise<PaginatedPurchaseOrders> {
     const params = new URLSearchParams({
       page: page.toString(),
-      limit: limit.toString()
+      limit: limit.toString(),
     })
-    
-    if (search) {
-      params.append('search', search)
-    }
 
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
+        if (
+          value !== undefined &&
+          value !== null &&
+          value !== ''
+        ) {
           params.append(key, String(value))
         }
       })
     }
-    
-    const response = await apiFetch(`/${workspaceId}/purchase-orders?${params}`, { 
-      method: 'GET'
-    })
-    
+
+    const response = await apiFetch(
+      `/${workspaceId}/purchase-orders?${params.toString()}`,
+      {
+        method: 'GET',
+      },
+    )
+
     return await response.json()
   }
 
-  async getOne(workspaceId: string, purchaseOrderId: string): Promise<PurchaseOrder> {
-    const response = await apiFetch(`/${workspaceId}/purchase-orders/${purchaseOrderId}`, { 
-      method: 'GET'
-    })
-    
+  async getOne(
+    workspaceId: string,
+    purchaseOrderId: string,
+  ): Promise<PurchaseOrder> {
+    const response = await apiFetch(
+      `/${workspaceId}/purchase-orders/${purchaseOrderId}`,
+      { method: 'GET' },
+    )
+
     return await response.json()
   }
 
-  async create(workspaceId: string, payload: PurchaseOrderCreate): Promise<PurchaseOrder> {
-    const response = await apiFetch(`/${workspaceId}/purchase-orders`, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    })
-    
+  async create(
+    workspaceId: string,
+    payload: PurchaseOrderCreate,
+  ): Promise<PurchaseOrder> {
+    const response = await apiFetch(
+      `/${workspaceId}/purchase-orders`,
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      },
+    )
+
     return await response.json()
   }
 
-  async update(workspaceId: string, purchaseOrderId: string, payload: PurchaseOrderUpdate): Promise<PurchaseOrder> {
-    const response = await apiFetch(`/${workspaceId}/purchase-orders/${purchaseOrderId}`, {
-      method: 'PATCH',
-      body: JSON.stringify(payload)
-    })
-    
+  async update(
+    workspaceId: string,
+    purchaseOrderId: string,
+    payload: PurchaseOrderUpdate,
+  ): Promise<PurchaseOrder> {
+    const response = await apiFetch(
+      `/${workspaceId}/purchase-orders/${purchaseOrderId}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      },
+    )
+
     return await response.json()
   }
 
-  async delete(workspaceId: string, purchaseOrderId: string): Promise<void> {
-    await apiFetch(`/${workspaceId}/purchase-orders/${purchaseOrderId}`, {
-      method: 'DELETE'
-    })
+  async delete(
+    workspaceId: string,
+    purchaseOrderId: string,
+  ): Promise<void> {
+    await apiFetch(
+      `/${workspaceId}/purchase-orders/${purchaseOrderId}`,
+      { method: 'DELETE' },
+    )
   }
 
   // =======================================================
-  // Purchase Order Lines (Sub-Resources)
+  // Purchase Order Lines
   // =======================================================
 
   async addLine(
-    workspaceId: string, 
-    purchaseOrderId: string, 
-    payload: PurchaseOrderLineCreate
+    workspaceId: string,
+    purchaseOrderId: string,
+    payload: PurchaseOrderLineCreate,
   ): Promise<PurchaseOrderLine> {
-    const response = await apiFetch(`/${workspaceId}/purchase-orders/${purchaseOrderId}/lines`, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    })
-    
+    const response = await apiFetch(
+      `/${workspaceId}/purchase-orders/${purchaseOrderId}/lines`,
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      },
+    )
+
     return await response.json()
   }
 
   async updateLine(
-    workspaceId: string, 
-    purchaseOrderId: string, 
-    lineId: string, 
-    payload: Partial<PurchaseOrderLineCreate>
+    workspaceId: string,
+    purchaseOrderId: string,
+    lineId: string,
+    payload: Partial<PurchaseOrderLineCreate>,
   ): Promise<PurchaseOrderLine> {
-    const response = await apiFetch(`/${workspaceId}/purchase-orders/${purchaseOrderId}/lines/${lineId}`, {
-      method: 'PATCH',
-      body: JSON.stringify(payload)
-    })
-    
+    const response = await apiFetch(
+      `/${workspaceId}/purchase-orders/${purchaseOrderId}/lines/${lineId}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      },
+    )
+
     return await response.json()
   }
 
   async removeLine(
-    workspaceId: string, 
-    purchaseOrderId: string, 
-    lineId: string
+    workspaceId: string,
+    purchaseOrderId: string,
+    lineId: string,
   ): Promise<void> {
-    await apiFetch(`/${workspaceId}/purchase-orders/${purchaseOrderId}/lines/${lineId}`, {
-      method: 'DELETE'
-    })
+    await apiFetch(
+      `/${workspaceId}/purchase-orders/${purchaseOrderId}/lines/${lineId}`,
+      { method: 'DELETE' },
+    )
   }
 }
 

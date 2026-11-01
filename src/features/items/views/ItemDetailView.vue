@@ -129,123 +129,76 @@
           </div>
 
           <!-- Column 2: Stocks / Movement Records Pane -->
-          <div class="lg:col-span-2 flex flex-col max-h-none sm:max-h-[600px]">
-            <BaseCard class="flex-1 flex flex-col overflow-hidden border-0 shadow-xl shadow-slate-200/50 dark:shadow-none ring-1 ring-slate-200 dark:ring-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-0">
-              <!-- Pane Header -->
-              <div class="shrink-0 p-4 sm:p-5 border-b border-slate-200/60 dark:border-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-                  <h3 class="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 truncate">
-                    INVENTORY HISTORY
-                  </h3>
-                  <span v-if="movementsTotal > 0" class="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 shrink-0">
-                    {{ movementsTotal }} Total
+        <div class="lg:col-span-2 flex flex-col max-h-none sm:max-h-[600px]">
+          <LoadMoreListCard
+            title="INVENTORY HISTORY"
+            :items="movements"
+            :is-loading="isMovementsLoading"
+            :has-more="hasMoreMovements"
+            :total="movementsTotal"
+            :page="movementsPage"
+            empty-title="No Inventory Records"
+            empty-description="When stock mutations, transactions, or warehouse receipts occur for this item, they will be securely registered here."
+            @load-more="loadMoreMovements"
+          >
+            <!-- Scoped Item Row Slot -->
+            <template #item="{ item: movement }">
+              <div 
+                class="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <!-- Movement Icon -->
+                <div 
+                  :class="[
+                    'flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full shrink-0 shadow-inner mt-0.5',
+                    movement.quantity_change > 0 
+                      ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' 
+                      : 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                  ]"
+                >
+                  <TrendingUp v-if="movement.quantity_change > 0" class="w-4 h-4 sm:w-5 sm:h-5" />
+                  <TrendingDown v-else class="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+
+                <!-- Details -->
+                <div class="flex-1 min-w-0 space-y-1">
+                  <p class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                    {{ formatReferenceType(movement.reference_type) }}
+                  </p>
+                  
+                  <div class="flex items-center gap-1.5 sm:gap-2">
+                    <Clock class="w-3 h-3 text-slate-400 shrink-0" />
+                    <span class="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 truncate">
+                      {{ formatDateTime(movement.created_at) }}
+                    </span>
+                  </div>
+
+                  <!-- Notes Field -->
+                  <p
+                    v-if="movement.notes"
+                    class="movement-notes text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 rounded-lg px-2.5 py-1.5 border border-slate-200/50 dark:border-slate-700/50 break-words mt-1.5"
+                  >
+                    <span class="font-semibold text-slate-500 dark:text-slate-400">Note:</span>
+                    {{ movement.notes }}
+                  </p>
+                </div>
+
+                <!-- Quantity Badge -->
+                <div class="shrink-0 text-right">
+                  <span 
+                    :class="[
+                      'inline-flex items-center justify-center px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-xs sm:text-sm font-mono font-black border shadow-sm',
+                      movement.quantity_change > 0 
+                        ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50' 
+                        : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/50'
+                    ]"
+                  >
+                    {{ movement.quantity_change > 0 ? '+' : '' }}{{ movement.quantity_change }}
                   </span>
                 </div>
-                <button
-                  v-if="!isReadOnly"
-                  @click="isStockAdjustModalOpen = true"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 hover:bg-brand-100 dark:hover:bg-brand-500/20 text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer shrink-0 self-start sm:self-auto"
-                >
-                  <ArrowRightLeft class="w-3.5 h-3.5 shrink-0" />
-                  <span>Adjust Stock</span>
-                </button>
               </div>
-
-              <!-- Content Area -->
-              <div class="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-slate-900/30 min-h-[300px] sm:min-h-[350px]">
-                
-                <!-- Initial Loading State -->
-                <div v-if="isMovementsLoading && movementsPage === 1" class="p-4 sm:p-5 space-y-3 sm:space-y-4">
-                  <div v-for="i in 4" :key="i" class="animate-pulse flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-white/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800/50">
-                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-200 dark:bg-slate-700/50 shrink-0"></div>
-                    <div class="flex-1 space-y-2 min-w-0">
-                      <div class="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-1/3"></div>
-                      <div class="h-3 bg-slate-100 dark:bg-slate-800/50 rounded w-1/4"></div>
-                    </div>
-                    <div class="w-14 sm:w-16 h-7 sm:h-8 rounded-lg bg-slate-200 dark:bg-slate-700/50 shrink-0"></div>
-                  </div>
-                </div>
-
-                <!-- Empty State -->
-                <section v-else-if="!movements.length" class="h-full flex flex-col items-center justify-center p-6 sm:p-12 text-center min-h-[300px] sm:min-h-[350px]">
-                  <div class="w-14 h-14 sm:w-16 sm:h-16 mb-4 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner">
-                    <PackageOpen class="w-7 h-7 sm:w-8 sm:h-8 text-slate-400 opacity-80" />
-                  </div>
-                  <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-2">No Inventory Records</h3>
-                  <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-                    When stock mutations, transactions, or warehouse receipts occur for this item, they will be securely registered here.
-                  </p>
-                </section>
-
-                <!-- Data List with Load More -->
-                <div v-else class="p-3 sm:p-5">
-                  <TransitionGroup name="list" tag="div" class="space-y-2.5 sm:space-y-3">
-                    <div 
-                      v-for="movement in movements" 
-                      :key="movement.id"
-                      class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 shadow-sm hover:shadow-md transition-shadow"
-                    >
-                      <!-- Movement Icon -->
-                      <div 
-                        :class="[
-                          'flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full shrink-0 shadow-inner',
-                          movement.quantity_change > 0 
-                            ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' 
-                            : 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                        ]"
-                      >
-                        <TrendingUp v-if="movement.quantity_change > 0" class="w-4 h-4 sm:w-5 sm:h-5" />
-                        <TrendingDown v-else class="w-4 h-4 sm:w-5 sm:h-5" />
-                      </div>
-
-                      <!-- Details -->
-                      <div class="flex-1 min-w-0">
-                        <p class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
-                          {{ formatReferenceType(movement.reference_type) }}
-                        </p>
-                        <div class="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
-                          <Clock class="w-3 h-3 text-slate-400 shrink-0" />
-                          <span class="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 truncate">
-                            {{ formatDateTime(movement.created_at) }}
-                          </span>
-                        </div>
-                      </div>
-
-                      <!-- Quantity Badge -->
-                      <div class="shrink-0 text-right">
-                        <span 
-                          :class="[
-                            'inline-flex items-center justify-center px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-xs sm:text-sm font-mono font-black border shadow-sm',
-                            movement.quantity_change > 0 
-                              ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50' 
-                              : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/50'
-                          ]"
-                        >
-                          {{ movement.quantity_change > 0 ? '+' : '' }}{{ movement.quantity_change }}
-                        </span>
-                      </div>
-                    </div>
-                  </TransitionGroup>
-
-                  <!-- Dynamic Load More Button -->
-                  <div v-if="hasMoreMovements" class="mt-5 sm:mt-6 flex justify-center pb-2 sm:pb-4">
-                    <AsyncButton
-                      :action="loadMoreMovements"
-                      class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-bold shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 transition-all active:scale-95 cursor-pointer"
-                    >
-                      Load More Records
-                    </AsyncButton>
-                  </div>
-                  
-                  <div v-else-if="movements.length > 0" class="mt-6 sm:mt-8 text-center pb-2 sm:pb-4">
-                    <p class="text-[11px] sm:text-xs font-medium text-slate-400 dark:text-slate-500">
-                      You've reached the end of the history
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </BaseCard>
-          </div>
+            </template>
+          </LoadMoreListCard>
+        </div>
 
         </div>
       </template>
@@ -260,16 +213,6 @@
       @close="isEditModalOpen = false"
       @updated="onItemUpdated"
     />
-
-    <!-- Stock Adjust Modal Integration -->
-    <StockAdjustModal
-      v-if="item && !isReadOnly"
-      :is-open="isStockAdjustModalOpen"
-      :workspace-id="workspaceId"
-      :preselected-item-id="item.id"
-      @close="isStockAdjustModalOpen = false"
-      @created="onStockAdjusted"
-    />
   </div>
 </template>
 
@@ -279,13 +222,11 @@ import { useRoute, useRouter } from 'vue-router'
 
 import { 
   ArrowLeft,
-  ArrowRightLeft,
   Calendar, 
   Check,
   Clock,
   Copy, 
   Edit2,
-  PackageOpen, 
   Tag,
   TrendingDown,
   TrendingUp
@@ -298,10 +239,10 @@ import { itemService } from '../services/item.service'
 import { inventoryService } from '../../inventory/services/inventory.service.ts'
 
 import BaseCard from '@/components/ui/BaseCard.vue'
-import AsyncButton from '@/components/layout/AsyncButton.vue'
+import LoadMoreListCard from '@/components/ui/BaseLoadMoreCard.vue'
 import ItemEditModal from './ItemEditModal.vue'
 import ItemBarcodeCard from '../components/ItemBarcodeCard.vue'
-import StockAdjustModal from '@/features/inventory/views/StockAdjustModal.vue'
+import { formatDate } from '@/utils/dateFormatter'
 
 const route = useRoute()
 const router = useRouter()
@@ -317,7 +258,6 @@ const item = ref<Item | null>(null)
 const isLoading = ref(true)
 const copiedId = ref(false)
 const isEditModalOpen = ref(false)
-const isStockAdjustModalOpen = ref(false)
 
 // --- Movements State ---
 const movements = ref<StockMovement[]>([])
@@ -347,7 +287,8 @@ const fetchMovements = async (isLoadMore = false) => {
     }
     const data = await inventoryService.getStockMovements(
       workspaceId, 
-      itemId, 
+      itemId,
+      undefined,          // We fetching all bins for this item
       movementsPage.value, 
       movementsLimit.value
     )
@@ -392,14 +333,6 @@ const formatPrice = (priceInCents: number) => {
   }).format(priceInCents / 100)
 }
 
-const formatDate = (dateString: string) => {
-  return new Intl.DateTimeFormat(LOCALE, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  }).format(new Date(dateString))
-}
-
 const formatDateTime = (dateString: string) => {
   return new Intl.DateTimeFormat(LOCALE, {
     month: 'short',
@@ -421,12 +354,6 @@ const formatReferenceType = (type: string) => {
 const onItemUpdated = (updatedData: Item) => {
   if (isReadOnly.value) return
   item.value = updatedData
-}
-
-const onStockAdjusted = async () => {
-  isStockAdjustModalOpen.value = false
-  movementsPage.value = 1
-  await fetchMovements(false)
 }
 
 onMounted(() => {

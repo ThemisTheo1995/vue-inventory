@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { ChartColumn } from 'lucide-vue-next'
-import { formatDate } from '../utils/formatters'
+import { formatDate } from '@/utils/dateFormatter'
 import type { DashboardResponse } from '../types/dashboard.types'
 import {
   Chart,

@@ -6,7 +6,7 @@ export const inventoryRoutes: RouteRecordRaw = {
     {
       path: '',
       name: 'inventory',
-      component: () => import('./views/InventoryView.vue'),
+      component: () => import('./views/InventoryBinView.vue'),
       meta: {
         title: 'Inventory', 
         description: 'Manage your inventory.'

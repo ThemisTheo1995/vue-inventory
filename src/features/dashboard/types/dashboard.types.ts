@@ -1,7 +1,16 @@
 export interface DashboardKPIs {
   total_revenue: number
+  revenue_trend?: string | null
+  revenue_trend_up: boolean
+
   total_sell_orders: number
+  sell_orders_trend?: string | null
+  sell_orders_trend_up: boolean
+
   total_purchase_orders: number
+  purchase_orders_trend?: string | null
+  purchase_orders_trend_up: boolean
+
   items_low_stock: number
 }
 

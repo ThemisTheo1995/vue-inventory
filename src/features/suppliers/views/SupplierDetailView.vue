@@ -174,8 +174,7 @@ import { supplierService } from '../services/supplier.service'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import AsyncButton from '@/components/layout/AsyncButton.vue'
 import SupplierEditModal from './SupplierEditModal.vue'
-
-const LOCALE = 'en-GB'
+import { formatDate } from '@/utils/dateFormatter'
 
 const route = useRoute()
 const router = useRouter()
@@ -209,14 +208,6 @@ const copyIdToClipboard = async (text: string) => {
     console.error('Failed to copy ID:', err)
     throw err
   }
-}
-
-const formatDate = (dateString: string) => {
-  return new Intl.DateTimeFormat(LOCALE, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  }).format(new Date(dateString))
 }
 
 const onSupplierUpdated = (updatedData: Supplier) => {

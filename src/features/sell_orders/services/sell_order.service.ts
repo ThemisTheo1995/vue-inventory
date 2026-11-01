@@ -18,7 +18,6 @@ class SellOrderService {
 
   async getAll(
     workspaceId: string,
-    search?: string,
     page = 1,
     limit = 20,
     filters?: Record<string, any>
@@ -27,10 +26,6 @@ class SellOrderService {
       page: page.toString(),
       limit: limit.toString()
     })
-    
-    if (search) {
-      params.append('search', search)
-    }
 
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -39,11 +34,12 @@ class SellOrderService {
         }
       })
     }
-    
-    const response = await apiFetch(`/${workspaceId}/sell-orders?${params}`, { 
-      method: 'GET'
-    })
-    
+
+    const response = await apiFetch(
+      `/${workspaceId}/sell-orders?${params.toString()}`,
+      { method: 'GET' }
+    )
+
     return await response.json()
   }
 
@@ -64,7 +60,11 @@ class SellOrderService {
     return await response.json()
   }
 
-  async update(workspaceId: string, sellOrderId: string, payload: SellOrderUpdate): Promise<SellOrder> {
+  async update(
+    workspaceId: string, 
+    sellOrderId: string, 
+    payload: SellOrderUpdate
+  ): Promise<SellOrder> {
     const response = await apiFetch(`/${workspaceId}/sell-orders/${sellOrderId}`, {
       method: 'PATCH',
       body: JSON.stringify(payload)

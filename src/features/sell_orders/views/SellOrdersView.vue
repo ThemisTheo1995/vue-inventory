@@ -3,33 +3,33 @@
   <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto">
     <!-- Header Section -->
     <header class="space-y-1">
-  <!-- Title & Action Button Row -->
-  <div class="flex items-center justify-between gap-4">
-    <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-wider">
-      {{ $route.meta.title || 'Sell Orders' }}
-    </h1>
+      <!-- Title & Action Button Row -->
+      <div class="flex items-center justify-between gap-4">
+        <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-wider">
+          {{ $route.meta.title || 'Sell Orders' }}
+        </h1>
 
-    <div v-if="!isReadOnly" class="flex items-center shrink-0">
-      <button
-        @click="isCreateModalOpen = true"
-        v-tooltip="'New Sell Order'"
-        aria-label="New Sell Order"
-        class="group relative inline-flex items-center justify-center p-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 shadow-md hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 transition-all duration-200 cursor-pointer"
-      >
-        <div
-          class="absolute inset-0 rounded-xl bg-white/20 dark:bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"
-        ></div>
+        <div v-if="!isReadOnly" class="flex items-center shrink-0">
+          <button
+            @click="isCreateModalOpen = true"
+            v-tooltip="'New Sell Order'"
+            aria-label="New Sell Order"
+            class="group relative inline-flex items-center justify-center p-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 shadow-md hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-white/20 active:scale-95 transition-all duration-200 cursor-pointer"
+          >
+            <div
+              class="absolute inset-0 rounded-xl bg-white/20 dark:bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"
+            ></div>
 
-        <Plus class="w-5 h-5 relative z-10 shrink-0" />
-      </button>
-    </div>
-  </div>
+            <Plus class="w-5 h-5 relative z-10 shrink-0" />
+          </button>
+        </div>
+      </div>
 
-  <!-- Description -->
-  <p class="text-sm sm:text-base font-medium text-slate-500 dark:text-slate-400">
-    {{ $route.meta.description || 'Manage and track your customer sell orders.' }}
-  </p>
-</header>
+      <!-- Description -->
+      <p class="text-sm sm:text-base font-medium text-slate-500 dark:text-slate-400">
+        {{ $route.meta.description || 'Manage and track your customer sell orders.' }}
+      </p>
+    </header>
 
     <!-- Reusable Table Component -->
     <BaseTable
@@ -44,7 +44,7 @@
       :total-items="totalItems"
       :items-per-page="itemsPerPage"
       :total-pages="totalPages"
-      search-placeholder="Search SO number or customer..."
+      search-placeholder="SO number, Item name, SKU..."
       empty-title="No sell orders found"
       :empty-description="isReadOnly ? 'There are currently no sell orders matching your criteria.' : 'Get started by creating your first sell order to track customer items.'"
       create-button-text="Create First SO"
@@ -98,23 +98,23 @@
             </div>
             <!-- Dynamic Actions -->
             <div v-if="!isReadOnly" class="flex items-center gap-1 -mr-2" @click.stop>
-              <AsyncButton
+              <button
                 v-if="so.status === 'DRAFT'"
-                :action="() => handleAction(so.id, () => updateStatus(so, 'CONFIRMED'))"
+                @click="openTransitionModal(so, 'CONFIRMED')"
                 class="p-2 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 rounded-full hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors border-0 cursor-pointer flex items-center justify-center bg-transparent"
                 title="Confirm Order"
               >
                 <Send class="w-4 h-4" />
-              </AsyncButton>
+              </button>
               
-              <AsyncButton
+              <button
                 v-if="so.status === 'CONFIRMED'"
-                :action="() => handleAction(so.id, () => updateStatus(so, 'FULLFILLED'))"
+                @click="openTransitionModal(so, 'FULLFILLED')"
                 class="p-2 text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors border-0 cursor-pointer flex items-center justify-center bg-transparent"
                 title="Fulfill Order"
               >
                 <CheckCircle class="w-4 h-4" />
-              </AsyncButton>
+              </button>
 
               <AsyncButton
                 v-if="so.status === 'DRAFT' || so.status === 'CANCELLED'"
@@ -207,23 +207,23 @@
                 class="flex items-center gap-1 transition-opacity duration-200"
                 :class="{ 'opacity-0 group-hover:opacity-100': !loadingRows[so.id] }"
               >
-                <AsyncButton
+                <button
                   v-if="so.status === 'DRAFT'"
-                  :action="() => handleAction(so.id, () => updateStatus(so, 'CONFIRMED'))"
+                  @click="openTransitionModal(so, 'CONFIRMED')"
                   class="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all transform active:scale-95 border-0 cursor-pointer flex items-center justify-center bg-transparent"
                   title="Confirm Order"
                 >
                   <Send class="w-4 h-4" />
-                </AsyncButton>
+                </button>
                 
-                <AsyncButton
+                <button
                   v-if="so.status === 'CONFIRMED'"
-                  :action="() => handleAction(so.id, () => updateStatus(so, 'FULLFILLED'))"
+                  @click="openTransitionModal(so, 'FULLFILLED')"
                   class="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all transform active:scale-95 border-0 cursor-pointer flex items-center justify-center bg-transparent"
                   title="Fulfill Order"
                 >
                   <CheckCircle class="w-4 h-4" />
-                </AsyncButton>
+                </button>
 
                 <AsyncButton
                   v-if="so.status === 'DRAFT' || so.status === 'CANCELLED'"
@@ -247,6 +247,16 @@
       @close="isCreateModalOpen = false" 
       @created="onSOCreated" 
     />
+
+    <!-- Status Transition Modal -->
+    <StatusTransitionModal
+      :is-open="isTransitionModalOpen"
+      :workspace-id="workspaceId"
+      :target-status="transitionTargetStatus"
+      :require-bin="transitionTargetStatus === 'FULLFILLED'"
+      @close="isTransitionModalOpen = false"
+      @confirm="handleTransitionConfirmed"
+    />
   </div>
 </template>
 
@@ -254,7 +264,7 @@
 import { computed, onMounted, ref, h } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { 
-  Plus, Trash2, Hash, User, Calendar, Send, CheckCircle, FileText 
+  Plus, Trash2, Hash, User, Calendar, Send, CheckCircle 
 } from "lucide-vue-next"
 
 import { useConfirm } from "@/composables/useConfirm"
@@ -264,6 +274,7 @@ import { useSearch } from "@/composables/useSearch"
 import BaseTable from "@/components/ui/table/BaseTable.vue"
 import AsyncButton from "@/components/layout/AsyncButton.vue"
 import SellOrderCreateModal from "./SellOrderCreateModal.vue"
+import StatusTransitionModal from "../components/StatusTransitionModal.vue"
 
 import { sellOrderService } from "../services/sell_order.service"
 import type { SellOrder, SellOrderStatus, TableFilter } from "../types/sell_order.types"
@@ -309,6 +320,11 @@ const isCreateModalOpen = ref(false)
 
 const loadingRows = ref<Record<string, boolean>>({})
 
+// Status Transition Modal State
+const isTransitionModalOpen = ref(false)
+const selectedOrderForTransition = ref<SellOrder | null>(null)
+const transitionTargetStatus = ref<SellOrderStatus>('CONFIRMED')
+
 const currentPage = ref(1)
 const itemsPerPage = ref(20)
 const totalItems = ref(0)
@@ -341,29 +357,33 @@ const formatDateTime = (dateString?: string) => {
 
 const fetchSellOrders = async (searchVal = searchQuery.value) => {
   try {
+    const requestFilters = {
+      ...selectedFilters.value,
+      search: searchVal?.trim() || undefined,
+    }
+
     const data = await sellOrderService.getAll(
       workspaceId,
-      searchVal,
       currentPage.value,
       itemsPerPage.value,
-      selectedFilters.value
+      requestFilters
     )
+
     sellOrders.value = data.items || []
     totalItems.value = data.total || 0
 
-    if (data.filters?.length) {
+    if (data.filters) {
       tableFilters.value = data.filters
     }
-
   } catch (err: any) {
-    const errorMessage = 
-        err.response?.data?.detail || 
-        err.message || 
-        "An unexpected error occurred"
+    const errorMessage =
+      err.response?.data?.detail ||
+      err.message ||
+      "An unexpected error occurred"
 
-    const displayMessage = Array.isArray(errorMessage) 
-        ? errorMessage[0].msg 
-        : errorMessage
+    const displayMessage = Array.isArray(errorMessage)
+      ? errorMessage[0].msg
+      : errorMessage
 
     showToast(displayMessage, "error")
   }
@@ -413,21 +433,28 @@ const handleAction = async (soId: string, actionFn: () => Promise<any>) => {
   }
 }
 
-const updateStatus = async (so: SellOrder, nextStatus: SellOrderStatus) => {
-  const isTransitionConfirmed = await confirm({
-    title: `Transition to ${nextStatus}`,
-    message: `Are you sure you want to transition this sell order status to ${nextStatus}? This action dictates downstream order processing.`,
-    confirmText: "Confirm Change",
-    cancelText: "Cancel",
-    variant: nextStatus === "CANCELLED" ? "danger" : "primary"
-  })
+const openTransitionModal = (so: SellOrder, nextStatus: SellOrderStatus) => {
+  selectedOrderForTransition.value = so
+  transitionTargetStatus.value = nextStatus
+  isTransitionModalOpen.value = true
+}
 
-  if (!isTransitionConfirmed) return
+const handleTransitionConfirmed = async (payload?: { binId?: string }) => {
+  if (!selectedOrderForTransition.value) return
+  const so = selectedOrderForTransition.value
+  const nextStatus = transitionTargetStatus.value
 
+  loadingRows.value[so.id] = true
   try {
-    await sellOrderService.update(workspaceId, so.id, { status: nextStatus })
+    await sellOrderService.update(workspaceId, so.id, { 
+      status: nextStatus,
+      bin_id: payload?.binId 
+    })
+    
     showToast(`SO successfully moved to ${nextStatus}`, "success")
     so.status = nextStatus
+    isTransitionModalOpen.value = false
+    selectedOrderForTransition.value = null
   } catch (err: any) {
     const errorMessage = 
         err.response?.data?.detail || 
@@ -440,6 +467,8 @@ const updateStatus = async (so: SellOrder, nextStatus: SellOrderStatus) => {
 
     showToast(displayMessage, "error")
     throw err
+  } finally {
+    loadingRows.value[so.id] = false
   }
 }
 

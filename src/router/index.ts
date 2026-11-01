@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import BaseLayout from '../components/layout/BaseLayout.vue'
 
 import { authRoutes } from '../features/auth/routes'
+import { binsRoutes } from '../features/bins/routes'
 import { dashboardRoutes } from '../features/dashboard/routes'
 import { settingsRoutes } from '../features/settings/routes'
 import { RootRoute } from '../features/root/routes'
@@ -35,7 +36,8 @@ const router = createRouter({
         inventoryRoutes,
         itemsRoutes,
         purchaseOrdersRoutes,
-        sellOrdersRoutes
+        sellOrdersRoutes,
+        binsRoutes
       ],
     },
 

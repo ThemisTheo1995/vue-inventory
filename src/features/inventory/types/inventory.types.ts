@@ -1,10 +1,13 @@
-// src/types/inventory.types.ts
+// src/features/inventory/types/inventory.types.ts
+
+import type { Bin } from '@/features/bins/types/bin.types'
 
 export enum OrderType {
   PURCHASE_ORDER = 'PURCHASE_ORDER',
-  SALES_ORDER = 'SALES_ORDER',
+  SELL_ORDER = 'SELL_ORDER',
   RETURN = 'RETURN',
-  MANUAL_ADJUSTMENT = 'MANUAL_ADJUSTMENT'
+  MANUAL_ADJUSTMENT = 'MANUAL_ADJUSTMENT',
+  BIN_TRANSFER = 'BIN_TRANSFER'
 }
 
 export interface Item {
@@ -21,14 +24,15 @@ export interface Inventory {
   id: string;
   workspace_id: string;
   item_id: string;
+  bin_id: string;
   quantity_on_hand: number;
-  quantity_allocated: number;
-  quantity_on_order: number;
-  quantity_available: number;
-  expected_available: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InventoryExpanded extends Inventory {
   item?: Item | null;
-  created_at?: string;
-  updated_at?: string;
+  bin?: Bin | null;
 }
 
 export interface PaginatedInventory {
@@ -39,22 +43,35 @@ export interface PaginatedInventory {
   pages?: number;
 }
 
+export interface PaginatedExpandedInventory {
+  items: InventoryExpanded[];
+  total: number;
+  page?: number;
+  limit?: number;
+  pages?: number;
+}
+
 export interface StockMovement {
   id: string;
   workspace_id: string;
   item_id: string;
+  bin_id: string;
   quantity_change: number;
   reference_type: OrderType | string;
   reference_id: string | null;
+  bin?: Bin | null;
   created_at: string;
   updated_at: string;
+  notes?: string | null;
 }
 
 export interface StockMovementCreate {
   item_id: string;
+  bin_id: string;
   quantity_change: number;
   reference_type: OrderType | string;
   reference_id?: string | null;
+  notes?: string | null;
 }
 
 export interface PaginatedStockMovements {
@@ -63,4 +80,16 @@ export interface PaginatedStockMovements {
   page?: number;
   limit?: number;
   pages?: number;
+}
+
+export interface InventoryTransferRequest {
+  item_id: string;
+  source_bin_id: string;
+  destination_bin_id: string;
+  quantity: number;
+  notes?: string | null;
+}
+
+export interface InventoryTransferResponse {
+  message: string;
 }
