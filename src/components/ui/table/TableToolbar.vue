@@ -54,7 +54,7 @@
               <template v-if="!filter.type || filter.type === 'select'">
                 <select
                   :value="localFilters?.[filter.key] ?? ''"
-                  @change="handleFilterChange(filter.key, ($event.target as HTMLSelectElement).value)"
+                  @change="handleSelectChange(filter, $event)"
                   class="w-full appearance-none pl-3.5 pr-8 py-2.5 rounded-xl border bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 cursor-pointer"
                   :class="[
                     isFilterActive(filter.key)
@@ -226,7 +226,7 @@ import { computed, ref, watch } from "vue"
 import { Search, Filter, RotateCcw, X } from "lucide-vue-next"
 import { formatCurrency } from "@/utils/currencyFormatter"
 import { priceFormatter } from "@/utils/priceFormatter"
-import type { TableFilter } from "./BaseTable.vue"
+import type { TableFilter } from "./types/filter.types"
 
 const props = defineProps<{
   showSearch: boolean
@@ -283,22 +283,48 @@ const isFilterActive = (key: string): boolean => {
   return val !== undefined && val !== null && val !== ''
 }
 
+const isDefaultFilterValue = (key: string, value: any): boolean => {
+  const filter = props.filters?.find(f => f.key === key)
+
+  if (!filter) return false
+
+  const defaultValue = filter.default_value
+
+  if (defaultValue === undefined || defaultValue === null) {
+    return value === undefined || value === null || value === ''
+  }
+
+  return String(value) === String(defaultValue)
+}
+
 const hasActiveFilters = computed(() => {
-  return Object.values(localFilters.value || {}).some(
-    val => val !== undefined && val !== null && val !== ''
-  )
+  return Object.entries(localFilters.value || {}).some(([key, value]) => {
+    if (value === undefined || value === null || value === '') return false
+
+    return !isDefaultFilterValue(key, value)
+  })
 })
 
 const activeFiltersCount = computed(() => {
-  return Object.entries(localFilters.value || {}).filter(([k, val]) => {
-    if (val === undefined || val === null || val === '') return false
-    const fDef = props.filters?.find(f => f.key === k)
-    if (fDef && fDef.type === 'range') {
-      const bounds = getFilterBounds(fDef)
-      if (Array.isArray(val) && val[0] === bounds[0] && val[1] === getSafeMax(fDef)) {
+  return Object.entries(localFilters.value || {}).filter(([key, value]) => {
+    if (value === undefined || value === null || value === '') return false
+
+    if (isDefaultFilterValue(key, value)) return false
+
+    const filter = props.filters?.find(f => f.key === key)
+
+    if (filter?.type === 'range') {
+      const bounds = getFilterBounds(filter)
+
+      if (
+        Array.isArray(value) &&
+        value[0] === bounds[0] &&
+        value[1] === getSafeMax(filter)
+      ) {
         return false
       }
     }
+
     return true
   }).length
 })
@@ -440,14 +466,41 @@ const commitRangeChange = (key: string) => {
 
 const handleReset = () => {
   activeDropdown.value = null
-  localFilters.value = {}
-  props.filters?.forEach(f => {
-    if (f.type === 'range') {
-      rangeValues.value[f.key] = getFilterBounds(f)
+
+  const defaults: Record<string, any> = {}
+
+  props.filters?.forEach(filter => {
+    if (filter.default_value !== undefined && filter.default_value !== null) {
+      defaults[filter.key] = filter.default_value
+    }
+
+    if (filter.type === 'range') {
+      rangeValues.value[filter.key] = getFilterBounds(filter)
     }
   })
-  emit('update:selectedFilters', {})
-  emit('filter-change', { key: 'reset', value: null, filters: {} })
+
+  localFilters.value = defaults
+
+  emit('update:selectedFilters', defaults)
+  emit('filter-change', {
+    key: 'reset',
+    value: null,
+    filters: defaults,
+  })
+
   emit('reset')
+}
+
+const handleSelectChange = (filter: TableFilter, event: Event) => {
+  const selectedValue = (event.target as HTMLSelectElement).value
+
+  const option = filter.options?.find(
+    opt => String(opt.value) === selectedValue
+  )
+
+  handleFilterChange(
+    filter.key,
+    option ? option.value : ''
+  )
 }
 </script>

@@ -1,6 +1,7 @@
 // src/features/inventory/types/inventory.types.ts
 
 import type { Bin } from '@/features/bins/types/bin.types'
+import type { TableFilter } from '@/components/ui/table/types/filter.types';
 
 export enum OrderType {
   PURCHASE_ORDER = 'PURCHASE_ORDER',
@@ -26,6 +27,7 @@ export interface Inventory {
   item_id: string;
   bin_id: string;
   quantity_on_hand: number;
+  is_deleted: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -35,9 +37,18 @@ export interface InventoryExpanded extends Inventory {
   bin?: Bin | null;
 }
 
+export interface InventoryUpdate {
+  is_deleted: boolean
+}
+
+export interface InventoryFilterParams {
+  is_deleted?: boolean | string;
+}
+
 export interface PaginatedInventory {
   items: Inventory[];
   total: number;
+  filters: TableFilter[];
   page?: number;
   limit?: number;
   pages?: number;
@@ -46,6 +57,7 @@ export interface PaginatedInventory {
 export interface PaginatedExpandedInventory {
   items: InventoryExpanded[];
   total: number;
+  filters: TableFilter[];
   page?: number;
   limit?: number;
   pages?: number;

@@ -1,6 +1,6 @@
 <!-- src/features/views/inventory/InventoryDetailView.vue -->
 <template>
-  <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto px-4 sm:px-6">
+  <div class="space-y-6 pb-6 lg:pb-10 max-w-full mx-auto px-4 sm:px-6">
     
     <!-- Breadcrumb Header -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

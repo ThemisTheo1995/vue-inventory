@@ -33,7 +33,7 @@
       </header>
 
       <main class="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10">
-        <div class="max-w-7xl mx-auto h-full">
+        <div class="max-w-full mx-auto h-full">
           <router-view v-slot="{ Component, route }">
             <transition name="fade" mode="out-in">
               <component :is="Component" :key="route.path" />

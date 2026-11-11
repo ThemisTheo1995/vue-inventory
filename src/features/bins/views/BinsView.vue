@@ -1,13 +1,13 @@
 <!-- src/views/bins/BinsView.vue -->
 <template>
-  <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto">
+  <div class="space-y-6 pb-6 lg:pb-10 max-w-full mx-auto">
     <!-- Header Section -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div class="space-y-1">
         <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-wider">
           {{ $route.meta.title || 'Bins' }}
         </h1>
-        <p class="text-sm sm:text-base font-medium text-slate-500 dark:text-slate-400">
+        <p class="text-sm font-medium text-slate-500 dark:text-slate-400">
           {{ $route.meta.description || 'Manage your warehouse bin locations and zones.' }}
         </p>
       </div>
@@ -32,7 +32,7 @@
       :is-read-only="isReadOnly"
       v-model:search-query="searchQuery"
       :is-searching="isSearching"
-      search-placeholder="Search bins by code or zone..."
+      search-placeholder="Search code, zone and item..."
       :current-page="currentPage"
       :total-pages="totalPages"
       :total-items="totalItems"
@@ -51,19 +51,19 @@
           v-for="bin in bins"
           :key="bin.id"
           @click="navigateToBin(bin.id)"
-          class="relative p-4 sm:p-5 hover:bg-slate-50 dark:hover:bg-slate-800/40 active:bg-slate-100 dark:active:bg-slate-800 transition-colors cursor-pointer group"
+          class="relative p-4 sm:p-5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 active:bg-slate-100 dark:active:bg-slate-900 transition-colors cursor-pointer group border-b dark:border-slate-900 last:border-0"
         >
           <div class="flex items-start justify-between gap-3">
             <div class="flex items-center gap-3 min-w-0">
-              <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 shadow-sm border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform shrink-0">
+              <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 shadow-sm border border-slate-200 dark:border-slate-700 shrink-0 group-hover:scale-105 transition-transform">
                 <ShelvingUnit class="w-5 h-5" />
               </div>
 
               <div class="min-w-0">
-                <p class="font-bold text-slate-900 dark:text-white text-base font-mono leading-tight tracking-wide truncate">
+                <p class="font-semibold text-slate-900 dark:text-white text-sm font-mono leading-tight tracking-wide truncate">
                   {{ bin.code }}
                 </p>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mt-0.5">
+                <p class="text-xs font-medium uppercase tracking-wider text-slate-400 dark:text-slate-500 mt-1">
                   ID: {{ bin.id.slice(0, 8) }}
                 </p>
               </div>
@@ -71,10 +71,10 @@
 
             <!-- Quantity on hand -->
             <div class="shrink-0 text-right">
-              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 On hand
               </p>
-              <span class="inline-flex items-center justify-center min-w-[2.5rem] mt-0.5 px-2.5 py-1 rounded-lg bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400 text-sm font-bold font-mono">
+              <span class="inline-flex items-center justify-center min-w-[2.5rem] mt-1 px-2.5 py-1 rounded-lg bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400 text-sm font-bold font-mono">
                 {{ bin.quantity_on_hand ?? 0 }}
               </span>
             </div>
@@ -88,10 +88,15 @@
               </span>
             </div>
 
-            <div v-if="!isReadOnly" class="shrink-0" @click.stop>
+            <!-- Actions -->
+            <div
+              v-if="!isReadOnly && (bin.quantity_on_hand ?? 0) === 0"
+              class="shrink-0"
+              @click.stop
+            >
               <AsyncButton
                 :action="() => deleteBin(bin)"
-                class="!p-2 -mr-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:!bg-red-50 dark:hover:!bg-red-400/10 transition-colors"
+                class="!p-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:!bg-red-50 dark:hover:!bg-red-400/10 rounded-lg transition-all transform active:scale-95"
                 title="Delete bin"
               >
                 <Trash2 class="w-4 h-4" />
@@ -103,6 +108,9 @@
 
       <!-- ================= DESKTOP TABLE VIEW ================= -->
       <template #desktop-headers>
+        <th :class="[dateColumnClass, 'px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500']">
+          Date Created
+        </th>
         <th :class="[codeColumnClass, 'px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500']">
           Bin Code
         </th>
@@ -111,9 +119,6 @@
         </th>
         <th :class="[quantityColumnClass, 'px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500']">
           Qty On Hand
-        </th>
-        <th :class="[dateColumnClass, 'px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500']">
-          Created At
         </th>
         <th
           v-if="!isReadOnly"
@@ -130,19 +135,30 @@
           @click="navigateToBin(bin.id)"
           class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
         >
-          <!-- Bin Code -->
-          <td class="px-6 py-4 relative">
+          <!-- Date Created -->
+          <td :class="[dateColumnClass, 'px-6 py-4 relative']">
             <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div class="flex flex-col">
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                  {{ formatDateTime(bin.created_at).date }}
+                </span>
+                <span class="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-0.5">
+                  {{ formatDateTime(bin.created_at).time }}
+                </span>
+            </div>
+          </td>
 
+          <!-- Bin Code -->
+          <td class="px-6 py-4">
             <div class="flex items-center gap-3">
               <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 shadow-sm border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform">
                 <ShelvingUnit class="w-4 h-4" />
               </div>
               <div class="min-w-0">
-                <p class="font-bold text-slate-900 dark:text-white text-sm font-mono truncate" :title="bin.code">
+                <p class="font-semibold text-slate-900 dark:text-white text-sm font-mono truncate" :title="bin.code">
                   {{ bin.code }}
                 </p>
-                <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider truncate">
+                <p class="text-xs text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider truncate">
                   ID: {{ bin.id.slice(0, 8) }}
                 </p>
               </div>
@@ -166,19 +182,13 @@
             </span>
           </td>
 
-          <!-- Created At -->
-          <td class="px-6 py-4">
-            <span class="text-sm font-medium text-slate-500 dark:text-slate-400">
-              {{ new Date(bin.created_at).toLocaleDateString() }}
-            </span>
-          </td>
-
           <!-- Actions -->
           <td v-if="!isReadOnly" class="px-6 py-4 text-right">
             <div class="flex items-center justify-end" @click.stop>
               <AsyncButton
+                v-if="(bin.quantity_on_hand ?? 0) === 0"
                 :action="() => deleteBin(bin)"
-                class="opacity-0 group-hover:opacity-100 !p-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:!bg-red-50 dark:hover:!bg-red-400/10 rounded-lg transition-all transform active:scale-95"
+                class="!p-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:!bg-red-50 dark:hover:!bg-red-400/10 rounded-lg transition-all transform active:scale-95"
                 title="Delete bin"
               >
                 <Trash2 class="w-4 h-4" />
@@ -215,6 +225,7 @@ import { useSearch } from "@/composables/useSearch"
 
 import { binService } from "../services/bin.service"
 import type { Bin } from "../types/bin.types"
+import { formatDateTime } from "@/utils/dateFormatter"
 
 const route = useRoute()
 const router = useRouter()

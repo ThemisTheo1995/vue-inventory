@@ -1,6 +1,6 @@
 <!-- src/views/bins/BinDetailView.vue -->
 <template>
-  <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto">
+  <div class="space-y-6 pb-6 lg:pb-10 max-w-full mx-auto">
     
     <!-- Breadcrumb Header -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -135,7 +135,31 @@
               <template #item="{ item: inv }">
                 <div class="flex items-center justify-between gap-4 p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/60 shadow-sm hover:shadow-md transition-shadow">
                   <div class="min-w-0 flex-1">
-                    <p class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm truncate">{{ inv.item?.title || 'Unknown Item' }}</p>
+                    <router-link
+                      v-if="inv.item?.id"
+                      :to="{
+                        name: 'item-details',
+                        params: {
+                          workspaceId,
+                          id: inv.item.id
+                        }
+                      }"
+                      class="inline-flex items-center gap-1.5 max-w-full font-bold text-brand-600 dark:text-brand-400 text-xs sm:text-sm hover:text-brand-700 dark:hover:text-brand-300 hover:underline underline-offset-4 transition-all duration-200 cursor-pointer group/item"
+                    >
+                      <span class="truncate">
+                        {{ inv.item.title || 'Unknown Item' }}
+                      </span>
+                      <ExternalLink
+                        class="w-3.5 h-3.5 shrink-0 opacity-60 group-hover/item:opacity-100 group-hover/item:translate-x-0.5 transition-all"
+                      />
+                    </router-link>
+
+                    <p
+                      v-else
+                      class="font-bold text-slate-500 dark:text-slate-400 text-xs sm:text-sm truncate"
+                    >
+                      Unknown Item
+                    </p>
                     <p class="font-mono text-[11px] sm:text-xs text-slate-400 truncate mt-0.5">{{ inv.item?.sku || 'NO-SKU' }}</p>
                   </div>
                   <div class="flex items-center gap-4 sm:gap-6 shrink-0 text-right">
@@ -168,7 +192,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, Calendar, Check, Copy, Edit2, ShelvingUnit, MapPin } from 'lucide-vue-next'
+import { ArrowLeft, Calendar, Check, Copy, Edit2, ShelvingUnit, MapPin, ExternalLink } from 'lucide-vue-next'
 
 import type { BinDetail, Bin } from '../types/bin.types'
 import { binService } from '../services/bin.service'

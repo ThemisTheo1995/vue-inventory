@@ -141,22 +141,11 @@ import { FileText } from "lucide-vue-next"
 import BaseCard from "@/components/ui/BaseCard.vue"
 import TableToolbar from "./TableToolbar.vue"
 import TablePagination from "./TablePagination.vue"
+import type { TableFilter } from "./types/filter.types"
 
 export interface TableFilterOption {
   label: string
   value: string | number | boolean
-}
-
-export interface TableFilter {
-  key: string
-  type?: 'select' | 'range'
-  label?: string
-  placeholder?: string
-  options?: TableFilterOption[]
-  min?: number
-  max?: number
-  step?: number
-  prefix?: string
 }
 
 export interface BaseTableProps {

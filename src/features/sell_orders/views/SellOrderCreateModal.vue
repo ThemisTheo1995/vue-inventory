@@ -18,74 +18,29 @@
       <!-- Top Metadata Row -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5 bg-slate-50/50 dark:bg-slate-900/30 p-5 sm:p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 shadow-sm">
         
-        <!-- Customer Autocomplete Search -->
-        <div class="space-y-2 relative md:col-span-2" ref="customerContainerRef">
+        <!-- Customer Autocomplete -->
+        <div class="space-y-2 relative md:col-span-2">
           <label class="text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 ml-1">
             Customer <span class="text-red-500">*</span>
           </label>
-          <div class="relative group">
-            <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
-              <Users class="w-4 h-4" />
-            </div>
-            <input
-              v-model="customerSearchInput"
-              @input="onCustomerSearchInput"
-              @focus="onCustomerInputFocus"
-              type="text"
-              placeholder="Type at least 3 letters of a customer"
-              required 
-              class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 pl-11 pr-10 py-3 text-sm font-medium text-slate-900 dark:text-white shadow-sm outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all placeholder:font-normal placeholder:text-slate-400"
-            />
-            <div class="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
-              <svg v-if="isCustomerLoading" class="animate-spin h-4 w-4 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
-                <path class="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <button
-                v-else-if="customerSearchInput"
-                type="button"
-                @click="clearCustomerSelection"
-                class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <X class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          <!-- Customer Dropdown -->
-          <Transition 
-            enter-active-class="transition duration-150 ease-out" 
-            enter-from-class="transform scale-95 opacity-0 translate-y-1" 
-            enter-to-class="transform scale-100 opacity-100 translate-y-0" 
-            leave-active-class="transition duration-100 ease-in" 
-            leave-from-class="transform scale-100 opacity-100" 
-            leave-to-class="transform scale-95 opacity-0"
+          <BaseAutocomplete
+            v-model="customerSearchInput"
+            :search="searchCustomers"
+            :get-item-label="getCustomerLabel"
+            placeholder="Search customer..."
+            input-class="rounded-xl py-3"
+            :max-height="240"
+            @select="selectCustomer"
+            @clear="clearCustomerSelection"
+            @search-error="handleAutocompleteError"
           >
-            <div
-              v-if="isCustomerDropdownOpen"
-              class="absolute z-50 left-0 right-0 mt-2 max-h-60 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl shadow-2xl ring-1 ring-black/5 "
-            >
-              <div v-if="isCustomerLoading && customers.length === 0" class="p-6 text-center text-sm font-medium text-slate-400">
-                Searching customers...
+            <template #option="{ item }">
+              <div class="flex min-w-0 flex-col gap-0.5">
+                <span class="block min-w-0 truncate text-sm font-bold leading-5 text-slate-900 dark:text-white">{{ getCustomerLabel(item) }}</span>
+                <span class="block min-w-0 truncate text-xs font-mono leading-4 text-slate-500 dark:text-slate-400">{{ item.email || 'No email provided' }}</span>
               </div>
-              <div v-else-if="customers.length === 0" class="p-6 text-center text-sm font-medium text-slate-400">
-                No customers found matching "{{ customerSearchInput }}"
-              </div>
-              <ul v-else class="py-2 divide-y divide-slate-100 dark:divide-slate-700/50">
-                <li
-                  v-for="customer in customers"
-                  :key="customer.id"
-                  @click="selectCustomer(customer)"
-                  class="px-4 py-3 cursor-pointer hover:bg-brand-50 dark:hover:bg-brand-500/10 flex flex-col transition-colors group"
-                >
-                  <span class="font-bold text-sm text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
-                    {{ customer.first_name }} {{ customer.last_name || '' }}
-                  </span>
-                  <span class="text-xs text-slate-500 font-mono mt-0.5">{{ customer.email || 'No email provided' }}</span>
-                </li>
-              </ul>
-            </div>
-          </Transition>
+            </template>
+          </BaseAutocomplete>
         </div>
 
         <!-- SO Number -->
@@ -143,8 +98,7 @@
             v-for="(line, index) in lines" 
             :key="index"
             :class="[
-              'relative p-4 md:p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all js-item-search-container group',
-              line.isDropdownOpen ? 'z-50 ring-2 ring-brand-500/20' : 'z-10'
+              'relative z-10 p-4 md:p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group'
             ]"
           >
             <div class="flex flex-col md:grid md:grid-cols-12 gap-4 md:gap-4 md:items-center">
@@ -165,48 +119,25 @@
                   </button>
                 </div>
 
-                <input
+                <BaseAutocomplete
                   v-model="line.searchInput"
-                  @input="onItemSearchInput(index)"
-                  @focus="onItemInputFocus(index)"
-                  type="text"
-                  required
+                  :search="searchItems"
+                  :get-item-label="getItemLabel"
                   placeholder="Search product..."
-                  class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-950 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
-                />
-                
-                <!-- Product Autocomplete Dropdown -->
-                <Transition 
-                  enter-active-class="transition duration-150 ease-out" 
-                  enter-from-class="transform scale-95 opacity-0 translate-y-1" 
-                  enter-to-class="transform scale-100 opacity-100 translate-y-0" 
-                  leave-active-class="transition duration-100 ease-in" 
-                  leave-from-class="transform scale-100 opacity-100" 
-                  leave-to-class="transform scale-95 opacity-0"
+                  input-class="rounded-lg bg-slate-50/50 dark:bg-slate-950 px-3.5 py-2.5"
+                  :max-height="240"
+                  @update:model-value="() => onItemSearchChange(index)"
+                  @select="(item) => selectItem(index, item)"
+                  @clear="() => clearItemSearch(index)"
+                  @search-error="handleAutocompleteError"
                 >
-                  <div 
-                    v-if="line.isDropdownOpen" 
-                    class="absolute z-50 left-0 w-[100%] md:w-[150%] mt-2 max-h-60 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl shadow-2xl ring-1 ring-black/5 "
-                  >
-                    <div v-if="line.isSearching" class="p-4 text-center text-xs font-medium text-slate-400">
-                      Searching catalog...
+                  <template #option="{ item }">
+                    <div class="flex min-w-0 flex-col gap-0.5">
+                      <span class="block min-w-0 truncate text-sm font-bold leading-5 text-slate-900 dark:text-white">{{ item.title }}</span>
+                      <span class="block min-w-0 truncate text-xs font-mono leading-4 text-slate-500 dark:text-slate-400">SKU: {{ item.sku || 'N/A' }}</span>
                     </div>
-                    <div v-else-if="line.searchResults.length === 0" class="p-4 text-center text-xs font-medium text-slate-400">
-                      No items found matching "{{ line.searchInput }}"
-                    </div>
-                    <ul v-else class="py-1.5 divide-y divide-slate-100 dark:divide-slate-700/50">
-                      <li
-                        v-for="item in line.searchResults"
-                        :key="item.id"
-                        @click="selectItem(index, item)"
-                        class="px-4 py-2.5 cursor-pointer hover:bg-brand-50 dark:hover:bg-brand-500/10 flex flex-col transition-colors group/item"
-                      >
-                        <span class="font-bold text-sm text-slate-900 dark:text-white group-hover/item:text-brand-600 dark:group-hover/item:text-brand-400 truncate">{{ item.title }}</span>
-                        <span class="text-[11px] text-slate-500 font-mono mt-0.5">SKU: {{ item.sku || 'N/A' }}</span>
-                      </li>
-                    </ul>
-                  </div>
-                </Transition>
+                  </template>
+                </BaseAutocomplete>
               </div>
 
               <!-- SKU (Desktop Only) -->
@@ -305,10 +236,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from "vue"
-import { Plus, Trash2, X, Users, PackageOpen } from "lucide-vue-next"
+import { ref, computed, watch } from "vue"
+import { Plus, Trash2, PackageOpen } from "lucide-vue-next"
 import BaseModal from "@/components/ui/BaseModal.vue"
 import AsyncButton from "@/components/layout/AsyncButton.vue"
+import BaseAutocomplete from "@/components/ui/BaseAutocomplete.vue"
 import { useToast } from "@/composables/useToast"
 import { sellOrderService } from "../services/sell_order.service"
 import { itemService } from "../../items/services/item.service"
@@ -318,308 +250,124 @@ import type { SellOrder } from "../types/sell_order.types"
 import type { Item } from "../../items/types/item.types"
 import type { Customer } from "../../customers/types/customer.types"
 
-const props = defineProps<{
-  isOpen: boolean
-  workspaceId: string
-}>()
-
-const emit = defineEmits<{
-  (e: "close"): void
-  (e: "created", so: SellOrder): void
-}>()
-
+const props = defineProps<{ isOpen: boolean; workspaceId: string }>()
+const emit = defineEmits<{ (e: "close"): void; (e: "created", so: SellOrder): void }>()
 const { showToast } = useToast()
-
 const CURRENCY_SYMBOL = "£"
 const LOCALE = "en-GB"
 
-// Elements references
-const customerContainerRef = ref<HTMLElement | null>(null)
+interface LineItemForm {
+  item_id: string | null
+  sku: string
+  searchInput: string
+  quantity: number
+  display_unit_cost: string
+}
 
-// Customer Autocomplete Variables
-const customers = ref<Customer[]>([])
+const form = ref({ customer_id: "", so_number: "" })
+const lines = ref<LineItemForm[]>([])
 const customerSearchInput = ref("")
 const selectedCustomer = ref<Customer | null>(null)
-const isCustomerDropdownOpen = ref(false)
-const isCustomerLoading = ref(false)
-let customerSearchTimeout: ReturnType<typeof setTimeout> | null = null
 
-interface LineItemForm {
-  item_id: string | null;
-  sku: string;
-  searchInput: string;
-  isSearching: boolean;
-  isDropdownOpen: boolean;
-  searchResults: Item[];
-  quantity: number;
-  display_unit_cost: string;
-  timeoutId: ReturnType<typeof setTimeout> | null;
+const getCustomerLabel = (customer: Customer) => `${customer.first_name} ${customer.last_name || ""}`.trim()
+const getItemLabel = (item: Item) => item.title
+
+const searchCustomers = async (query: string): Promise<Customer[]> => {
+  const data = await customerService.getAll(props.workspaceId, query.trim())
+  return data.items
+}
+const searchItems = async (query: string): Promise<Item[]> => {
+  const data = await itemService.getAll(props.workspaceId, query.trim(), 1, 15)
+  return data.items
 }
 
-const form = ref({
-  customer_id: "",
-  so_number: ""
-})
-
-const lines = ref<LineItemForm[]>([])
-
-watch(
-  () => props.isOpen,
-  (open) => {
-    if (open) {
-      form.value = { customer_id: "", so_number: "" }
-      lines.value = []
-      clearCustomerSelection()
-      addLineItem()
-    }
-  }
-)
-
-// Customer Autocomplete
-const onCustomerSearchInput = () => {
-  const query = customerSearchInput.value.trim()
-
-  // Reset selected state if input changes
-  if (selectedCustomer.value && query !== `${selectedCustomer.value.first_name} ${selectedCustomer.value.last_name || ''}`.trim()) {
-    selectedCustomer.value = null
-    form.value.customer_id = ""
-  }
-
-  if (query.length < 3) {
-    customers.value = []
-    isCustomerDropdownOpen.value = false
-    return
-  }
-
-  isCustomerDropdownOpen.value = true
-
-  if (customerSearchTimeout) clearTimeout(customerSearchTimeout)
-  customerSearchTimeout = setTimeout(async () => {
-    isCustomerLoading.value = true
-    try {
-      const customersData = await customerService.getAll(props.workspaceId, query)
-      customers.value = customersData.items
-    } catch (err: any) {
-      const errorMessage = 
-        err.response?.data?.detail || 
-        err.message || 
-        "An unexpected error occurred"
-
-        const displayMessage = Array.isArray(errorMessage) 
-        ? errorMessage[0].msg 
-        : errorMessage
-
-    showToast(displayMessage, "error")
-    } finally {
-      isCustomerLoading.value = false
-    }
-  }, 300)
-}
-
-const onCustomerInputFocus = () => {
-  if (customerSearchInput.value.trim().length >= 3) {
-    isCustomerDropdownOpen.value = true
-  }
+const handleAutocompleteError = (error: unknown) => {
+  const err = error as any
+  const detail = err?.response?.data?.detail || err?.message || "An unexpected error occurred"
+  showToast(Array.isArray(detail) ? detail[0]?.msg || "An unexpected error occurred" : detail, "error")
 }
 
 const selectCustomer = (customer: Customer) => {
   selectedCustomer.value = customer
   form.value.customer_id = customer.id
-  customerSearchInput.value = `${customer.first_name} ${customer.last_name || ''}`.trim()
-  isCustomerDropdownOpen.value = false
 }
-
 const clearCustomerSelection = () => {
-  customerSearchInput.value = ""
   selectedCustomer.value = null
   form.value.customer_id = ""
-  customers.value = []
-  isCustomerDropdownOpen.value = false
 }
+watch(customerSearchInput, (query) => {
+  if (selectedCustomer.value && query.trim() !== getCustomerLabel(selectedCustomer.value)) {
+    selectedCustomer.value = null
+    form.value.customer_id = ""
+  }
+})
 
-// Line Items
-const addLineItem = () => {
-  lines.value.push({
-    item_id: null,
-    sku: "",
-    searchInput: "",
-    isSearching: false,
-    isDropdownOpen: false,
-    searchResults: [],
-    quantity: 1,
-    display_unit_cost: "0.00",
-    timeoutId: null
-  })
-}
-
-const removeLineItem = (index: number) => {
-  const line = lines.value[index]
-  if (line?.timeoutId) clearTimeout(line.timeoutId)
-  lines.value.splice(index, 1)
-}
-
-const onItemSearchInput = (index: number) => {
+const onItemSearchChange = (index: number) => {
   const line = lines.value[index]
   if (!line) return
-
-  const query = line.searchInput.trim()
-
-  // Reset internal item bindings if string alters
-  if (line.item_id) {
-    line.item_id = null
-    line.sku = ""
-  }
-
-  if (query.length < 3) {
-    line.searchResults = []
-    line.isDropdownOpen = false
-    return
-  }
-
-  line.isDropdownOpen = true
-
-  if (line.timeoutId) clearTimeout(line.timeoutId)
-  line.timeoutId = setTimeout(async () => {
-    line.isSearching = true
-    try {
-      const data = await itemService.getAll(props.workspaceId, query, 1, 15)
-      line.searchResults = data.items
-    } catch (error: any) {
-      const errorMessage = 
-          error.response?.data?.detail || 
-          error.message || 
-          "An unexpected error occurred";
-
-      const displayMessage = Array.isArray(errorMessage) 
-          ? errorMessage[0].msg 
-          : errorMessage;
-
-      showToast(displayMessage, "error")
-
-    } finally {
-      line.isSearching = false
-    }
-  }, 300)
+  line.item_id = null
+  line.sku = ""
 }
-
-const onItemInputFocus = (index: number) => {
+const clearItemSearch = (index: number) => {
   const line = lines.value[index]
-  if (line && line.searchInput.trim().length >= 3) {
-    line.isDropdownOpen = true
-  }
+  if (!line) return
+  line.item_id = null
+  line.sku = ""
+  line.display_unit_cost = "0.00"
 }
-
 const selectItem = (index: number, item: Item) => {
   const line = lines.value[index]
   if (!line) return
-
   line.item_id = item.id
   line.sku = item.sku
   line.searchInput = item.title
-  line.isDropdownOpen = false
-
-  if (item.base_price !== null && item.base_price !== undefined) {
-    line.display_unit_cost = (item.base_price / 100).toFixed(2)
-  } else {
-    line.display_unit_cost = "0.00"
-  }
+  line.display_unit_cost = item.base_price != null ? (item.base_price / 100).toFixed(2) : "0.00"
 }
 
-// Price and Math
+watch(() => props.isOpen, (open) => {
+  if (!open) return
+  form.value = { customer_id: "", so_number: "" }
+  customerSearchInput.value = ""
+  selectedCustomer.value = null
+  lines.value = []
+  addLineItem()
+})
+
+const addLineItem = () => lines.value.push({ item_id: null, sku: "", searchInput: "", quantity: 1, display_unit_cost: "0.00" })
+const removeLineItem = (index: number) => lines.value.splice(index, 1)
+
 const handlePriceInput = (event: Event, index: number) => {
   const line = lines.value[index]
-  if (line) {
-    const el = event.target as HTMLInputElement
-    line.display_unit_cost = priceFormatter.formatElement(el, "js-price-input")
-  }
+  if (line) line.display_unit_cost = priceFormatter.formatElement(event.target as HTMLInputElement, "js-price-input")
 }
-
-const getLineSubtotal = (line: LineItemForm) => {
-  const cents = priceFormatter.toCents(line.display_unit_cost) || 0
-  return cents * (line.quantity || 0)
-}
-
-const calculatedTotalCents = computed(() => {
-  return lines.value.reduce((total, line) => total + getLineSubtotal(line), 0)
-})
-
-const formatPrice = (cents: number) => {
-  return new Intl.NumberFormat(LOCALE, {
-    style: 'currency',
-    currency: 'GBP'
-  }).format(cents / 100)
-}
-
-const handleClose = () => {
-  emit("close")
-}
-
-// Global Click Outside logic
-const handleClickOutside = (event: MouseEvent) => {
-  const target = event.target as Element | null
-  
-  // Close customer dropdown if clicking outside
-  if (customerContainerRef.value && !customerContainerRef.value.contains(target)) {
-    isCustomerDropdownOpen.value = false
-  }
-
-  // Close item dropdowns if clicking completely outside any item search container
-  if (target && !target.closest('.js-item-search-container')) {
-    lines.value.forEach(line => line.isDropdownOpen = false)
-  }
-}
-
-onMounted(() => {
-  document.addEventListener("mousedown", handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener("mousedown", handleClickOutside)
-  if (customerSearchTimeout) clearTimeout(customerSearchTimeout)
-  lines.value.forEach(line => {
-    if (line.timeoutId) clearTimeout(line.timeoutId)
-  })
-})
+const getLineSubtotal = (line: LineItemForm) => (priceFormatter.toCents(line.display_unit_cost) || 0) * (line.quantity || 0)
+const calculatedTotalCents = computed(() => lines.value.reduce((total, line) => total + getLineSubtotal(line), 0))
+const formatPrice = (cents: number) => new Intl.NumberFormat(LOCALE, { style: "currency", currency: "GBP" }).format(cents / 100)
+const handleClose = () => emit("close")
 
 const submitForm = async () => {
   if (!form.value.customer_id) {
     showToast("Please choose a Customer", "error")
     throw new Error("Please choose a Customer")
   }
-
-  if (lines.value.some(l => !l.item_id || l.quantity < 1)) {
+  if (lines.value.some(line => !line.item_id || line.quantity < 1)) {
     showToast("Please make sure all line items contain resolved products with correct quantities", "error")
     throw new Error("Invalid line items")
   }
-
   try {
     const payload = {
       customer_id: form.value.customer_id,
       so_number: form.value.so_number.trim().toUpperCase(),
-      status: "DRAFT" as const, 
-      sell_order_lines: lines.value.map(l => ({
-        item_id: l.item_id as string,
-        quantity: l.quantity,
-        unit_cost: priceFormatter.toCents(l.display_unit_cost) || 0
-      }))
+      status: "DRAFT" as const,
+      sell_order_lines: lines.value.map(line => ({ item_id: line.item_id as string, quantity: line.quantity, unit_cost: priceFormatter.toCents(line.display_unit_cost) || 0 }))
     }
-
     const newSO = await sellOrderService.create(props.workspaceId, payload)
-    
     showToast("Sell order draft created successfully", "success")
     emit("created", newSO)
     handleClose()
   } catch (error: any) {
-    const errorMessage = 
-        error.response?.data?.detail || 
-        error.message || 
-        "An unexpected error occurred"
-
-        const displayMessage = Array.isArray(errorMessage) 
-        ? errorMessage[0].msg 
-        : errorMessage
-
-    showToast(displayMessage, "error")
+    const detail = error.response?.data?.detail || error.message || "An unexpected error occurred"
+    showToast(Array.isArray(detail) ? detail[0]?.msg || "An unexpected error occurred" : detail, "error")
     throw error
   }
 }

@@ -22,72 +22,30 @@
 
         <form @submit.prevent class="grid grid-cols-1 md:grid-cols-4 gap-5 bg-slate-50/50 dark:bg-slate-900/30 p-5 sm:p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 shadow-sm items-end">
           
-          <!-- Customer Autocomplete Search (50%) -->
-          <div class="space-y-2 relative md:col-span-2" ref="customerContainerRef">
+          <!-- Customer Autocomplete -->
+          <div class="space-y-2 relative md:col-span-2">
             <label class="text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 ml-1">
               Customer <span class="text-red-500">*</span>
             </label>
-            <div class="relative group">
-              <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors">
-                <User class="w-4 h-4" />
-              </div>
-              <input
-                v-model="customerSearchInput"
-                @input="onCustomerSearchInput"
-                @focus="onCustomerInputFocus"
-                type="text"
-                placeholder="Type at least 3 letters of a customer"
-                required
-                class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 pl-11 pr-10 py-3 text-sm font-medium text-slate-900 dark:text-white shadow-sm outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition duration-200 ease-out placeholder:font-normal placeholder:text-slate-400"
-              />
-              <div class="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                <svg v-if="isCustomerLoading" class="animate-spin h-4 w-4 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
-                  <path class="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <button
-                  v-else-if="customerSearchInput"
-                  type="button"
-                  @click="clearCustomerSelection"
-                  class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                >
-                  <X class="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            <!-- Customer Dropdown -->
-            <Transition 
-              enter-active-class="transition duration-150 ease-out" 
-              enter-from-class="transform scale-95 opacity-0 translate-y-1" 
-              enter-to-class="transform scale-100 opacity-100 translate-y-0" 
-              leave-active-class="transition duration-100 ease-in" 
-              leave-from-class="transform scale-100 opacity-100" 
-              leave-to-class="transform scale-95 opacity-0"
+            <BaseAutocomplete
+              v-model="customerSearchInput"
+              :search="searchCustomers"
+              :get-item-label="getCustomerLabel"
+              placeholder="Type at least 3 letters of a customer"
+              input-class="rounded-xl py-3"
+              :min-chars="3"
+              :max-height="240"
+              @select="selectCustomer"
+              @clear="clearCustomerSelection"
+              @search-error="handleAutocompleteError"
             >
-              <div
-                v-if="isCustomerDropdownOpen"
-                class="absolute z-50 left-0 right-0 mt-2 max-h-60 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl shadow-2xl ring-1 ring-black/5"
-              >
-                <div v-if="isCustomerLoading && customers.length === 0" class="p-6 text-center text-sm font-medium text-slate-400">
-                  Searching customers...
+              <template #option="{ item }">
+                <div class="flex min-w-0 flex-col gap-0.5">
+                  <span class="block min-w-0 truncate text-sm font-bold leading-5 text-slate-900 dark:text-white">{{ getCustomerLabel(item) }}</span>
+                  <span class="block min-w-0 truncate text-xs font-mono leading-4 text-slate-500 dark:text-slate-400">{{ item.email || 'No email provided' }}</span>
                 </div>
-                <div v-else-if="customers.length === 0" class="p-6 text-center text-sm font-medium text-slate-400">
-                  No customers found matching "{{ customerSearchInput }}"
-                </div>
-                <ul v-else class="py-2 divide-y divide-slate-100 dark:divide-slate-700/50">
-                  <li
-                    v-for="customer in customers"
-                    :key="customer.id"
-                    @click="selectCustomer(customer)"
-                    class="px-4 py-3 cursor-pointer hover:bg-brand-50 dark:hover:bg-brand-500/10 flex flex-col transition-colors group"
-                  >
-                    <span class="font-bold text-sm text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{{ customer.first_name }} {{ customer.last_name }}</span>
-                    <span class="text-xs text-slate-500 font-mono mt-0.5">{{ customer.email || 'No email provided' }}</span>
-                  </li>
-                </ul>
-              </div>
-            </Transition>
+              </template>
+            </BaseAutocomplete>
           </div>
 
           <!-- SO Number (25%) -->
@@ -157,9 +115,8 @@
             v-for="(line, index) in lines" 
             :key="index"
             :class="[
-              'relative p-4 md:p-2 bg-white dark:bg-slate-900 rounded-xl border transition-all js-item-search-container group',
-              line.isDirty ? 'border-amber-300 dark:border-amber-700/50 shadow-md bg-amber-50/10 dark:bg-amber-900/10' : 'border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md',
-              line.isDropdownOpen ? 'z-50 ring-2 ring-brand-500/20' : 'z-10'
+              'relative z-10 p-4 md:p-2 bg-white dark:bg-slate-900 rounded-xl border transition-all group',
+              line.isDirty ? 'border-amber-300 dark:border-amber-700/50 shadow-md bg-amber-50/10 dark:bg-amber-900/10' : 'border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md'
             ]"
           >
             <div class="flex flex-col md:grid md:grid-cols-12 gap-4 md:gap-4 md:items-center">
@@ -190,55 +147,28 @@
                   </div>
                 </div>
 
-                <input
+                <BaseAutocomplete
                   v-model="line.searchInput"
-                  @input="onItemSearchInput(index)"
-                  @focus="onItemInputFocus(index)"
-                  type="text"
-                  required
-                  :disabled="!!line.id"
-                  :title="line.id ? 'Item cannot be changed once saved. Remove this line and add a new one.' : 'Search product...'"
+                  :search="searchItems"
+                  :get-item-label="getItemLabel"
                   placeholder="Search product..."
-                  :class="[
-                    'w-full rounded-lg border px-3.5 py-2.5 text-sm font-medium focus:outline-none transition-colors',
-                    line.id 
-                      ? 'border-slate-200/50 dark:border-slate-700/50 bg-slate-100/50 dark:bg-slate-800/30 text-slate-500 cursor-not-allowed select-none shadow-inner' 
-                      : 'border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-950 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 focus:bg-white dark:focus:bg-slate-900'
-                  ]"
-                />
-                
-                <!-- Product Autocomplete Dropdown -->
-                <Transition 
-                  enter-active-class="transition duration-150 ease-out" 
-                  enter-from-class="transform scale-95 opacity-0 translate-y-1" 
-                  enter-to-class="transform scale-100 opacity-100 translate-y-0" 
-                  leave-active-class="transition duration-100 ease-in" 
-                  leave-from-class="transform scale-100 opacity-100" 
-                  leave-to-class="transform scale-95 opacity-0"
+                  :disabled="!!line.id"
+                  :clearable="!line.id"
+                  :input-class="line.id
+                    ? 'cursor-not-allowed bg-slate-100 dark:bg-slate-800 opacity-70'
+                    : 'bg-slate-50 dark:bg-slate-950'"
+                  @update:model-value="onItemSearchChange(index)"
+                  @select="(item) => selectItem(index, item)"
+                  @clear="clearItemSearch(index)"
+                  @search-error="handleAutocompleteError"
                 >
-                  <div 
-                    v-if="line.isDropdownOpen && !line.id"
-                    class="absolute z-50 left-0 w-[100%] md:w-[150%] mt-2 max-h-60 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl shadow-2xl ring-1 ring-black/5"
-                  >
-                    <div v-if="line.isSearching" class="p-4 text-center text-xs font-medium text-slate-400">
-                      Searching catalog...
+                  <template #option="{ item }">
+                    <div class="flex min-w-0 flex-col gap-0.5">
+                      <span class="block min-w-0 truncate text-sm font-bold leading-5 text-slate-900 dark:text-white">{{ item.title }}</span>
+                      <span class="block min-w-0 truncate text-xs font-mono leading-4 text-slate-500 dark:text-slate-400">SKU: {{ item.sku || 'N/A' }}</span>
                     </div>
-                    <div v-else-if="line.searchResults.length === 0" class="p-4 text-center text-xs font-medium text-slate-400">
-                      No items found matching "{{ line.searchInput }}"
-                    </div>
-                    <ul v-else class="py-1.5 divide-y divide-slate-100 dark:divide-slate-700/50">
-                      <li
-                        v-for="item in line.searchResults"
-                        :key="item.id"
-                        @click="selectItem(index, item)"
-                        class="px-4 py-2.5 cursor-pointer hover:bg-brand-50 dark:hover:bg-brand-500/10 flex flex-col transition-colors group/item"
-                      >
-                        <span class="font-bold text-sm text-slate-900 dark:text-white group-hover/item:text-brand-600 dark:group-hover/item:text-brand-400 truncate">{{ item.title }}</span>
-                        <span class="text-[11px] text-slate-500 font-mono mt-0.5">SKU: {{ item.sku || 'N/A' }}</span>
-                      </li>
-                    </ul>
-                  </div>
-                </Transition>
+                  </template>
+                </BaseAutocomplete>
               </div>
 
               <!-- SKU (Desktop Only) -->
@@ -329,10 +259,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from "vue"
-import { Edit2, Plus, Trash2, X, User, PackageOpen, Save } from "lucide-vue-next"
+import { ref, computed, watch } from "vue"
+import { Edit2, Plus, Trash2, PackageOpen, Save } from "lucide-vue-next"
 import BaseModal from "@/components/ui/BaseModal.vue"
 import AsyncButton from "@/components/layout/AsyncButton.vue"
+import BaseAutocomplete from "@/components/ui/BaseAutocomplete.vue"
 import { useToast } from "@/composables/useToast"
 import { useConfirm } from "@/composables/useConfirm"
 import { sellOrderService } from "../services/sell_order.service"
@@ -343,87 +274,93 @@ import type { SellOrder } from "../types/sell_order.types"
 import type { Item } from "../../items/types/item.types"
 import type { Customer } from "../../customers/types/customer.types"
 
-const props = defineProps<{
-  isOpen: boolean
-  workspaceId: string
-  so: SellOrder | null
-}>()
-
-const emit = defineEmits<{
-  (e: "close"): void
-  (e: "updated"): void
-}>()
-
+const props = defineProps<{ isOpen: boolean; workspaceId: string; so: SellOrder | null }>()
+const emit = defineEmits<{ (e: "close"): void; (e: "updated"): void }>()
 const { showToast } = useToast()
 const { confirm } = useConfirm()
-
 const CURRENCY_SYMBOL = "£"
 const LOCALE = "en-GB"
 
-// Header State
-const customerContainerRef = ref<HTMLElement | null>(null)
-const customers = ref<Customer[]>([])
-const customerSearchInput = ref("")
-const isCustomerDropdownOpen = ref(false)
-const isCustomerLoading = ref(false)
-let customerSearchTimeout: ReturnType<typeof setTimeout> | null = null
-
-const headerForm = ref({
-  customer_id: "",
-  so_number: ""
-})
-
-// Line Items State
 interface LineItemForm {
-  id: string | null;
-  item_id: string | null;
-  sku: string;
-  searchInput: string;
-  isSearching: boolean;
-  isDropdownOpen: boolean;
-  searchResults: Item[];
-  quantity: number;
-  display_unit_cost: string;
-  timeoutId: ReturnType<typeof setTimeout> | null;
-  isDirty: boolean;
-  isSaving: boolean;
+  id: string | null
+  item_id: string | null
+  sku: string
+  searchInput: string
+  quantity: number
+  display_unit_cost: string
+  isDirty: boolean
+  isSaving: boolean
 }
 
 const lines = ref<LineItemForm[]>([])
+const customerSearchInput = ref("")
+const selectedCustomerLabel = ref("")
+const headerForm = ref({ customer_id: "", so_number: "" })
 
-watch(
-  () => props.so,
-  (newSo) => {
-    if (props.isOpen && newSo) {
-      initFormState(newSo)
-    }
-  },
-  { deep: true }
-)
+const getCustomerLabel = (customer: Customer) => `${customer.first_name} ${customer.last_name || ""}`.trim()
+const getItemLabel = (item: Item) => item.title
+const searchCustomers = async (query: string): Promise<Customer[]> => (await customerService.getAll(props.workspaceId, query.trim())).items
+const searchItems = async (query: string): Promise<Item[]> => (await itemService.getAll(props.workspaceId, query.trim(), 1, 15)).items
 
-watch(
-  () => props.isOpen,
-  (open) => {
-    if (open && props.so) {
-      initFormState(props.so)
-    }
-  }
-)
+const handleAutocompleteError = (error: unknown) => {
+  const err = error as any
+  const detail = err?.response?.data?.detail || err?.message || "An unexpected error occurred"
+  showToast(Array.isArray(detail) ? detail[0]?.msg || "An unexpected error occurred" : detail, "error")
+}
+
+const selectCustomer = (customer: Customer) => {
+  headerForm.value.customer_id = customer.id
+  selectedCustomerLabel.value = getCustomerLabel(customer)
+}
+const clearCustomerSelection = () => {
+  headerForm.value.customer_id = ""
+  selectedCustomerLabel.value = ""
+}
+watch(customerSearchInput, query => {
+  if (query.trim() !== selectedCustomerLabel.value) headerForm.value.customer_id = ""
+})
+
+const onItemSearchChange = (index: number) => {
+  const line = lines.value[index]
+  if (!line || line.id) return
+  line.item_id = null
+  line.sku = ""
+  markLineDirty(index)
+}
+const clearItemSearch = (index: number) => {
+  const line = lines.value[index]
+  if (!line || line.id) return
+  line.item_id = null
+  line.sku = ""
+  markLineDirty(index)
+}
+const selectItem = (index: number, item: Item) => {
+  const line = lines.value[index]
+  if (!line || line.id) return
+  markLineDirty(index)
+  line.item_id = item.id
+  line.sku = item.sku
+  line.searchInput = item.title
+  line.display_unit_cost = item.base_price != null ? (item.base_price / 100).toFixed(2) : "0.00"
+}
+
+watch(() => props.so, newSo => {
+  if (props.isOpen && newSo) initFormState(newSo)
+}, { deep: true })
+watch(() => props.isOpen, open => {
+  if (open && props.so) initFormState(props.so)
+})
 
 const initFormState = (soData: SellOrder) => {
-  headerForm.value = {
-    customer_id: soData.customer_id || "",
-    so_number: soData.so_number || ""
-  }
-  
-  customerSearchInput.value = soData.customer ? `${soData.customer.first_name} ${soData.customer.last_name}`.trim() : ""
-  
-  const mergedLines: LineItemForm[] = []
+  headerForm.value = { customer_id: soData.customer_id || "", so_number: soData.so_number || "" }
+  const customerLabel = soData.customer ? getCustomerLabel(soData.customer) : ""
+  customerSearchInput.value = customerLabel
+  selectedCustomerLabel.value = customerLabel
 
+  const mergedLines: LineItemForm[] = []
   soData.sell_order_lines.forEach(backendLine => {
-    const existingLocalLine = lines.value.find(l => l.id === backendLine.id)
-    
-    if (existingLocalLine && existingLocalLine.isDirty) {
+    const existingLocalLine = lines.value.find(line => line.id === backendLine.id)
+    if (existingLocalLine?.isDirty) {
       mergedLines.push(existingLocalLine)
     } else {
       mergedLines.push({
@@ -431,78 +368,15 @@ const initFormState = (soData: SellOrder) => {
         item_id: backendLine.item_id,
         sku: backendLine.item?.sku || "",
         searchInput: backendLine.item?.title || "",
-        isSearching: false,
-        isDropdownOpen: false,
-        searchResults: [],
         quantity: backendLine.quantity,
         display_unit_cost: (backendLine.unit_cost / 100).toFixed(2),
-        timeoutId: null,
         isDirty: false,
-        isSaving: false
+        isSaving: false,
       })
     }
   })
-
-  const unsavedNewLines = lines.value.filter(l => l.id === null)
-  mergedLines.push(...unsavedNewLines)
-
+  mergedLines.push(...lines.value.filter(line => line.id === null))
   lines.value = mergedLines
-}
-
-// ==========================================
-// Header / Customer Autocomplete
-// ==========================================
-const onCustomerSearchInput = () => {
-  const query = customerSearchInput.value.trim()
-
-  if (query.length < 3) {
-    customers.value = []
-    isCustomerDropdownOpen.value = false
-    return
-  }
-
-  isCustomerDropdownOpen.value = true
-
-  if (customerSearchTimeout) clearTimeout(customerSearchTimeout)
-  customerSearchTimeout = setTimeout(async () => {
-    isCustomerLoading.value = true
-    try {
-      const customersData = await customerService.getAll(props.workspaceId, query)
-      customers.value = customersData.items
-    } catch (err: any) {
-      const errorMessage = 
-        err.response?.data?.detail || 
-        err.message || 
-        "An unexpected error occurred"
-
-        const displayMessage = Array.isArray(errorMessage) 
-        ? errorMessage[0].msg 
-        : errorMessage
-
-    showToast(displayMessage, "error")
-    } finally {
-      isCustomerLoading.value = false
-    }
-  }, 300)
-}
-
-const onCustomerInputFocus = () => {
-  if (customerSearchInput.value.trim().length >= 3) {
-    isCustomerDropdownOpen.value = true
-  }
-}
-
-const selectCustomer = (customer: Customer) => {
-  headerForm.value.customer_id = customer.id
-  customerSearchInput.value = `${customer.first_name} ${customer.last_name}`.trim()
-  isCustomerDropdownOpen.value = false
-}
-
-const clearCustomerSelection = () => {
-  customerSearchInput.value = ""
-  headerForm.value.customer_id = ""
-  customers.value = []
-  isCustomerDropdownOpen.value = false
 }
 
 const updateHeader = async () => {
@@ -511,7 +385,6 @@ const updateHeader = async () => {
     showToast("Customer selection is required", "error")
     throw new Error("Customer selection is required")
   }
-
   try {
     await sellOrderService.update(props.workspaceId, props.so.id, {
       customer_id: headerForm.value.customer_id,
@@ -520,151 +393,29 @@ const updateHeader = async () => {
     showToast("SO header details updated successfully", "success")
     emit("updated")
   } catch (error: any) {
-    const errorMessage = 
-        error.response?.data?.detail || 
-        error.message || 
-        "An unexpected error occurred"
-
-        const displayMessage = Array.isArray(errorMessage) 
-        ? errorMessage[0].msg 
-        : errorMessage
-
-    showToast(displayMessage, "error")
+    const detail = error.response?.data?.detail || error.message || "An unexpected error occurred"
+    showToast(Array.isArray(detail) ? detail[0]?.msg || "An unexpected error occurred" : detail, "error")
     throw error
   }
 }
 
-// ==========================================
-// Line Items
-// ==========================================
-const addLineItem = () => {
-  lines.value.push({
-    id: null,
-    item_id: null,
-    sku: "",
-    searchInput: "",
-    isSearching: false,
-    isDropdownOpen: false,
-    searchResults: [],
-    quantity: 1,
-    display_unit_cost: "0.00",
-    timeoutId: null,
-    isDirty: true,
-    isSaving: false
-  })
-}
-
-const markLineDirty = (index: number) => {
-  if (lines.value[index]) {
-    lines.value[index].isDirty = true
-  }
-}
-
-const onItemSearchInput = (index: number) => {
-  const line = lines.value[index]
-  if (!line || line.id) return
-
-  markLineDirty(index)
-  const query = line.searchInput.trim()
-
-  if (line.item_id) {
-    line.item_id = null
-    line.sku = ""
-  }
-
-  if (query.length < 3) {
-    line.searchResults = []
-    line.isDropdownOpen = false
-    return
-  }
-
-  line.isDropdownOpen = true
-
-  if (line.timeoutId) clearTimeout(line.timeoutId)
-  line.timeoutId = setTimeout(async () => {
-    line.isSearching = true
-    try {
-      const data = await itemService.getAll(props.workspaceId, query, 1, 15)
-      line.searchResults = data.items
-    } catch (error: any) {
-    const errorMessage = 
-        error.response?.data?.detail || 
-        error.message || 
-        "An unexpected error occurred";
-
-    const displayMessage = Array.isArray(errorMessage) 
-        ? errorMessage[0].msg 
-        : errorMessage;
-
-    showToast(displayMessage, "error")
-    } finally {
-      line.isSearching = false
-    }
-  }, 300)
-}
-
-const onItemInputFocus = (index: number) => {
-  const line = lines.value[index]
-  
-  if (!line || line.id) return 
-  
-  if (line.searchInput.trim().length >= 3) {
-    line.isDropdownOpen = true
-  }
-}
-
-const selectItem = (index: number, item: Item) => {
-  const line = lines.value[index]
-  if (!line || line.id) return
-
-  markLineDirty(index)
-  line.item_id = item.id
-  line.sku = item.sku
-  line.searchInput = item.title
-  line.isDropdownOpen = false
-
-  if (item.base_price !== null && item.base_price !== undefined) {
-    line.display_unit_cost = (item.base_price / 100).toFixed(2)
-  }
-}
-
+const addLineItem = () => lines.value.push({ id: null, item_id: null, sku: "", searchInput: "", quantity: 1, display_unit_cost: "0.00", isDirty: true, isSaving: false })
+const markLineDirty = (index: number) => { if (lines.value[index]) lines.value[index].isDirty = true }
 const handlePriceInput = (event: Event, index: number) => {
   const line = lines.value[index]
-  if (line) {
-    markLineDirty(index)
-    const el = event.target as HTMLInputElement
-    line.display_unit_cost = priceFormatter.formatElement(el, "js-price-input")
-  }
+  if (!line) return
+  markLineDirty(index)
+  line.display_unit_cost = priceFormatter.formatElement(event.target as HTMLInputElement, "js-price-input")
 }
+const getLineSubtotal = (line: LineItemForm) => (priceFormatter.toCents(line.display_unit_cost) || 0) * (line.quantity || 0)
+const calculatedTotalCents = computed(() => lines.value.reduce((total, line) => total + getLineSubtotal(line), 0))
+const formatPrice = (cents: number) => new Intl.NumberFormat(LOCALE, { style: "currency", currency: "GBP" }).format(cents / 100)
 
-const getLineSubtotal = (line: LineItemForm) => {
-  const cents = priceFormatter.toCents(line.display_unit_cost) || 0
-  return cents * (line.quantity || 0)
-}
-
-const calculatedTotalCents = computed(() => {
-  return lines.value.reduce((total, line) => total + getLineSubtotal(line), 0)
-})
-
-const formatPrice = (cents: number) => {
-  return new Intl.NumberFormat(LOCALE, {
-    style: 'currency',
-    currency: 'GBP'
-  }).format(cents / 100)
-}
-
-// Line Item API Actions
 const saveLineItem = async (index: number) => {
   const line = lines.value[index]
   if (!props.so || !line || !line.item_id) return
-
   try {
-    const payload = {
-      item_id: line.item_id,
-      quantity: line.quantity,
-      unit_cost: priceFormatter.toCents(line.display_unit_cost) || 0
-    }
-
+    const payload = { item_id: line.item_id, quantity: line.quantity, unit_cost: priceFormatter.toCents(line.display_unit_cost) || 0 }
     if (line.id) {
       await sellOrderService.updateLine(props.workspaceId, props.so.id, line.id, payload)
       showToast("Line updated successfully", "success")
@@ -673,20 +424,11 @@ const saveLineItem = async (index: number) => {
       line.id = newLine.id
       showToast("Line added successfully", "success")
     }
-    
     line.isDirty = false
     emit("updated")
   } catch (error: any) {
-    const errorMessage = 
-        error.response?.data?.detail || 
-        error.message || 
-        "An unexpected error occurred"
-
-        const displayMessage = Array.isArray(errorMessage) 
-        ? errorMessage[0].msg 
-        : errorMessage
-
-    showToast(displayMessage, "error")
+    const detail = error.response?.data?.detail || error.message || "An unexpected error occurred"
+    showToast(Array.isArray(detail) ? detail[0]?.msg || "An unexpected error occurred" : detail, "error")
     throw error
   }
 }
@@ -694,66 +436,20 @@ const saveLineItem = async (index: number) => {
 const removeLineItem = async (index: number) => {
   const line = lines.value[index]
   if (!props.so || !line) return
-
   if (line.id) {
-    const isConfirmed = await confirm({
-      title: "Remove Line Item",
-      message: "Are you sure you want to permanently remove this line item from the sell order?",
-      confirmText: "Remove",
-      variant: "danger"
-    })
-
+    const isConfirmed = await confirm({ title: "Remove Line Item", message: "Are you sure you want to permanently remove this line item from the sell order?", confirmText: "Remove", variant: "danger" })
     if (!isConfirmed) return
-
     try {
       await sellOrderService.removeLine(props.workspaceId, props.so.id, line.id)
       showToast("Line removed successfully", "success")
       emit("updated")
     } catch (error: any) {
-      const errorMessage = 
-        error.response?.data?.detail || 
-        error.message || 
-        "An unexpected error occurred"
-
-        const displayMessage = Array.isArray(errorMessage) 
-        ? errorMessage[0].msg 
-        : errorMessage
-
-      showToast(displayMessage, "error")
+      const detail = error.response?.data?.detail || error.message || "An unexpected error occurred"
+      showToast(Array.isArray(detail) ? detail[0]?.msg || "An unexpected error occurred" : detail, "error")
       throw error
     }
   }
-
-  if (line.timeoutId) clearTimeout(line.timeoutId)
   lines.value.splice(index, 1)
 }
-
-const handleClose = () => {
-  emit("close")
-}
-
-// Global Click Outside logic
-const handleClickOutside = (event: MouseEvent) => {
-  const target = event.target as Element | null
-  
-  if (customerContainerRef.value && !customerContainerRef.value.contains(target)) {
-    isCustomerDropdownOpen.value = false
-  }
-
-  if (target && !target.closest('.js-item-search-container')) {
-    lines.value.forEach(line => line.isDropdownOpen = false)
-  }
-}
-
-onMounted(() => {
-  document.addEventListener("mousedown", handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener("mousedown", handleClickOutside)
-  if (customerSearchTimeout) clearTimeout(customerSearchTimeout)
-  lines.value.forEach(line => {
-    if (line.timeoutId) clearTimeout(line.timeoutId)
-  })
-})
+const handleClose = () => emit("close")
 </script>

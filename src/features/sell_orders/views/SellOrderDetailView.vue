@@ -1,6 +1,6 @@
 <!-- src/features/sell_orders/views/sellOrderDetailView.vue -->
 <template>
-  <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto print:space-y-4 print:pb-0">
+  <div class="space-y-6 pb-6 lg:pb-10 max-w-full mx-auto print:space-y-4 print:pb-0">
     
     <!-- Breadcrumb Header -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

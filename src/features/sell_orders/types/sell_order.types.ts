@@ -2,19 +2,13 @@
 
 import type { Item } from '../../items/types/item.types'
 import type { Customer } from '../../customers/types/customer.types'
+import type { TableFilter } from "@/components/ui/table/types/filter.types"
 
 export type SellOrderStatus = 'DRAFT' | 'CONFIRMED' | 'FULLFILLED' | 'CANCELLED' | 'RETURNED' | 'CLOSED'
 
 export interface FilterOption {
   label: string
   value: string | number | boolean
-}
-
-export interface TableFilter {
-  key: string
-  label?: string
-  placeholder?: string
-  options: FilterOption[]
 }
 
 export interface SellOrderLine {

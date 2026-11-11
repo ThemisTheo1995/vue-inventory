@@ -1,7 +1,5 @@
-<!-- src/views/customers/CustomersView.vue -->
 <template>
-  <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto">
-    <!-- Header Section -->
+  <div class="space-y-6 pb-6 lg:pb-10 max-w-full mx-auto">
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div class="space-y-1">
         <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-wider">
@@ -24,7 +22,6 @@
       </div>
     </header>
 
-    <!-- Main Table Component -->
     <BaseTable
       :items="customers"
       :is-loading="isTableLoading"
@@ -36,7 +33,7 @@
       :total-pages="totalPages"
       :total-items="totalItems"
       :items-per-page="itemsPerPage"
-      :column-span="isReadOnly ? 2 : 3"
+      :column-span="isReadOnly ? 3 : 4"
       empty-title="No customers found"
       empty-description="Get started by adding your first client to the directory."
       create-button-text="Add First Customer"
@@ -44,17 +41,16 @@
       @next-page="nextPage"
       @create="isCreateModalOpen = true"
     >
-      <!-- ================= MOBILE LIST VIEW ================= -->
       <template #mobile-cards>
-        <div 
-          v-for="customer in customers" 
+        <div
+          v-for="customer in customers"
           :key="customer.id"
           @click="navigateToCustomer(customer.id)"
           class="relative p-4 sm:p-5 hover:bg-slate-50 dark:hover:bg-slate-800/40 active:bg-slate-100 dark:active:bg-slate-800 transition-colors cursor-pointer group"
         >
           <div class="flex justify-between items-start mb-3">
             <div class="flex items-center gap-3">
-              <div class="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold uppercase shadow-sm group-hover:scale-105 transition-transform">
+              <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase shadow-sm border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform">
                 {{ customer.first_name.charAt(0) }}{{ customer.last_name?.charAt(0) || '' }}
               </div>
               <div>
@@ -69,12 +65,18 @@
           </div>
 
           <div class="flex justify-between items-end mt-4">
-            <div class="flex items-center gap-2 truncate pr-4">
-              <Mail class="w-4 h-4 text-slate-400 shrink-0" />
-              <span class="font-mono text-sm font-bold text-slate-600 dark:text-slate-300 truncate">
-                {{ customer.email }}
-              </span>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 truncate pr-4">
+                <Mail class="w-4 h-4 text-slate-400 shrink-0" />
+                <span class="font-mono text-sm font-bold text-slate-600 dark:text-slate-300 truncate">
+                  {{ customer.email }}
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+                {{ customer.created_at ? formatDateTime(customer.created_at).date : '—' }}
+              </p>
             </div>
+
             <div v-if="!isReadOnly" class="shrink-0">
               <AsyncButton
                 :action="() => deleteCustomer(customer)"
@@ -89,15 +91,17 @@
         </div>
       </template>
 
-      <!-- ================= DESKTOP TABLE VIEW ================= -->
       <template #desktop-headers>
+        <th class="w-[20%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+          Date Created
+        </th>
         <th :class="[customerColumnClass, 'px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500']">
           Customer
         </th>
         <th :class="[emailColumnClass, 'px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500']">
           Email
         </th>
-        <th v-if="!isReadOnly" class="w-[15%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right">
+        <th v-if="!isReadOnly" class="w-[10%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right">
           Actions
         </th>
       </template>
@@ -109,12 +113,21 @@
           @click="navigateToCustomer(customer.id)"
           class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
         >
-          <!-- Interactive left border highlight -->
           <td class="px-6 py-4 relative">
             <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            
+            <div class="flex flex-col">
+              <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                {{ formatDateTime(customer.created_at).date }}
+              </span>
+              <span class="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-0.5">
+                {{ formatDateTime(customer.created_at).time }}
+              </span>
+            </div>
+          </td>
+
+          <td class="px-6 py-4">
             <div class="flex items-center gap-3">
-              <div class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold uppercase shadow-sm group-hover:scale-105 transition-transform">
+              <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase shadow-sm border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform">
                 {{ customer.first_name.charAt(0) }}{{ customer.last_name?.charAt(0) || '' }}
               </div>
               <div class="min-w-0">
@@ -127,7 +140,7 @@
               </div>
             </div>
           </td>
-          
+
           <td class="px-6 py-4">
             <div class="flex items-center gap-2">
               <Mail class="w-4 h-4 text-slate-400 dark:text-slate-500 hidden xl:block" />
@@ -141,7 +154,7 @@
             <div class="flex items-center justify-end" @click.stop>
               <AsyncButton
                 :action="() => deleteCustomer(customer)"
-                class="opacity-0 group-hover:opacity-100 !p-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:!bg-red-50 dark:hover:!bg-red-400/10 rounded-lg transition-all transform active:scale-95"
+                class="!p-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:!bg-red-50 dark:hover:!bg-red-400/10 rounded-lg transition-all transform active:scale-95"
                 title="Archive customer"
               >
                 <Trash2 class="w-4 h-4" />
@@ -152,12 +165,12 @@
       </template>
     </BaseTable>
 
-    <CustomerCreateModal 
-      v-if="!isReadOnly" 
-      :is-open="isCreateModalOpen" 
-      :workspace-id="workspaceId" 
-      @close="isCreateModalOpen = false" 
-      @created="onCustomerCreated" 
+    <CustomerCreateModal
+      v-if="!isReadOnly"
+      :is-open="isCreateModalOpen"
+      :workspace-id="workspaceId"
+      @close="isCreateModalOpen = false"
+      @created="onCustomerCreated"
     />
   </div>
 </template>
@@ -178,6 +191,7 @@ import CustomerCreateModal from "./CustomerCreateModal.vue"
 
 import { customerService } from "../services/customer.service"
 import type { Customer } from "../types/customer.types"
+import { formatDateTime } from "@/utils/dateFormatter"
 
 const route = useRoute()
 const router = useRouter()
@@ -197,9 +211,8 @@ const totalItems = ref(0)
 
 const totalPages = computed(() => Math.max(1, Math.ceil(totalItems.value / itemsPerPage.value)))
 
-// Match exact column proportions dynamically based on read-only status
-const customerColumnClass = computed(() => isReadOnly.value ? "w-1/2" : "w-[40%]")
-const emailColumnClass = computed(() => isReadOnly.value ? "w-1/2" : "w-[45%]")
+const customerColumnClass = computed(() => isReadOnly.value ? "w-[30%]" : "w-[30%]")
+const emailColumnClass = computed(() => isReadOnly.value ? "w-[50%]" : "w-[40%]")
 
 const fetchCustomers = async (searchVal = searchQuery.value) => {
   try {
@@ -207,14 +220,14 @@ const fetchCustomers = async (searchVal = searchQuery.value) => {
     customers.value = data.items || []
     totalItems.value = data.total || 0
   } catch (err: any) {
-    const errorMessage = 
-        err.response?.data?.detail || 
-        err.message || 
-        "An unexpected error occurred"
+    const errorMessage =
+      err.response?.data?.detail ||
+      err.message ||
+      "An unexpected error occurred"
 
-    const displayMessage = Array.isArray(errorMessage) 
-        ? errorMessage[0].msg 
-        : errorMessage
+    const displayMessage = Array.isArray(errorMessage)
+      ? errorMessage[0].msg
+      : errorMessage
 
     showToast(displayMessage, "error")
   }
@@ -264,7 +277,7 @@ const deleteCustomer = async (customer: Customer) => {
     customers.value = customers.value.filter((c) => c.id !== customer.id)
     totalItems.value = Math.max(0, totalItems.value - 1)
     showToast("Customer archived successfully", "success")
-    
+
     if (customers.value.length === 0 && currentPage.value > 1) {
       prevPage()
     }
