@@ -108,21 +108,21 @@
 
       <!-- ================= DESKTOP TABLE VIEW ================= -->
       <template #desktop-headers>
-        <th :class="[dateColumnClass, 'px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500']">
+        <th :class="[dateColumnClass, 'px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500']">
           Date Created
         </th>
-        <th :class="[codeColumnClass, 'px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500']">
+        <th :class="[codeColumnClass, 'px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500']">
           Bin Code
         </th>
-        <th :class="[zoneColumnClass, 'px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500']">
+        <th :class="[zoneColumnClass, 'px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500']">
           Zone
         </th>
-        <th :class="[quantityColumnClass, 'px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500']">
+        <th :class="[quantityColumnClass, 'px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500']">
           Qty On Hand
         </th>
         <th
           v-if="!isReadOnly"
-          class="w-[15%] px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 text-right"
+          class="w-[15%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right"
         >
           Actions
         </th>
@@ -136,8 +136,8 @@
           class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
         >
           <!-- Date Created -->
-          <td :class="[dateColumnClass, 'px-6 py-4']">
-            <div v-if="bin.created_at" class="flex items-center min-w-0">
+          <td :class="[dateColumnClass, 'px-6 py-4 relative']">
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div class="flex flex-col">
                 <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
                   {{ formatDateTime(bin.created_at).date }}
@@ -146,8 +146,6 @@
                   {{ formatDateTime(bin.created_at).time }}
                 </span>
             </div>
-            </div>
-            <span v-else class="text-sm font-medium text-slate-400 dark:text-slate-500">—</span>
           </td>
 
           <!-- Bin Code -->

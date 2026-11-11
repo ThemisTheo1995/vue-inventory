@@ -1,7 +1,5 @@
-<!-- src/views/suppliers/SuppliersView.vue -->
 <template>
   <div class="space-y-6 pb-6 lg:pb-10 max-w-full mx-auto">
-    <!-- Header Section -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div class="space-y-1">
         <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -23,7 +21,6 @@
       </div>
     </header>
 
-    <!-- Main Table Component -->
     <BaseTable
       :items="suppliers"
       :is-loading="isTableLoading"
@@ -35,7 +32,7 @@
       :total-pages="totalPages"
       :total-items="totalItems"
       :items-per-page="itemsPerPage"
-      :column-span="isReadOnly ? 2 : 3"
+      :column-span="isReadOnly ? 3 : 4"
       empty-title="No suppliers found"
       empty-description="Get started by adding your first vendor to the directory."
       create-button-text="Add First Supplier"
@@ -43,10 +40,9 @@
       @next-page="nextPage"
       @create="isCreateModalOpen = true"
     >
-      <!-- ================= MOBILE LIST VIEW ================= -->
       <template #mobile-cards>
-        <div 
-          v-for="supplier in suppliers" 
+        <div
+          v-for="supplier in suppliers"
           :key="supplier.id"
           @click="navigateToSupplier(supplier.id)"
           class="relative p-4 sm:p-5 hover:bg-slate-100/60 dark:hover:bg-slate-800/60 active:bg-slate-200/60 dark:active:bg-slate-700/60 transition-colors cursor-pointer group bg-transparent"
@@ -56,6 +52,7 @@
               <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase shadow-sm border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform">
                 {{ supplier.name.charAt(0).toUpperCase() }}
               </div>
+
               <div>
                 <p class="font-bold text-slate-900 dark:text-white text-base leading-tight truncate">
                   {{ supplier.name }}
@@ -68,15 +65,21 @@
           </div>
 
           <div class="flex justify-between items-end mt-4">
-            <div class="flex items-center gap-2 truncate pr-4">
-              <Mail class="w-4 h-4 text-slate-400 shrink-0" />
-              <span 
-                class="font-mono text-sm font-bold truncate"
-                :class="supplier.email ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500 font-medium italic'"
-              >
-                {{ supplier.email || '—' }}
-              </span>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 truncate pr-4">
+                <Mail class="w-4 h-4 text-slate-400 shrink-0" />
+                <span
+                  class="font-mono text-sm font-bold truncate"
+                  :class="supplier.email ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500 font-medium italic'"
+                >
+                  {{ supplier.email || '—' }}
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+                {{ supplier.created_at ? formatDateTime(supplier.created_at).date : '—' }}
+              </p>
             </div>
+
             <div v-if="!isReadOnly" class="shrink-0" @click.stop>
               <AsyncButton
                 :action="() => deleteSupplier(supplier)"
@@ -90,15 +93,17 @@
         </div>
       </template>
 
-      <!-- ================= DESKTOP TABLE VIEW ================= -->
       <template #desktop-headers>
+        <th class="w-[20%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+          Date Created
+        </th>
         <th :class="[supplierColumnClass, 'px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500']">
           Supplier
         </th>
         <th :class="[emailColumnClass, 'px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500']">
           Email
         </th>
-        <th v-if="!isReadOnly" class="w-[15%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right">
+        <th v-if="!isReadOnly" class="w-[10%] px-6 py-4 text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-right">
           Actions
         </th>
       </template>
@@ -110,6 +115,18 @@
           @click="navigateToSupplier(supplier.id)"
           class="group hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors cursor-pointer bg-transparent"
         >
+          <td class="px-6 py-4 relative">
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="flex flex-col">
+              <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                {{ formatDateTime(supplier.created_at).date }}
+              </span>
+              <span class="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-0.5">
+                {{ formatDateTime(supplier.created_at).time }}
+              </span>
+            </div>
+          </td>
+
           <td class="px-6 py-4">
             <div class="flex items-center gap-3">
               <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase shadow-sm border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform">
@@ -125,12 +142,12 @@
               </div>
             </div>
           </td>
-          
+
           <td class="px-6 py-4">
             <div class="flex items-center gap-2">
               <Mail class="w-4 h-4 text-slate-400 dark:text-slate-500 hidden xl:block shrink-0" />
-              <span 
-                class="font-mono text-sm font-bold truncate" 
+              <span
+                class="font-mono text-sm font-bold truncate"
                 :class="supplier.email ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500 font-medium italic'"
                 :title="supplier.email ?? 'No email provided'"
               >
@@ -154,12 +171,12 @@
       </template>
     </BaseTable>
 
-    <SupplierCreateModal 
-      v-if="!isReadOnly" 
-      :is-open="isCreateModalOpen" 
-      :workspace-id="workspaceId" 
-      @close="isCreateModalOpen = false" 
-      @created="onSupplierCreated" 
+    <SupplierCreateModal
+      v-if="!isReadOnly"
+      :is-open="isCreateModalOpen"
+      :workspace-id="workspaceId"
+      @close="isCreateModalOpen = false"
+      @created="onSupplierCreated"
     />
   </div>
 </template>
@@ -179,6 +196,7 @@ import SupplierCreateModal from "./SupplierCreateModal.vue"
 
 import { supplierService } from "../services/supplier.service"
 import type { Supplier } from "../types/supplier.types"
+import { formatDateTime } from "@/utils/dateFormatter"
 
 const route = useRoute()
 const router = useRouter()
@@ -198,8 +216,8 @@ const totalItems = ref(0)
 
 const totalPages = computed(() => Math.max(1, Math.ceil(totalItems.value / itemsPerPage.value)))
 
-const supplierColumnClass = computed(() => isReadOnly.value ? "w-1/2" : "w-[40%]")
-const emailColumnClass = computed(() => isReadOnly.value ? "w-1/2" : "w-[45%]")
+const supplierColumnClass = computed(() => isReadOnly.value ? "w-[35%]" : "w-[30%]")
+const emailColumnClass = computed(() => isReadOnly.value ? "w-[45%]" : "w-[35%]")
 
 const fetchSuppliers = async (searchVal = searchQuery.value) => {
   try {
@@ -207,14 +225,14 @@ const fetchSuppliers = async (searchVal = searchQuery.value) => {
     suppliers.value = data.items || []
     totalItems.value = data.total || 0
   } catch (err: any) {
-    const errorMessage = 
-        err.response?.data?.detail || 
-        err.message || 
-        "An unexpected error occurred"
+    const errorMessage =
+      err.response?.data?.detail ||
+      err.message ||
+      "An unexpected error occurred"
 
-    const displayMessage = Array.isArray(errorMessage) 
-        ? errorMessage[0].msg 
-        : errorMessage
+    const displayMessage = Array.isArray(errorMessage)
+      ? errorMessage[0].msg
+      : errorMessage
 
     showToast(displayMessage, "error")
   }
@@ -264,7 +282,7 @@ const deleteSupplier = async (supplier: Supplier) => {
     suppliers.value = suppliers.value.filter((s) => s.id !== supplier.id)
     totalItems.value = Math.max(0, totalItems.value - 1)
     showToast("Supplier archived successfully", "success")
-    
+
     if (suppliers.value.length === 0 && currentPage.value > 1) {
       prevPage()
     }

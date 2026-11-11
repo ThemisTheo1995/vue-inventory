@@ -1,20 +1,11 @@
 // src/types/item.types.ts
 
+import type { TableFilter } from "@/components/ui/table/types/filter.types"
+
+
 export interface FilterOption {
   label: string
   value: string | number | boolean
-}
-
-export interface TableFilter {
-  key: string
-  label?: string
-  placeholder?: string
-  type?: "select" | "range"
-  options?: FilterOption[]
-  min?: number
-  max?: number
-  step?: number
-  prefix?: string
 }
 
 export interface ItemFilterParams {

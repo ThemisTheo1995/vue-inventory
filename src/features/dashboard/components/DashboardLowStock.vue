@@ -23,12 +23,16 @@
         </div>
         <div class="text-right shrink-0">
           <p class="text-sm font-black text-amber-600 dark:text-amber-400">{{ item.quantity_available }} left</p>
-          <router-link 
-            :to="{ name: 'item-details', params: { workspaceId, id: item.item_id || item.id } }"
-            class="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline mt-0.5 inline-block cursor-pointer"
-          >
-            Restock
-          </router-link>
+          <router-link
+              :to="{
+                name: 'inventory',
+                params: { workspaceId },
+                query: { search: item.sku || item.title }
+              }"
+              class="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline mt-0.5 inline-block cursor-pointer"
+            >
+              Restock
+            </router-link>
         </div>
       </div>
     </div>

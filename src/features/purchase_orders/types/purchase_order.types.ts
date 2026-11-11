@@ -1,6 +1,7 @@
 // src/types/purchase_orders.types.ts
 import type { Item } from '../../items/types/item.types'
 import type { Supplier } from '../../suppliers/types/supplier.types'
+import type { TableFilter } from "@/components/ui/table/types/filter.types"
 
 export type PurchaseOrderStatus =
   | 'DRAFT'
@@ -16,12 +17,6 @@ export interface FilterOption {
   value: string | number | boolean
 }
 
-export interface TableFilter {
-  key: string
-  label?: string
-  placeholder?: string
-  options: FilterOption[]
-}
 
 export interface PurchaseOrderLine {
   id: string
