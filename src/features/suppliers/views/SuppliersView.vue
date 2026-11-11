@@ -1,6 +1,6 @@
 <!-- src/views/suppliers/SuppliersView.vue -->
 <template>
-  <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto">
+  <div class="space-y-6 pb-6 lg:pb-10 max-w-full mx-auto">
     <!-- Header Section -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div class="space-y-1">
@@ -53,7 +53,7 @@
         >
           <div class="flex justify-between items-start mb-3">
             <div class="flex items-center gap-3">
-              <div class="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-bold uppercase">
+              <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase shadow-sm border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform">
                 {{ supplier.name.charAt(0).toUpperCase() }}
               </div>
               <div>
@@ -79,7 +79,7 @@
             </div>
             <div v-if="!isReadOnly" class="shrink-0" @click.stop>
               <AsyncButton
-                :action="() => handleAction(supplier.id, () => deleteSupplier(supplier))"
+                :action="() => deleteSupplier(supplier)"
                 class="p-2 -mr-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-100/60 dark:hover:bg-red-950/60 transition-colors bg-transparent border-0 cursor-pointer flex items-center justify-center"
                 title="Archive supplier"
               >
@@ -112,7 +112,7 @@
         >
           <td class="px-6 py-4">
             <div class="flex items-center gap-3">
-              <div class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-bold uppercase">
+              <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase shadow-sm border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform">
                 {{ supplier.name.charAt(0).toUpperCase() }}
               </div>
               <div class="min-w-0">
@@ -141,18 +141,13 @@
 
           <td v-if="!isReadOnly" class="px-6 py-4 text-right">
             <div class="flex items-center justify-end" @click.stop>
-              <div 
-                class="flex items-center gap-1 transition-opacity duration-200"
-                :class="{ 'opacity-0 group-hover:opacity-100': !loadingRows[supplier.id] }"
+              <AsyncButton
+                :action="() => deleteSupplier(supplier)"
+                class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-100/60 dark:hover:bg-red-950/60 rounded-lg transition-all active:scale-95 bg-transparent border-0 cursor-pointer flex items-center justify-center"
+                title="Archive supplier"
               >
-                <AsyncButton
-                  :action="() => handleAction(supplier.id, () => deleteSupplier(supplier))"
-                  class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-100/60 dark:hover:bg-red-950/60 rounded-lg transition-all active:scale-95 bg-transparent border-0 cursor-pointer flex items-center justify-center"
-                  title="Archive supplier"
-                >
-                  <Trash2 class="w-4 h-4" />
-                </AsyncButton>
-              </div>
+                <Trash2 class="w-4 h-4" />
+              </AsyncButton>
             </div>
           </td>
         </tr>
@@ -196,8 +191,6 @@ const { showToast } = useToast()
 const suppliers = ref<Supplier[]>([])
 const isLoading = ref(true)
 const isCreateModalOpen = ref(false)
-
-const loadingRows = ref<Record<string, boolean>>({})
 
 const currentPage = ref(1)
 const itemsPerPage = ref(20)
@@ -253,15 +246,6 @@ const prevPage = async () => {
 
 const navigateToSupplier = (id: string) => {
   router.push({ name: "supplier-details", params: { id } })
-}
-
-const handleAction = async (supplierId: string, actionFn: () => Promise<any>) => {
-  loadingRows.value[supplierId] = true
-  try {
-    await actionFn()
-  } finally {
-    loadingRows.value[supplierId] = false
-  }
 }
 
 const deleteSupplier = async (supplier: Supplier) => {

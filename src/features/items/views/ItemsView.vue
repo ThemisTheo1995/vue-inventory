@@ -1,6 +1,6 @@
 <!-- src/views/items/ItemsView.vue -->
 <template>
-  <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto">
+  <div class="space-y-6 pb-6 lg:pb-10 max-w-full mx-auto">
     <!-- Header Section -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div class="space-y-1">
@@ -84,7 +84,7 @@
               <AsyncButton
                 v-if="!item.is_deleted"
                 :action="() => deleteItem(item)"
-                class="opacity-0 group-hover:opacity-100 !p-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:!bg-red-50 dark:hover:!bg-red-400/10 rounded-lg transition-all transform active:scale-95"
+                class="!p-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:!bg-red-50 dark:hover:!bg-red-400/10 rounded-lg transition-all transform active:scale-95"
                 title="Delete item"
               >
                 <Trash2 class="w-4 h-4" />
@@ -92,8 +92,7 @@
               <AsyncButton
                 v-else
                 :action="() => reinstateItem(item)"
-                class="opacity-0 group-hover:opacity-100 !p-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:!bg-emerald-50 dark:hover:!bg-emerald-400/10 rounded-lg transition-all transform active:scale-95"
-                title="Reinstate item"
+                class="!p-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:!bg-emerald-50 dark:hover:!bg-emerald-400/10 rounded-lg transition-all transform active:scale-95"
               >
                 <RotateCcw class="w-4 h-4" />
               </AsyncButton>
@@ -191,7 +190,7 @@
               <AsyncButton
                 v-if="!item.is_deleted"
                 :action="() => deleteItem(item)"
-                class="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95 cursor-pointer"
+                class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95 cursor-pointer"
                 title="Delete item"
               >
                 <Trash2 class="w-4 h-4" />
@@ -199,7 +198,7 @@
               <AsyncButton
                 v-else
                 :action="() => reinstateItem(item)"
-                class="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-400/10 rounded-lg transition-all transform active:scale-95 cursor-pointer"
+                class="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-400/10 rounded-lg transition-all transform active:scale-95 cursor-pointer"
                 title="Reinstate item"
               >
                 <RotateCcw class="w-4 h-4" />

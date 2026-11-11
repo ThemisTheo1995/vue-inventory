@@ -1,6 +1,6 @@
 <!-- src/views/customers/CustomersView.vue -->
 <template>
-  <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto">
+  <div class="space-y-6 pb-6 lg:pb-10 max-w-full mx-auto">
     <!-- Header Section -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div class="space-y-1">
@@ -54,7 +54,7 @@
         >
           <div class="flex justify-between items-start mb-3">
             <div class="flex items-center gap-3">
-              <div class="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold uppercase shadow-sm group-hover:scale-105 transition-transform">
+              <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase shadow-sm border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform">
                 {{ customer.first_name.charAt(0) }}{{ customer.last_name?.charAt(0) || '' }}
               </div>
               <div>
@@ -114,7 +114,7 @@
             <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             
             <div class="flex items-center gap-3">
-              <div class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold uppercase shadow-sm group-hover:scale-105 transition-transform">
+              <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase shadow-sm border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform">
                 {{ customer.first_name.charAt(0) }}{{ customer.last_name?.charAt(0) || '' }}
               </div>
               <div class="min-w-0">
@@ -141,7 +141,7 @@
             <div class="flex items-center justify-end" @click.stop>
               <AsyncButton
                 :action="() => deleteCustomer(customer)"
-                class="opacity-0 group-hover:opacity-100 !p-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:!bg-red-50 dark:hover:!bg-red-400/10 rounded-lg transition-all transform active:scale-95"
+                class="!p-2 !bg-transparent !min-w-0 !border-none text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:!bg-red-50 dark:hover:!bg-red-400/10 rounded-lg transition-all transform active:scale-95"
                 title="Archive customer"
               >
                 <Trash2 class="w-4 h-4" />

@@ -1,6 +1,6 @@
 <!-- src/views/customers/CustomerDetailView.vue -->
 <template>
-  <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto">
+  <div class="space-y-6 pb-6 lg:pb-10 max-w-full mx-auto">
     
     <!-- Breadcrumb Header -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -40,7 +40,7 @@
         <!-- Header Profile Card -->
         <BaseCard class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-0 shadow-xl shadow-slate-200/50 dark:shadow-none ring-1 ring-slate-200 dark:ring-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-5 sm:p-6 overflow-hidden">
           <div class="flex items-center gap-4 sm:gap-5 min-w-0 flex-1 w-full sm:w-auto">
-            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-2xl uppercase shadow-sm border border-indigo-100 dark:border-indigo-800/50 shrink-0">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-2xl uppercase shrink-0">
               {{ customer.first_name.charAt(0) }}{{ customer.last_name?.charAt(0) || '' }}
             </div>
             <div class="min-w-0 flex-1">

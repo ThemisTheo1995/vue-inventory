@@ -1,6 +1,6 @@
 <!-- src/views/sell_orders/SellOrdersView.vue -->
 <template>
-  <div class="space-y-6 pb-6 lg:pb-10 max-w-7xl mx-auto">
+  <div class="space-y-6 pb-6 lg:pb-10 max-w-full mx-auto">
     <!-- Header Section -->
     <header class="space-y-1">
       <!-- Title & Action Button Row -->
@@ -118,7 +118,7 @@
 
               <AsyncButton
                 v-if="so.status === 'DRAFT' || so.status === 'CANCELLED'"
-                :action="() => handleAction(so.id, () => deleteSO(so))"
+                :action="() => deleteSO(so)"
                 class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-400/10 transition-colors border-0 cursor-pointer flex items-center justify-center bg-transparent"
                 title="Delete"
               >
@@ -181,10 +181,10 @@
                 <User class="w-4 h-4" />
               </div>
               <div class="min-w-0">
-                <p class="font-bold text-sm text-slate-800 dark:text-slate-200 truncate" :title="formatCustomerName(so.customer)">
+                <p class="font-bold text-sm text-slate-800 dark:text-slate-200 truncate">
                   {{ formatCustomerName(so.customer) }}
                 </p>
-                <p v-if="so.customer?.email" class="text-xs text-slate-400 dark:text-slate-500 truncate" :title="so.customer.email">
+                <p v-if="so.customer?.email" class="text-xs text-slate-400 dark:text-slate-500 truncate">
                   {{ so.customer?.email }}
                 </p>
               </div>
@@ -202,38 +202,33 @@
           </td>
 
           <td v-if="!isReadOnly" class="px-6 py-4 text-right">
-            <div class="flex items-center justify-end" @click.stop>
-              <div 
-                class="flex items-center gap-1 transition-opacity duration-200"
-                :class="{ 'opacity-0 group-hover:opacity-100': !loadingRows[so.id] }"
+            <div class="flex items-center justify-end gap-1" @click.stop>
+              <button
+                v-if="so.status === 'DRAFT'"
+                @click="openTransitionModal(so, 'CONFIRMED')"
+                class="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all transform active:scale-95 border-0 cursor-pointer flex items-center justify-center bg-transparent"
+                title="Confirm Order"
               >
-                <button
-                  v-if="so.status === 'DRAFT'"
-                  @click="openTransitionModal(so, 'CONFIRMED')"
-                  class="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all transform active:scale-95 border-0 cursor-pointer flex items-center justify-center bg-transparent"
-                  title="Confirm Order"
-                >
-                  <Send class="w-4 h-4" />
-                </button>
-                
-                <button
-                  v-if="so.status === 'CONFIRMED'"
-                  @click="openTransitionModal(so, 'FULLFILLED')"
-                  class="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all transform active:scale-95 border-0 cursor-pointer flex items-center justify-center bg-transparent"
-                  title="Fulfill Order"
-                >
-                  <CheckCircle class="w-4 h-4" />
-                </button>
+                <Send class="w-4 h-4" />
+              </button>
 
-                <AsyncButton
-                  v-if="so.status === 'DRAFT' || so.status === 'CANCELLED'"
-                  :action="() => handleAction(so.id, () => deleteSO(so))"
-                  class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95 border-0 cursor-pointer flex items-center justify-center bg-transparent"
-                  title="Delete sell order"
-                >
-                  <Trash2 class="w-4 h-4" />
-                </AsyncButton>
-              </div>
+              <button
+                v-if="so.status === 'CONFIRMED'"
+                @click="openTransitionModal(so, 'FULLFILLED')"
+                class="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all transform active:scale-95 border-0 cursor-pointer flex items-center justify-center bg-transparent"
+                title="Fulfill Order"
+              >
+                <CheckCircle class="w-4 h-4" />
+              </button>
+
+              <AsyncButton
+                v-if="so.status === 'DRAFT' || so.status === 'CANCELLED'"
+                :action="() => deleteSO(so)"
+                class="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all transform active:scale-95 border-0 cursor-pointer flex items-center justify-center bg-transparent"
+                title="Delete sell order"
+              >
+                <Trash2 class="w-4 h-4" />
+              </AsyncButton>
             </div>
           </td>
         </tr>
@@ -279,6 +274,7 @@ import StatusTransitionModal from "../components/StatusTransitionModal.vue"
 import { sellOrderService } from "../services/sell_order.service"
 import type { SellOrder, SellOrderStatus, TableFilter } from "../types/sell_order.types"
 import { formatCurrency } from "@/utils/currencyFormatter.ts"
+import { formatDateTime } from "@/utils/dateFormatter.ts"
 
 // --- Helper Components ---
 const StatusBadge = (props: { status: string }) => {
@@ -301,7 +297,6 @@ const StatusBadge = (props: { status: string }) => {
 }
 
 // --- Logic ---
-const LOCALE = "en-GB"
 
 const route = useRoute()
 const router = useRouter()
@@ -317,8 +312,6 @@ const selectedFilters = ref<Record<string, any>>({ status: '' })
 
 const isLoading = ref(true)
 const isCreateModalOpen = ref(false)
-
-const loadingRows = ref<Record<string, boolean>>({})
 
 // Status Transition Modal State
 const isTransitionModalOpen = ref(false)
@@ -337,22 +330,6 @@ const formatCustomerName = (customer?: { first_name?: string; last_name?: string
   const last = customer.last_name || ""
   const fullName = `${first} ${last}`.trim()
   return fullName || "Unnamed Customer"
-}
-
-const formatDateTime = (dateString?: string) => {
-  if (!dateString) return { date: "—", time: "" }
-  const d = new Date(dateString)
-  const date = new Intl.DateTimeFormat(LOCALE, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  }).format(d)
-  const time = new Intl.DateTimeFormat(LOCALE, {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
-  }).format(d)
-  return { date, time }
 }
 
 const fetchSellOrders = async (searchVal = searchQuery.value) => {
@@ -424,15 +401,6 @@ const navigateToSO = (id: string) => {
   router.push({ name: "sell-order-details", params: { workspaceId, id } })
 }
 
-const handleAction = async (soId: string, actionFn: () => Promise<any>) => {
-  loadingRows.value[soId] = true
-  try {
-    await actionFn()
-  } finally {
-    loadingRows.value[soId] = false
-  }
-}
-
 const openTransitionModal = (so: SellOrder, nextStatus: SellOrderStatus) => {
   selectedOrderForTransition.value = so
   transitionTargetStatus.value = nextStatus
@@ -444,7 +412,6 @@ const handleTransitionConfirmed = async (payload?: { binId?: string }) => {
   const so = selectedOrderForTransition.value
   const nextStatus = transitionTargetStatus.value
 
-  loadingRows.value[so.id] = true
   try {
     await sellOrderService.update(workspaceId, so.id, { 
       status: nextStatus,
@@ -467,8 +434,6 @@ const handleTransitionConfirmed = async (payload?: { binId?: string }) => {
 
     showToast(displayMessage, "error")
     throw err
-  } finally {
-    loadingRows.value[so.id] = false
   }
 }
 

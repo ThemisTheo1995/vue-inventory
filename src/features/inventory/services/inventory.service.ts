@@ -92,6 +92,12 @@ class InventoryService {
     return await response.json()
   }
 
+  async deleteInventory(workspaceId: string, inventoryId: string): Promise<void> {
+    await apiFetch(`/${workspaceId}/inventory/${inventoryId}`, {
+      method: 'DELETE'
+    })
+  }
+
   // --- Stock Movement Endpoints ---
 
   async createStockMovement(workspaceId: string, payload: StockMovementCreate): Promise<StockMovement> {
