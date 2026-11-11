@@ -272,7 +272,8 @@ import SellOrderCreateModal from "./SellOrderCreateModal.vue"
 import StatusTransitionModal from "../components/StatusTransitionModal.vue"
 
 import { sellOrderService } from "../services/sell_order.service"
-import type { SellOrder, SellOrderStatus, TableFilter } from "../types/sell_order.types"
+import type { SellOrder, SellOrderStatus } from "../types/sell_order.types"
+import type { TableFilter } from "@/components/ui/table/types/filter.types.ts"
 import { formatCurrency } from "@/utils/currencyFormatter.ts"
 import { formatDateTime } from "@/utils/dateFormatter.ts"
 

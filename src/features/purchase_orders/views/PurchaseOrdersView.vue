@@ -261,7 +261,8 @@ import AsyncButton from "@/components/layout/AsyncButton.vue"
 import PurchaseOrderCreateModal from "./PurchaseOrderCreateModal.vue"
 
 import { purchaseOrderService } from "../services/purchase_order.service"
-import type { PurchaseOrder, PurchaseOrderStatus, TableFilter } from "../types/purchase_order.types"
+import type { PurchaseOrder, PurchaseOrderStatus } from "../types/purchase_order.types"
+import type { TableFilter } from "@/components/ui/table/types/filter.types.ts"
 import { formatCurrency } from "@/utils/currencyFormatter.ts"
 import { formatDateTime } from "@/utils/dateFormatter.ts"
 
